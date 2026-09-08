@@ -30,13 +30,11 @@ const getAll = async (req, res) => {
   try {
     const {
       status,
-      category_id,
       search,
     } = req.query;
 
     const courses = await getCourses({
       status,
-      category_id,
       search,
     });
 

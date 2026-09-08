@@ -10,10 +10,21 @@ const Course = sequelize.define(
       autoIncrement: true,
     },
 
-    course_code: {
-      type: DataTypes.STRING(50),
+    code: {
+      type: DataTypes.STRING(30),
       allowNull: false,
       unique: true,
+    },
+
+    // Getter alias for backward-compatibility
+    course_code: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue("code");
+      },
+      set(val) {
+        if (val) this.setDataValue("code", val);
+      },
     },
 
     name: {
@@ -26,37 +37,18 @@ const Course = sequelize.define(
       allowNull: true,
     },
 
-    category_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: true,
-    },
-
     thumbnail_url: {
       type: DataTypes.STRING(500),
       allowNull: true,
     },
 
-    duration_value: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-
-    duration_unit: {
-      type: DataTypes.ENUM(
-        "DAYS",
-        "WEEKS",
-        "MONTHS"
-      ),
+    duration: {
+      type: DataTypes.STRING(20),
       allowNull: true,
     },
 
     status: {
-      type: DataTypes.ENUM(
-        "DRAFT",
-        "ACTIVE",
-        "INACTIVE",
-        "ARCHIVED"
-      ),
+      type: DataTypes.ENUM("DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED"),
       allowNull: false,
       defaultValue: "DRAFT",
     },
@@ -78,5 +70,11 @@ const Course = sequelize.define(
     updatedAt: "updated_at",
   }
 );
+
+Course.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  values.course_code = values.code;
+  return values;
+};
 
 module.exports = Course;

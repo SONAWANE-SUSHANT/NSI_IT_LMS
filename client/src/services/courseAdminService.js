@@ -53,27 +53,6 @@ function queryString(filters = {}) {
   return params.toString() ? `?${params.toString()}` : '';
 }
 
-export const getCourseCategories = (filters) =>
-  request(`/admin/course-categories${queryString(filters)}`, {}, 'Failed to load course categories');
-
-export const createCourseCategory = (data) =>
-  request('/admin/course-categories', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }, 'Failed to create course category');
-
-export const updateCourseCategory = (id, data) =>
-  request(`/admin/course-categories/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }, 'Failed to update course category');
-
-export const updateCourseCategoryStatus = (id, status) =>
-  request(`/admin/course-categories/${id}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  }, 'Failed to update category status');
-
 export const getCourses = (filters) =>
   request(`/admin/courses${queryString(filters)}`, {}, 'Failed to load courses');
 
@@ -155,3 +134,59 @@ export const removeBatchStudent = (batchId, studentId) =>
   request(`/admin/batches/${batchId}/students/${studentId}`, {
     method: 'DELETE',
   }, 'Failed to remove student enrollment');
+
+// ─── Course Modules ───────────────────────────────────────────────────────────
+
+export const getModulesByCourse = (courseId) =>
+  request(`/courses/${courseId}/modules`, {}, 'Failed to load modules');
+
+export const createModule = (courseId, data) =>
+  request(`/courses/${courseId}/modules`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }, 'Failed to create module');
+
+export const updateModule = (moduleId, data) =>
+  request(`/modules/${moduleId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }, 'Failed to update module');
+
+export const updateModuleStatus = (moduleId, status) =>
+  request(`/modules/${moduleId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  }, 'Failed to update module status');
+
+export const deleteModule = (moduleId) =>
+  request(`/modules/${moduleId}`, {
+    method: 'DELETE',
+  }, 'Failed to archive module');
+
+// ─── Lectures ─────────────────────────────────────────────────────────────────
+
+export const getLecturesByModule = (moduleId) =>
+  request(`/modules/${moduleId}/lectures`, {}, 'Failed to load lectures');
+
+export const createLecture = (moduleId, data) =>
+  request(`/modules/${moduleId}/lectures`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }, 'Failed to create lecture');
+
+export const updateLecture = (lectureId, data) =>
+  request(`/lectures/${lectureId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }, 'Failed to update lecture');
+
+export const updateLectureStatus = (lectureId, status) =>
+  request(`/lectures/${lectureId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  }, 'Failed to update lecture status');
+
+export const deleteLecture = (lectureId) =>
+  request(`/lectures/${lectureId}`, {
+    method: 'DELETE',
+  }, 'Failed to archive lecture');

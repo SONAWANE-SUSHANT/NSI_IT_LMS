@@ -7,11 +7,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import StudentsPage from './pages/admin/StudentsPage';
 import InstructorsPage from './pages/admin/InstructorsPage';
 import AdminsPage from './pages/admin/AdminsPage';
-import CourseCategoriesPage from './pages/admin/CourseCategoriesPage';
 import CoursesPage from './pages/admin/CoursesPage';
 import BatchesPage from './pages/admin/BatchesPage';
 import BatchAssignmentsPage from './pages/admin/BatchAssignmentsPage';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
+import CourseContentPage from './pages/admin/CourseContentPage';
 import AdminLayout from './components/admin/AdminLayout';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -68,18 +68,11 @@ export default function App() {
         <Route path="admins" element={<AdminsPage />} />
 
         {/* Courses */}
-        <Route path="course-categories" element={<CourseCategoriesPage />} />
         <Route path="courses" element={<CoursesPage />} />
         <Route path="batches" element={<BatchesPage />} />
         <Route
           path="courses/content"
-          element={
-            <AdminPlaceholderPage
-              title="Course Content"
-              phase="Phase 2B"
-              description="Lesson materials, video lectures, assignments, and resource files."
-            />
-          }
+          element={<CourseContentPage />}
         />
 
         {/* Assignments */}

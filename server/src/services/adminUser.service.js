@@ -4,7 +4,7 @@ const { User, UserRole } = require("../models");
 const { hashPassword } = require("../utils/password");
 
 const STUDENT_ROLE_ID = 3;
-const REQUIRED_IMPORT_FIELDS = ["first_name", "last_name", "email", "username", "password"];
+const REQUIRED_IMPORT_FIELDS = ["first_name", "last_name", "email", "password"];
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -12,7 +12,10 @@ const normalizeImportRow = (row) => ({
   first_name: String(row.first_name || "").trim(),
   last_name: String(row.last_name || "").trim(),
   email: String(row.email || "").trim().toLowerCase(),
-  username: String(row.username || "").trim(),
+  contact_no: String(row.contact_no || "0000000000").trim(),
+  gender: ["MALE", "FEMALE", "OTHER"].includes(String(row.gender || "").toUpperCase())
+    ? String(row.gender).toUpperCase()
+    : "OTHER",
   password: String(row.password || ""),
 });
 
@@ -20,7 +23,6 @@ const validateStudentImportRows = async (rows) => {
   const errors = [];
   const normalizedRows = [];
   const seenEmails = new Map();
-  const seenUsernames = new Map();
 
   rows.forEach((row, index) => {
     const rowNumber = index + 1;
@@ -35,12 +37,8 @@ const validateStudentImportRows = async (rows) => {
       rowErrors.push("Email is invalid");
     }
 
-    if (normalized.username && normalized.username.length < 3) {
-      rowErrors.push("Username must be at least 3 characters");
-    }
-
-    if (normalized.password && normalized.password.length < 8) {
-      rowErrors.push("Password must be at least 8 characters");
+    if (normalized.password && normalized.password.length < 6) {
+      rowErrors.push("Password must be at least 6 characters");
     }
 
     if (normalized.email) {
@@ -51,38 +49,24 @@ const validateStudentImportRows = async (rows) => {
       }
     }
 
-    if (normalized.username) {
-      const usernameKey = normalized.username.toLowerCase();
-      if (seenUsernames.has(usernameKey)) {
-        rowErrors.push(`Duplicate username in CSV (also row ${seenUsernames.get(usernameKey)})`);
-      } else {
-        seenUsernames.set(usernameKey, rowNumber);
-      }
-    }
-
     normalizedRows.push({ ...normalized, rowNumber });
     if (rowErrors.length) errors.push({ row: rowNumber, errors: rowErrors });
   });
 
   const emails = normalizedRows.map((row) => row.email).filter(Boolean);
-  const usernames = normalizedRows.map((row) => row.username).filter(Boolean);
 
-  if (emails.length || usernames.length) {
+  if (emails.length) {
     const existingUsers = await User.findAll({
       where: {
-        [Op.or]: [
-          ...(emails.length ? [{ email: { [Op.in]: emails } }] : []),
-          ...(usernames.length ? [{ username: { [Op.in]: usernames } }] : []),
-        ],
+        email: { [Op.in]: emails },
       },
-      attributes: ["email", "username"],
+      attributes: ["email"],
     });
 
     existingUsers.forEach((user) => {
       normalizedRows.forEach((row) => {
         const rowErrors = [];
         if (user.email === row.email) rowErrors.push("Email already exists");
-        if (user.username === row.username) rowErrors.push("Username already exists");
         if (rowErrors.length) errors.push({ row: row.rowNumber, errors: rowErrors });
       });
     });
@@ -99,23 +83,14 @@ const createUserByAdmin = async (userData, adminId) => {
     first_name,
     last_name,
     email,
-    username,
     password,
     role_id,
-    device_code,
-    profile_photo,
+    contact_no,
+    gender,
+    date_of_birth,
+    photo,
     status,
   } = userData;
-
-  const existingUsername = await User.findOne({
-    where: {
-      username,
-    },
-  });
-
-  if (existingUsername) {
-    throw new Error("Username already exists");
-  }
 
   const existingEmail = await User.findOne({
     where: {
@@ -128,28 +103,29 @@ const createUserByAdmin = async (userData, adminId) => {
   }
 
   const role = await UserRole.findByPk(role_id);
-
   if (!role) {
     throw new Error("Invalid role");
   }
 
-  const password_hash = await hashPassword(password);
+  const hashedPassword = await hashPassword(password);
 
   const user = await User.create({
     first_name,
     last_name,
     email,
-    username,
-    password_hash,
+    password: hashedPassword,
     role_id,
-    device_code: device_code || null,
-    profile_photo: profile_photo || null,
+    contact_no: contact_no || "0000000000",
+    gender: gender || "OTHER",
+    date_of_birth: date_of_birth || null,
+    photo: photo || null,
     status: status || "ACTIVE",
-
-    // IMPORTANT
     created_by: adminId,
     updated_by: adminId,
   });
+
+  // Reload to get the generated username
+  await user.reload();
 
   return {
     id: user.id,
@@ -159,8 +135,10 @@ const createUserByAdmin = async (userData, adminId) => {
     username: user.username,
     role_id: user.role_id,
     role: role.name,
-    device_code: user.device_code,
-    profile_photo: user.profile_photo,
+    photo: user.photo,
+    contact_no: user.contact_no,
+    gender: user.gender,
+    date_of_birth: user.date_of_birth,
     status: user.status,
     created_by: user.created_by,
     updated_by: user.updated_by,
@@ -193,7 +171,23 @@ const getUsersByAdmin = async (filters = {}) => {
 
   const users = await User.findAll({
     where,
-    attributes: { exclude: ["password_hash"] },
+    attributes: [
+      "id",
+      "first_name",
+      "last_name",
+      "email",
+      "username",
+      "role_id",
+      "photo",
+      "contact_no",
+      "gender",
+      "date_of_birth",
+      "status",
+      "created_by",
+      "updated_by",
+      "created_at",
+      "updated_at",
+    ],
     include: [
       {
         model: UserRole,
@@ -202,6 +196,8 @@ const getUsersByAdmin = async (filters = {}) => {
       },
     ],
     order: [["created_at", "DESC"]],
+    raw: true,
+    nest: true,
   });
 
   return users.map((user) => ({
@@ -212,8 +208,10 @@ const getUsersByAdmin = async (filters = {}) => {
     username: user.username,
     role_id: user.role_id,
     role: user.role?.name || null,
-    device_code: user.device_code,
-    profile_photo: user.profile_photo,
+    photo: user.photo,
+    contact_no: user.contact_no,
+    gender: user.gender,
+    date_of_birth: user.date_of_birth,
     status: user.status,
     created_by: user.created_by,
     updated_by: user.updated_by,
@@ -224,7 +222,7 @@ const getUsersByAdmin = async (filters = {}) => {
 
 const getUserByIdByAdmin = async (id) => {
   const user = await User.findByPk(id, {
-    attributes: { exclude: ["password_hash"] },
+    attributes: { exclude: ["password"] },
     include: [
       {
         model: UserRole,
@@ -246,8 +244,10 @@ const getUserByIdByAdmin = async (id) => {
     username: user.username,
     role_id: user.role_id,
     role: user.role?.name || null,
-    device_code: user.device_code,
-    profile_photo: user.profile_photo,
+    photo: user.photo,
+    contact_no: user.contact_no,
+    gender: user.gender,
+    date_of_birth: user.date_of_birth,
     status: user.status,
     created_by: user.created_by,
     updated_by: user.updated_by,
@@ -262,12 +262,18 @@ const updateUserByAdmin = async (id, updateData, adminId) => {
     throw new Error("User not found");
   }
 
-  const { first_name, last_name, email, username, profile_photo, status, role_id } = updateData;
-
-  if (username && username !== user.username) {
-    const existing = await User.findOne({ where: { username, id: { [Op.ne]: id } } });
-    if (existing) throw new Error("Username already exists");
-  }
+  const {
+    first_name,
+    last_name,
+    email,
+    photo,
+    contact_no,
+    gender,
+    date_of_birth,
+    status,
+    role_id,
+    password,
+  } = updateData;
 
   if (email && email !== user.email) {
     const existing = await User.findOne({ where: { email, id: { [Op.ne]: id } } });
@@ -283,12 +289,16 @@ const updateUserByAdmin = async (id, updateData, adminId) => {
   if (first_name !== undefined) user.first_name = first_name;
   if (last_name !== undefined) user.last_name = last_name;
   if (email !== undefined) user.email = email;
-  if (username !== undefined) user.username = username;
-  if (profile_photo !== undefined) user.profile_photo = profile_photo;
+  if (photo !== undefined) user.photo = photo;
+  if (contact_no !== undefined) user.contact_no = contact_no;
+  if (gender !== undefined) user.gender = gender;
+  if (date_of_birth !== undefined) user.date_of_birth = date_of_birth;
   if (status !== undefined) user.status = status;
+  if (password) user.password = await hashPassword(password);
 
   user.updated_by = adminId;
   await user.save();
+  await user.reload();
 
   const role = await UserRole.findByPk(user.role_id);
 
@@ -300,8 +310,10 @@ const updateUserByAdmin = async (id, updateData, adminId) => {
     username: user.username,
     role_id: user.role_id,
     role: role?.name || null,
-    device_code: user.device_code,
-    profile_photo: user.profile_photo,
+    photo: user.photo,
+    contact_no: user.contact_no,
+    gender: user.gender,
+    date_of_birth: user.date_of_birth,
     status: user.status,
     created_by: user.created_by,
     updated_by: user.updated_by,
@@ -373,8 +385,9 @@ const importStudentsByAdmin = async (rows, adminId) => {
         first_name: row.first_name,
         last_name: row.last_name,
         email: row.email,
-        username: row.username,
-        password_hash: await hashPassword(row.password),
+        contact_no: row.contact_no || "0000000000",
+        gender: row.gender || "OTHER",
+        password: await hashPassword(row.password),
         role_id: STUDENT_ROLE_ID,
         status: "ACTIVE",
         created_by: adminId,

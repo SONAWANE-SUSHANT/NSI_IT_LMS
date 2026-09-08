@@ -15,6 +15,11 @@ const Lecture = sequelize.define(
       allowNull: false,
     },
 
+    instructor_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+    },
+
     title: {
       type: DataTypes.STRING(250),
       allowNull: false,
@@ -25,9 +30,21 @@ const Lecture = sequelize.define(
       allowNull: true,
     },
 
-    lecture_type: {
+    session_type: {
       type: DataTypes.ENUM("RECORDED", "LIVE"),
       allowNull: false,
+      defaultValue: "LIVE",
+    },
+
+    // Backward-compatibility alias
+    lecture_type: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue("session_type");
+      },
+      set(val) {
+        if (val) this.setDataValue("session_type", val);
+      },
     },
 
     status: {
@@ -36,7 +53,6 @@ const Lecture = sequelize.define(
         "SCHEDULED",
         "LIVE",
         "COMPLETED",
-        "RECORDING_AVAILABLE",
         "CANCELLED",
         "PUBLISHED"
       ),
@@ -56,13 +72,24 @@ const Lecture = sequelize.define(
     },
 
     duration_minutes: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
     },
 
-    meet_url: {
+    session_url: {
       type: DataTypes.STRING(1000),
       allowNull: true,
+    },
+
+    // Backward-compatibility alias
+    meet_url: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue("session_url");
+      },
+      set(val) {
+        if (val) this.setDataValue("session_url", val);
+      },
     },
 
     recording_url: {
@@ -97,7 +124,7 @@ const Lecture = sequelize.define(
     },
   },
   {
-    tableName: "lectures",
+    tableName: "sessions",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",

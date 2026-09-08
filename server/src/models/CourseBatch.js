@@ -15,14 +15,15 @@ const CourseBatch = sequelize.define(
       allowNull: false,
     },
 
-    batch_code: {
-      type: DataTypes.STRING(50),
+    name: {
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
 
-    name: {
-      type: DataTypes.STRING(150),
-      allowNull: false,
+    batch_code: {
+      type: DataTypes.STRING(100),
+      // Generated stored column in MySQL
+      allowNull: true,
     },
 
     description: {
@@ -32,7 +33,7 @@ const CourseBatch = sequelize.define(
 
     start_date: {
       type: DataTypes.DATEONLY,
-      allowNull: true,
+      allowNull: false,
     },
 
     end_date: {
@@ -40,17 +41,28 @@ const CourseBatch = sequelize.define(
       allowNull: true,
     },
 
-    status: {
-      type: DataTypes.ENUM(
-        "DRAFT",
-        "UPCOMING",
-        "ACTIVE",
-        "COMPLETED",
-        "CANCELLED",
-        "ARCHIVED"
-      ),
+    batch_mode: {
+      type: DataTypes.ENUM("ONLINE", "OFFLINE", "HYBRID"),
       allowNull: false,
-      defaultValue: "DRAFT",
+      defaultValue: "ONLINE",
+    },
+
+    batch_time: {
+      type: DataTypes.ENUM("MORNING", "EVENING"),
+      allowNull: false,
+      defaultValue: "MORNING",
+    },
+
+    batch_schedule: {
+      type: DataTypes.ENUM("WEEKDAYS", "WEEKENDS"),
+      allowNull: false,
+      defaultValue: "WEEKDAYS",
+    },
+
+    status: {
+      type: DataTypes.ENUM("UPCOMING", "ACTIVE", "COMPLETED", "CANCELLED"),
+      allowNull: false,
+      defaultValue: "UPCOMING",
     },
 
     created_by: {
@@ -64,7 +76,7 @@ const CourseBatch = sequelize.define(
     },
   },
   {
-    tableName: "course_batches",
+    tableName: "batches",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",

@@ -13,7 +13,9 @@ const createLecture = async (req, res) => {
       title: req.body.title,
       description: req.body.description,
 
-      lecture_type: req.body.lecture_type,
+      instructorId: req.body.instructor_id || req.body.instructorId,
+      session_type: req.body.session_type || req.body.lecture_type,
+      lecture_type: req.body.lecture_type || req.body.session_type,
       status: req.body.status,
 
       display_order: req.body.display_order,
@@ -21,7 +23,8 @@ const createLecture = async (req, res) => {
       scheduled_at: req.body.scheduled_at,
       duration_minutes: req.body.duration_minutes,
 
-      meet_url: req.body.meet_url,
+      session_url: req.body.session_url || req.body.meet_url,
+      meet_url: req.body.meet_url || req.body.session_url,
 
       recording_url: req.body.recording_url,
       recording_provider: req.body.recording_provider,
@@ -113,12 +116,15 @@ const updateLecture = async (req, res) => {
         title: req.body.title,
         description: req.body.description,
 
-        lecture_type: req.body.lecture_type,
+        instructorId: req.body.instructor_id || req.body.instructorId,
+        session_type: req.body.session_type || req.body.lecture_type,
+        lecture_type: req.body.lecture_type || req.body.session_type,
 
         scheduled_at: req.body.scheduled_at,
         duration_minutes: req.body.duration_minutes,
 
-        meet_url: req.body.meet_url,
+        session_url: req.body.session_url || req.body.meet_url,
+        meet_url: req.body.meet_url || req.body.session_url,
 
         recording_url: req.body.recording_url,
         recording_provider: req.body.recording_provider,

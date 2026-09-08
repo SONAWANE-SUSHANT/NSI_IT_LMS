@@ -1,6 +1,5 @@
 const User = require("./User");
 const UserRole = require("./UserRole");
-const CourseCategory = require("./CourseCategory");
 const Course = require("./Course");
 const CourseBatch = require("./CourseBatch");
 const CourseInstructor = require("./CourseInstructor");
@@ -8,8 +7,11 @@ const CourseStudent = require("./CourseStudent");
 const CourseModule = require("./CourseModule");
 const Lecture = require("./Lecture");
 const LectureNote = require("./LectureNote");
+const Quiz = require("./Quiz");
+const QuizQuestion = require("./QuizQuestion");
+const QuizOption = require("./QuizOption");
 
-// User ↔ Role
+// 1. User ↔ Role
 UserRole.hasMany(User, {
   foreignKey: "role_id",
   as: "users",
@@ -20,18 +22,7 @@ User.belongsTo(UserRole, {
   as: "role",
 });
 
-// Course ↔ Category
-Course.belongsTo(CourseCategory, {
-  foreignKey: "category_id",
-  as: "category",
-});
-
-CourseCategory.hasMany(Course, {
-  foreignKey: "category_id",
-  as: "courses",
-});
-
-// Course ↔ Batch
+// 2. Course ↔ Batches
 CourseBatch.belongsTo(Course, {
   foreignKey: "course_id",
   as: "course",
@@ -42,7 +33,7 @@ Course.hasMany(CourseBatch, {
   as: "batches",
 });
 
-// Course ↔ Modules
+// 3. Course ↔ Modules
 Course.hasMany(CourseModule, {
   foreignKey: "course_id",
   as: "modules",
@@ -53,7 +44,7 @@ CourseModule.belongsTo(Course, {
   as: "course",
 });
 
-// Module ↔ Lectures
+// 4. Module ↔ Sessions (Lectures)
 CourseModule.hasMany(Lecture, {
   foreignKey: "module_id",
   as: "lectures",
@@ -64,23 +55,29 @@ Lecture.belongsTo(CourseModule, {
   as: "module",
 });
 
-// Lecture ↔ Notes
+// 5. Session ↔ Notes
 Lecture.hasMany(LectureNote, {
-  foreignKey: "lecture_id",
+  foreignKey: "session_id",
   as: "notes",
 });
 
 LectureNote.belongsTo(Lecture, {
-  foreignKey: "lecture_id",
+  foreignKey: "session_id",
   as: "lecture",
 });
 
-// Course Instructor
-CourseInstructor.belongsTo(Course, {
-  foreignKey: "course_id",
-  as: "course",
+// 6. Session ↔ Instructor
+Lecture.belongsTo(User, {
+  foreignKey: "instructor_id",
+  as: "instructor",
 });
 
+User.hasMany(Lecture, {
+  foreignKey: "instructor_id",
+  as: "conductedSessions",
+});
+
+// 7. Batch Instructors
 CourseInstructor.belongsTo(CourseBatch, {
   foreignKey: "batch_id",
   as: "batch",
@@ -91,11 +88,6 @@ CourseInstructor.belongsTo(User, {
   as: "instructor",
 });
 
-Course.hasMany(CourseInstructor, {
-  foreignKey: "course_id",
-  as: "instructors",
-});
-
 CourseBatch.hasMany(CourseInstructor, {
   foreignKey: "batch_id",
   as: "instructors",
@@ -103,15 +95,10 @@ CourseBatch.hasMany(CourseInstructor, {
 
 User.hasMany(CourseInstructor, {
   foreignKey: "instructor_id",
-  as: "courseAssignments",
+  as: "batchAssignments",
 });
 
-// Course Student
-CourseStudent.belongsTo(Course, {
-  foreignKey: "course_id",
-  as: "course",
-});
-
+// 8. Batch Students
 CourseStudent.belongsTo(CourseBatch, {
   foreignKey: "batch_id",
   as: "batch",
@@ -122,11 +109,6 @@ CourseStudent.belongsTo(User, {
   as: "student",
 });
 
-Course.hasMany(CourseStudent, {
-  foreignKey: "course_id",
-  as: "students",
-});
-
 CourseBatch.hasMany(CourseStudent, {
   foreignKey: "batch_id",
   as: "students",
@@ -134,13 +116,45 @@ CourseBatch.hasMany(CourseStudent, {
 
 User.hasMany(CourseStudent, {
   foreignKey: "student_id",
-  as: "courseEnrollments",
+  as: "enrollments",
+});
+
+// 9. Session ↔ Quizzes
+Lecture.hasMany(Quiz, {
+  foreignKey: "session_id",
+  as: "quizzes",
+});
+
+Quiz.belongsTo(Lecture, {
+  foreignKey: "session_id",
+  as: "session",
+});
+
+// 10. Quiz ↔ QuizQuestions
+Quiz.hasMany(QuizQuestion, {
+  foreignKey: "quiz_id",
+  as: "questions",
+});
+
+QuizQuestion.belongsTo(Quiz, {
+  foreignKey: "quiz_id",
+  as: "quiz",
+});
+
+// 11. QuizQuestion ↔ QuizOptions
+QuizQuestion.hasMany(QuizOption, {
+  foreignKey: "question_id",
+  as: "options",
+});
+
+QuizOption.belongsTo(QuizQuestion, {
+  foreignKey: "question_id",
+  as: "question",
 });
 
 module.exports = {
   User,
   UserRole,
-  CourseCategory,
   Course,
   CourseBatch,
   CourseInstructor,
@@ -148,4 +162,7 @@ module.exports = {
   CourseModule,
   Lecture,
   LectureNote,
+  Quiz,
+  QuizQuestion,
+  QuizOption,
 };

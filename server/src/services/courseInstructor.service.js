@@ -6,11 +6,7 @@ const {
   UserRole,
 } = require("../models");
 
-const assignInstructor = async (
-  batchId,
-  instructorId,
-  adminId
-) => {
+const assignInstructor = async (batchId, instructorId, adminId) => {
   const batch = await CourseBatch.findByPk(batchId);
 
   if (!batch) {
@@ -32,31 +28,23 @@ const assignInstructor = async (
   }
 
   if (!instructor.role || instructor.role.name !== "INSTRUCTOR") {
-    throw new Error(
-      "Selected user does not have INSTRUCTOR role"
-    );
+    throw new Error("Selected user does not have INSTRUCTOR role");
   }
 
   if (instructor.status !== "ACTIVE") {
-    throw new Error(
-      "Instructor account is not active"
-    );
+    throw new Error("Instructor account is not active");
   }
 
-  const existingAssignment =
-    await CourseInstructor.findOne({
-      where: {
-        course_id: batch.course_id,
-        batch_id: batch.id,
-        instructor_id: instructorId,
-      },
-    });
+  const existingAssignment = await CourseInstructor.findOne({
+    where: {
+      batch_id: batchId,
+      instructor_id: instructorId,
+    },
+  });
 
   if (existingAssignment) {
     if (existingAssignment.status === "ACTIVE") {
-      throw new Error(
-        "Instructor is already assigned to this batch"
-      );
+      throw new Error("Instructor is already assigned to this batch");
     }
 
     existingAssignment.status = "ACTIVE";
@@ -64,18 +52,15 @@ const assignInstructor = async (
 
     await existingAssignment.save();
 
-    return getInstructorAssignmentById(
-      existingAssignment.id
-    );
+    return getInstructorAssignmentById(existingAssignment.id);
   }
 
   const assignment = await CourseInstructor.create({
-    course_id: batch.course_id,
-    batch_id: batch.id,
+    batch_id: batchId,
     instructor_id: instructorId,
     status: "ACTIVE",
     assigned_at: new Date(),
-    created_by: adminId,
+    assigned_by: adminId,
     updated_by: adminId,
   });
 
@@ -93,7 +78,6 @@ const getInstructorAssignments = async (batchId) => {
     where: {
       batch_id: batchId,
     },
-
     include: [
       {
         model: User,
@@ -115,77 +99,61 @@ const getInstructorAssignments = async (batchId) => {
         ],
       },
       {
-        model: Course,
-        as: "course",
-        attributes: [
-          "id",
-          "course_code",
-          "name",
-        ],
-      },
-      {
         model: CourseBatch,
         as: "batch",
-        attributes: [
-          "id",
-          "batch_code",
-          "name",
+        attributes: ["id", "batch_code", "name"],
+        include: [
+          {
+            model: Course,
+            as: "course",
+            attributes: ["id", "code", "name"],
+          },
         ],
       },
     ],
-
     order: [["assigned_at", "DESC"]],
   });
 };
 
 const getInstructorAssignmentById = async (id) => {
-  const assignment =
-    await CourseInstructor.findByPk(id, {
-      include: [
-        {
-          model: User,
-          as: "instructor",
-          attributes: [
-            "id",
-            "first_name",
-            "last_name",
-            "email",
-            "username",
-            "status",
-          ],
-          include: [
-            {
-              model: UserRole,
-              as: "role",
-              attributes: ["id", "name"],
-            },
-          ],
-        },
-        {
-          model: Course,
-          as: "course",
-          attributes: [
-            "id",
-            "course_code",
-            "name",
-          ],
-        },
-        {
-          model: CourseBatch,
-          as: "batch",
-          attributes: [
-            "id",
-            "batch_code",
-            "name",
-          ],
-        },
-      ],
-    });
+  const assignment = await CourseInstructor.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "instructor",
+        attributes: [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "username",
+          "status",
+        ],
+        include: [
+          {
+            model: UserRole,
+            as: "role",
+            attributes: ["id", "name"],
+          },
+        ],
+      },
+      {
+        model: CourseBatch,
+        as: "batch",
+        attributes: ["id", "batch_code", "name"],
+        include: [
+          {
+            model: Course,
+            as: "course",
+            attributes: ["id", "code", "name"],
+          },
+        ],
+      },
+    ],
+  });
 
   if (!assignment) {
-    throw new Error(
-      "Instructor assignment not found"
-    );
+    throw new Error("Instructor assignment not found");
   }
 
   return assignment;
@@ -198,23 +166,18 @@ const updateInstructorAssignmentStatus = async (
   adminId
 ) => {
   if (!["ACTIVE", "INACTIVE"].includes(status)) {
-    throw new Error(
-      "Invalid assignment status"
-    );
+    throw new Error("Invalid assignment status");
   }
 
-  const assignment =
-    await CourseInstructor.findOne({
-      where: {
-        batch_id: batchId,
-        instructor_id: instructorId,
-      },
-    });
+  const assignment = await CourseInstructor.findOne({
+    where: {
+      batch_id: batchId,
+      instructor_id: instructorId,
+    },
+  });
 
   if (!assignment) {
-    throw new Error(
-      "Instructor assignment not found"
-    );
+    throw new Error("Instructor assignment not found");
   }
 
   assignment.status = status;
@@ -222,28 +185,19 @@ const updateInstructorAssignmentStatus = async (
 
   await assignment.save();
 
-  return getInstructorAssignmentById(
-    assignment.id
-  );
+  return getInstructorAssignmentById(assignment.id);
 };
 
-const removeInstructor = async (
-  batchId,
-  instructorId,
-  adminId
-) => {
-  const assignment =
-    await CourseInstructor.findOne({
-      where: {
-        batch_id: batchId,
-        instructor_id: instructorId,
-      },
-    });
+const removeInstructor = async (batchId, instructorId, adminId) => {
+  const assignment = await CourseInstructor.findOne({
+    where: {
+      batch_id: batchId,
+      instructor_id: instructorId,
+    },
+  });
 
   if (!assignment) {
-    throw new Error(
-      "Instructor assignment not found"
-    );
+    throw new Error("Instructor assignment not found");
   }
 
   assignment.status = "INACTIVE";

@@ -1,21 +1,20 @@
-const {
-  Course,
-  CourseModule,
-  Lecture,
-} = require("../models");
+const { Course, CourseModule, Lecture, LectureNote, User } = require("../models");
 
 /*
- * Create Lecture
+ * Create Lecture / Session
  */
 const createLecture = async ({
   moduleId,
+  instructorId,
   title,
   description,
+  session_type,
   lecture_type,
   status,
   display_order,
   scheduled_at,
   duration_minutes,
+  session_url,
   meet_url,
   recording_url,
   recording_provider,
@@ -30,20 +29,19 @@ const createLecture = async ({
 
   const lecture = await Lecture.create({
     module_id: moduleId,
+    instructor_id: instructorId || null,
     title,
     description: description || null,
-    lecture_type,
+    session_type: session_type || lecture_type || "LIVE",
     status: status || "DRAFT",
     display_order: display_order ?? 0,
     scheduled_at: scheduled_at || null,
     duration_minutes: duration_minutes || null,
-    meet_url: meet_url || null,
+    session_url: session_url || meet_url || null,
     recording_url: recording_url || null,
     recording_provider: recording_provider || null,
-    recording_status:
-      recording_status || "NOT_AVAILABLE",
-    published_at:
-      status === "PUBLISHED" ? new Date() : null,
+    recording_status: recording_status || "NOT_AVAILABLE",
+    published_at: status === "PUBLISHED" ? new Date() : null,
     created_by: userId || null,
     updated_by: userId || null,
   });
@@ -55,7 +53,10 @@ const createLecture = async ({
  * Get all lectures of a module
  */
 const getLecturesByModule = async (moduleId) => {
-  const module = await CourseModule.findByPk(moduleId);
+  const module = await CourseModule.findByPk(moduleId, {
+    attributes: ["id"],
+    raw: true,
+  });
 
   if (!module) {
     throw new Error("Course module not found");
@@ -65,6 +66,17 @@ const getLecturesByModule = async (moduleId) => {
     where: {
       module_id: moduleId,
     },
+    include: [
+      {
+        model: LectureNote,
+        as: "notes",
+      },
+      {
+        model: User,
+        as: "instructor",
+        attributes: ["id", "first_name", "last_name", "email"],
+      },
+    ],
     order: [
       ["display_order", "ASC"],
       ["id", "ASC"],
@@ -81,24 +93,23 @@ const getLectureById = async (lectureId) => {
       {
         model: CourseModule,
         as: "module",
-        attributes: [
-          "id",
-          "course_id",
-          "title",
-          "status",
-        ],
+        attributes: ["id", "course_id", "name", "status"],
         include: [
           {
             model: Course,
             as: "course",
-            attributes: [
-              "id",
-              "course_code",
-              "name",
-              "status",
-            ],
+            attributes: ["id", "code", "name", "status"],
           },
         ],
+      },
+      {
+        model: LectureNote,
+        as: "notes",
+      },
+      {
+        model: User,
+        as: "instructor",
+        attributes: ["id", "first_name", "last_name", "email"],
       },
     ],
   });
@@ -115,11 +126,16 @@ const getLectureById = async (lectureId) => {
  */
 const updateLecture = async ({
   lectureId,
+  instructorId,
   title,
   description,
+  session_type,
   lecture_type,
+  status,
+  display_order,
   scheduled_at,
   duration_minutes,
+  session_url,
   meet_url,
   recording_url,
   recording_provider,
@@ -140,8 +156,23 @@ const updateLecture = async ({
     lecture.description = description;
   }
 
-  if (lecture_type !== undefined) {
-    lecture.lecture_type = lecture_type;
+  if (session_type !== undefined || lecture_type !== undefined) {
+    lecture.session_type = session_type || lecture_type;
+  }
+
+  if (instructorId !== undefined) {
+    lecture.instructor_id = instructorId;
+  }
+
+  if (status !== undefined) {
+    lecture.status = status;
+    if (status === "PUBLISHED" && !lecture.published_at) {
+      lecture.published_at = new Date();
+    }
+  }
+
+  if (display_order !== undefined) {
+    lecture.display_order = display_order;
   }
 
   if (scheduled_at !== undefined) {
@@ -152,8 +183,8 @@ const updateLecture = async ({
     lecture.duration_minutes = duration_minutes;
   }
 
-  if (meet_url !== undefined) {
-    lecture.meet_url = meet_url;
+  if (session_url !== undefined || meet_url !== undefined) {
+    lecture.session_url = session_url || meet_url;
   }
 
   if (recording_url !== undefined) {
@@ -161,30 +192,23 @@ const updateLecture = async ({
   }
 
   if (recording_provider !== undefined) {
-    lecture.recording_provider =
-      recording_provider;
+    lecture.recording_provider = recording_provider;
   }
 
   if (recording_status !== undefined) {
-    lecture.recording_status =
-      recording_status;
+    lecture.recording_status = recording_status;
   }
 
   lecture.updated_by = userId || null;
-
   await lecture.save();
 
   return getLectureById(lecture.id);
 };
 
 /*
- * Update Lecture Status
+ * Update status
  */
-const updateLectureStatus = async ({
-  lectureId,
-  status,
-  userId,
-}) => {
+const updateLectureStatus = async ({ lectureId, status, userId }) => {
   const lecture = await Lecture.findByPk(lectureId);
 
   if (!lecture) {
@@ -195,25 +219,18 @@ const updateLectureStatus = async ({
 
   if (status === "PUBLISHED") {
     lecture.published_at = new Date();
-  } else if (status !== "PUBLISHED") {
-    lecture.published_at = null;
   }
 
   lecture.updated_by = userId || null;
-
   await lecture.save();
 
   return getLectureById(lecture.id);
 };
 
 /*
- * Update Lecture Order
+ * Update order
  */
-const updateLectureOrder = async ({
-  lectureId,
-  display_order,
-  userId,
-}) => {
+const updateLectureOrder = async ({ lectureId, display_order, userId }) => {
   const lecture = await Lecture.findByPk(lectureId);
 
   if (!lecture) {
@@ -229,12 +246,9 @@ const updateLectureOrder = async ({
 };
 
 /*
- * Archive Lecture
+ * Delete / cancel lecture
  */
-const deleteLecture = async ({
-  lectureId,
-  userId,
-}) => {
+const deleteLecture = async ({ lectureId, userId }) => {
   const lecture = await Lecture.findByPk(lectureId);
 
   if (!lecture) {
@@ -246,7 +260,7 @@ const deleteLecture = async ({
 
   await lecture.save();
 
-  return getLectureById(lecture.id);
+  return lecture;
 };
 
 module.exports = {

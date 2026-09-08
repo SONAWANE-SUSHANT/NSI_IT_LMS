@@ -83,7 +83,6 @@ export default function AdminHeader({ title, onToggleSidebar }) {
     if (path.includes('/admin/students')) return 'Students';
     if (path.includes('/admin/instructors')) return 'Instructors';
     if (path.includes('/admin/admins')) return 'Administrators';
-    if (path.includes('/admin/course-categories')) return 'Course Categories';
     if (path.includes('/admin/batches')) return 'Batches';
     if (path.includes('/admin/batch-instructors')) return 'Batch Instructors';
     if (path.includes('/admin/batch-students')) return 'Batch Students';

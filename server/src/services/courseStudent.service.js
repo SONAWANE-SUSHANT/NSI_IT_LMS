@@ -6,11 +6,7 @@ const {
   UserRole,
 } = require("../models");
 
-const enrollStudent = async (
-  batchId,
-  studentId,
-  adminId
-) => {
+const enrollStudent = async (batchId, studentId, adminId) => {
   const batch = await CourseBatch.findByPk(batchId);
 
   if (!batch) {
@@ -32,52 +28,40 @@ const enrollStudent = async (
   }
 
   if (!student.role || student.role.name !== "STUDENT") {
-    throw new Error(
-      "Selected user does not have STUDENT role"
-    );
+    throw new Error("Selected user does not have STUDENT role");
   }
 
   if (student.status !== "ACTIVE") {
-    throw new Error(
-      "Student account is not active"
-    );
+    throw new Error("Student account is not active");
   }
 
-  const existingEnrollment =
-    await CourseStudent.findOne({
-      where: {
-        course_id: batch.course_id,
-        batch_id: batch.id,
-        student_id: studentId,
-      },
-    });
+  const existingEnrollment = await CourseStudent.findOne({
+    where: {
+      batch_id: batchId,
+      student_id: studentId,
+    },
+  });
 
   if (existingEnrollment) {
-    if (existingEnrollment.status === "ENROLLED") {
-      throw new Error(
-        "Student is already enrolled in this batch"
-      );
+    if (existingEnrollment.status === "ACTIVE") {
+      throw new Error("Student is already enrolled in this batch");
     }
 
-    existingEnrollment.status = "ENROLLED";
-    existingEnrollment.enrolled_at = new Date();
-    existingEnrollment.completed_at = null;
-    existingEnrollment.dropped_at = null;
+    existingEnrollment.status = "ACTIVE";
+    existingEnrollment.enrollment_date = new Date();
+    existingEnrollment.completion_date = null;
     existingEnrollment.updated_by = adminId;
 
     await existingEnrollment.save();
 
-    return getEnrollmentById(
-      existingEnrollment.id
-    );
+    return getEnrollmentById(existingEnrollment.id);
   }
 
   const enrollment = await CourseStudent.create({
-    course_id: batch.course_id,
-    batch_id: batch.id,
+    batch_id: batchId,
     student_id: studentId,
-    status: "ENROLLED",
-    enrolled_at: new Date(),
+    status: "ACTIVE",
+    enrollment_date: new Date(),
     created_by: adminId,
     updated_by: adminId,
   });
@@ -96,7 +80,6 @@ const getStudentsByBatch = async (batchId) => {
     where: {
       batch_id: batchId,
     },
-
     include: [
       {
         model: User,
@@ -117,77 +100,59 @@ const getStudentsByBatch = async (batchId) => {
           },
         ],
       },
-
-      {
-        model: Course,
-        as: "course",
-        attributes: [
-          "id",
-          "course_code",
-          "name",
-        ],
-      },
-
       {
         model: CourseBatch,
         as: "batch",
-        attributes: [
-          "id",
-          "batch_code",
-          "name",
+        attributes: ["id", "batch_code", "name"],
+        include: [
+          {
+            model: Course,
+            as: "course",
+            attributes: ["id", "code", "name"],
+          },
         ],
       },
     ],
-
-    order: [["enrolled_at", "DESC"]],
+    order: [["enrollment_date", "DESC"]],
   });
 };
 
 const getEnrollmentById = async (id) => {
-  const enrollment =
-    await CourseStudent.findByPk(id, {
-      include: [
-        {
-          model: User,
-          as: "student",
-          attributes: [
-            "id",
-            "first_name",
-            "last_name",
-            "email",
-            "username",
-            "status",
-          ],
-          include: [
-            {
-              model: UserRole,
-              as: "role",
-              attributes: ["id", "name"],
-            },
-          ],
-        },
-
-        {
-          model: Course,
-          as: "course",
-          attributes: [
-            "id",
-            "course_code",
-            "name",
-          ],
-        },
-
-        {
-          model: CourseBatch,
-          as: "batch",
-          attributes: [
-            "id",
-            "batch_code",
-            "name",
-          ],
-        },
-      ],
-    });
+  const enrollment = await CourseStudent.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "student",
+        attributes: [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "username",
+          "status",
+        ],
+        include: [
+          {
+            model: UserRole,
+            as: "role",
+            attributes: ["id", "name"],
+          },
+        ],
+      },
+      {
+        model: CourseBatch,
+        as: "batch",
+        attributes: ["id", "batch_code", "name"],
+        include: [
+          {
+            model: Course,
+            as: "course",
+            attributes: ["id", "code", "name"],
+          },
+        ],
+      },
+    ],
+  });
 
   if (!enrollment) {
     throw new Error("Student enrollment not found");
@@ -202,49 +167,33 @@ const updateEnrollmentStatus = async (
   status,
   adminId
 ) => {
-  const allowedStatuses = [
-    "ENROLLED",
-    "INACTIVE",
-    "COMPLETED",
-    "DROPPED",
-  ];
+  const allowedStatuses = ["ACTIVE", "INACTIVE", "COMPLETED", "DROPPED"];
 
   if (!allowedStatuses.includes(status)) {
-    throw new Error("Invalid enrollment status");
+    throw new Error("Invalid enrollment status. Allowed: ACTIVE, INACTIVE, COMPLETED, DROPPED");
   }
 
-  const enrollment =
-    await CourseStudent.findOne({
-      where: {
-        batch_id: batchId,
-        student_id: studentId,
-      },
-    });
+  const enrollment = await CourseStudent.findOne({
+    where: {
+      batch_id: batchId,
+      student_id: studentId,
+    },
+  });
 
   if (!enrollment) {
-    throw new Error(
-      "Student enrollment not found"
-    );
+    throw new Error("Student enrollment not found");
   }
 
   enrollment.status = status;
   enrollment.updated_by = adminId;
 
   if (status === "COMPLETED") {
-    enrollment.completed_at = new Date();
-    enrollment.dropped_at = null;
+    enrollment.completion_date = new Date();
   }
 
-  if (status === "DROPPED") {
-    enrollment.dropped_at = new Date();
-    enrollment.completed_at = null;
-  }
-
-  if (status === "ENROLLED") {
-    enrollment.dropped_at = null;
-    enrollment.completed_at = null;
-    enrollment.enrolled_at =
-      enrollment.enrolled_at || new Date();
+  if (status === "ACTIVE") {
+    enrollment.completion_date = null;
+    enrollment.enrollment_date = enrollment.enrollment_date || new Date();
   }
 
   await enrollment.save();
@@ -252,23 +201,16 @@ const updateEnrollmentStatus = async (
   return getEnrollmentById(enrollment.id);
 };
 
-const removeStudent = async (
-  batchId,
-  studentId,
-  adminId
-) => {
-  const enrollment =
-    await CourseStudent.findOne({
-      where: {
-        batch_id: batchId,
-        student_id: studentId,
-      },
-    });
+const removeStudent = async (batchId, studentId, adminId) => {
+  const enrollment = await CourseStudent.findOne({
+    where: {
+      batch_id: batchId,
+      student_id: studentId,
+    },
+  });
 
   if (!enrollment) {
-    throw new Error(
-      "Student enrollment not found"
-    );
+    throw new Error("Student enrollment not found");
   }
 
   enrollment.status = "INACTIVE";

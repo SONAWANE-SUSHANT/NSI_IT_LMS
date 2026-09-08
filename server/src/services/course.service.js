@@ -1,12 +1,12 @@
 const { Op } = require("sequelize");
-const { Course, CourseCategory } = require("../models");
+const { Course } = require("../models");
 
 const createCourse = async (courseData, adminId) => {
-  const courseCode = courseData.course_code.trim();
+  const code = (courseData.code || courseData.course_code || "").trim();
 
   const existingCourse = await Course.findOne({
     where: {
-      course_code: courseCode,
+      code,
     },
   });
 
@@ -14,42 +14,23 @@ const createCourse = async (courseData, adminId) => {
     throw new Error("Course code already exists");
   }
 
-  if (courseData.category_id) {
-    const category = await CourseCategory.findByPk(
-      courseData.category_id
-    );
-
-    if (!category) {
-      throw new Error("Course category not found");
-    }
-
-    if (category.status !== "ACTIVE") {
-      throw new Error("Selected course category is inactive");
-    }
+  let duration = courseData.duration;
+  if (!duration && courseData.duration_value) {
+    duration = `${courseData.duration_value} ${courseData.duration_unit || "WEEKS"}`;
   }
 
   const course = await Course.create({
-    course_code: courseCode,
+    code,
     name: courseData.name.trim(),
     description: courseData.description?.trim() || null,
-    category_id: courseData.category_id || null,
     thumbnail_url: courseData.thumbnail_url?.trim() || null,
-    duration_value: courseData.duration_value || null,
-    duration_unit: courseData.duration_unit || null,
+    duration: duration?.trim() || null,
     status: courseData.status || "DRAFT",
     created_by: adminId,
     updated_by: adminId,
   });
 
-  return Course.findByPk(course.id, {
-    include: [
-      {
-        model: CourseCategory,
-        as: "category",
-        attributes: ["id", "name", "status"],
-      },
-    ],
-  });
+  return Course.findByPk(course.id);
 };
 
 const getCourses = async (filters = {}) => {
@@ -57,10 +38,6 @@ const getCourses = async (filters = {}) => {
 
   if (filters.status && filters.status !== "ALL") {
     where.status = filters.status;
-  }
-
-  if (filters.category_id) {
-    where.category_id = filters.category_id;
   }
 
   if (filters.search && filters.search.trim()) {
@@ -71,7 +48,7 @@ const getCourses = async (filters = {}) => {
         },
       },
       {
-        course_code: {
+        code: {
           [Op.like]: `%${filters.search.trim()}%`,
         },
       },
@@ -80,27 +57,13 @@ const getCourses = async (filters = {}) => {
 
   return Course.findAll({
     where,
-    include: [
-      {
-        model: CourseCategory,
-        as: "category",
-        attributes: ["id", "name", "status"],
-      },
-    ],
+    attributes: ["id", "code", "name", "description", "thumbnail_url", "duration", "status", "created_at", "updated_at"],
     order: [["created_at", "DESC"]],
   });
 };
 
 const getCourseById = async (id) => {
-  const course = await Course.findByPk(id, {
-    include: [
-      {
-        model: CourseCategory,
-        as: "category",
-        attributes: ["id", "name", "status"],
-      },
-    ],
-  });
+  const course = await Course.findByPk(id);
 
   if (!course) {
     throw new Error("Course not found");
@@ -116,12 +79,13 @@ const updateCourse = async (id, courseData, adminId) => {
     throw new Error("Course not found");
   }
 
-  if (courseData.course_code !== undefined) {
-    const courseCode = courseData.course_code.trim();
+  const code = courseData.code !== undefined ? courseData.code : courseData.course_code;
+  if (code !== undefined) {
+    const trimmedCode = code.trim();
 
     const existingCourse = await Course.findOne({
       where: {
-        course_code: courseCode,
+        code: trimmedCode,
         id: {
           [Op.ne]: id,
         },
@@ -132,7 +96,7 @@ const updateCourse = async (id, courseData, adminId) => {
       throw new Error("Course code already exists");
     }
 
-    course.course_code = courseCode;
+    course.code = trimmedCode;
   }
 
   if (courseData.name !== undefined) {
@@ -140,59 +104,27 @@ const updateCourse = async (id, courseData, adminId) => {
   }
 
   if (courseData.description !== undefined) {
-    course.description =
-      courseData.description?.trim() || null;
-  }
-
-  if (courseData.category_id !== undefined) {
-    if (courseData.category_id === null) {
-      course.category_id = null;
-    } else {
-      const category = await CourseCategory.findByPk(
-        courseData.category_id
-      );
-
-      if (!category) {
-        throw new Error("Course category not found");
-      }
-
-      if (category.status !== "ACTIVE") {
-        throw new Error("Selected course category is inactive");
-      }
-
-      course.category_id = courseData.category_id;
-    }
+    course.description = courseData.description?.trim() || null;
   }
 
   if (courseData.thumbnail_url !== undefined) {
-    course.thumbnail_url =
-      courseData.thumbnail_url?.trim() || null;
+    course.thumbnail_url = courseData.thumbnail_url?.trim() || null;
   }
 
-  if (courseData.duration_value !== undefined) {
-    course.duration_value =
-      courseData.duration_value || null;
-  }
-
-  if (courseData.duration_unit !== undefined) {
-    course.duration_unit =
-      courseData.duration_unit || null;
+  if (courseData.duration !== undefined) {
+    course.duration = courseData.duration?.trim() || null;
+  } else if (courseData.duration_value !== undefined) {
+    course.duration = `${courseData.duration_value} ${courseData.duration_unit || "WEEKS"}`;
   }
 
   course.updated_by = adminId;
-
   await course.save();
 
   return getCourseById(id);
 };
 
 const updateCourseStatus = async (id, status, adminId) => {
-  const validStatuses = [
-    "DRAFT",
-    "ACTIVE",
-    "INACTIVE",
-    "ARCHIVED",
-  ];
+  const validStatuses = ["DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED"];
 
   if (!validStatuses.includes(status)) {
     throw new Error("Invalid course status");

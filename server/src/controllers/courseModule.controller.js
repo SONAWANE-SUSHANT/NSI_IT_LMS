@@ -6,8 +6,10 @@ const createModule = async (req, res) => {
 
     const module = await courseModuleService.createModule({
       courseId: Number(courseId),
-      title: req.body.title,
+      name: req.body.name || req.body.title,
+      title: req.body.title || req.body.name,
       description: req.body.description,
+      duration: req.body.duration,
       display_order: req.body.display_order,
       userId: req.user?.id || null,
     });
@@ -82,8 +84,10 @@ const updateModule = async (req, res) => {
     const module =
       await courseModuleService.updateModule({
         moduleId: Number(moduleId),
+        name: req.body.name,
         title: req.body.title,
         description: req.body.description,
+        duration: req.body.duration,
         display_order: req.body.display_order,
         userId: req.user?.id || null,
       });

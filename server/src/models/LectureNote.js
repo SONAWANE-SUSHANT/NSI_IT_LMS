@@ -10,52 +10,50 @@ const LectureNote = sequelize.define(
       primaryKey: true,
     },
 
-    lecture_id: {
+    session_id: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
     },
 
+    // Backward-compatibility alias
+    lecture_id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue("session_id");
+      },
+      set(val) {
+        if (val) this.setDataValue("session_id", val);
+      },
+    },
+
     title: {
-      type: DataTypes.STRING(200),
+      type: DataTypes.STRING(250),
       allowNull: false,
     },
 
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-
-    file_name: {
-      type: DataTypes.STRING(255),
+    note_type: {
+      type: DataTypes.ENUM(
+        "PDF",
+        "PPT",
+        "DOC",
+        "EXCEL",
+        "ZIP",
+        "CODE",
+        "LINK",
+        "OTHER"
+      ),
       allowNull: false,
+      defaultValue: "PDF",
     },
 
     file_url: {
       type: DataTypes.STRING(1000),
-      allowNull: false,
-    },
-
-    file_type: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      defaultValue: "application/pdf",
-    },
-
-    file_size: {
-      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
     },
 
-    storage_provider: {
-      type: DataTypes.ENUM("GOOGLE_DRIVE", "S3"),
-      allowNull: false,
-      defaultValue: "GOOGLE_DRIVE",
-    },
-
-    status: {
-      type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
-      allowNull: false,
-      defaultValue: "ACTIVE",
+    external_url: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
     },
 
     display_order: {
@@ -64,14 +62,10 @@ const LectureNote = sequelize.define(
       defaultValue: 0,
     },
 
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-
-    updated_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+    status: {
+      type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
+      allowNull: false,
+      defaultValue: "ACTIVE",
     },
 
     created_by: {
@@ -85,7 +79,7 @@ const LectureNote = sequelize.define(
     },
   },
   {
-    tableName: "lecture_notes",
+    tableName: "session_notes",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",

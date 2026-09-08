@@ -1,50 +1,36 @@
-const validateCreateLecture = (req, res, next) => {
-  const {
-    title,
-    lecture_type,
-    status,
-    display_order,
-    scheduled_at,
-    duration_minutes,
-    meet_url,
-    recording_url,
-    recording_provider,
-    recording_status,
-  } = req.body;
+const ALLOWED_STATUSES = [
+  "DRAFT",
+  "SCHEDULED",
+  "LIVE",
+  "COMPLETED",
+  "CANCELLED",
+  "PUBLISHED",
+];
 
-  if (!title || !title.trim()) {
+const validateCreateLecture = (req, res, next) => {
+  const title = (req.body.title || "").trim();
+  const session_type = req.body.session_type || req.body.lecture_type;
+  const status = req.body.status;
+  const display_order = req.body.display_order;
+  const duration_minutes = req.body.duration_minutes;
+  const recording_provider = req.body.recording_provider;
+  const recording_status = req.body.recording_status;
+
+  if (!title) {
     return res.status(400).json({
       success: false,
       message: "Lecture title is required",
     });
   }
 
-  if (!lecture_type) {
+  if (session_type && !["RECORDED", "LIVE"].includes(session_type)) {
     return res.status(400).json({
       success: false,
-      message: "Lecture type is required",
+      message: "Invalid session/lecture type. Allowed: RECORDED, LIVE",
     });
   }
 
-  if (!["RECORDED", "LIVE"].includes(lecture_type)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid lecture type",
-    });
-  }
-
-  if (
-    status !== undefined &&
-    ![
-      "DRAFT",
-      "SCHEDULED",
-      "LIVE",
-      "COMPLETED",
-      "RECORDING_AVAILABLE",
-      "CANCELLED",
-      "PUBLISHED",
-    ].includes(status)
-  ) {
+  if (status !== undefined && !ALLOWED_STATUSES.includes(status)) {
     return res.status(400).json({
       success: false,
       message: "Invalid lecture status",
@@ -53,8 +39,7 @@ const validateCreateLecture = (req, res, next) => {
 
   if (
     display_order !== undefined &&
-    (!Number.isInteger(Number(display_order)) ||
-      Number(display_order) < 0)
+    (!Number.isInteger(Number(display_order)) || Number(display_order) < 0)
   ) {
     return res.status(400).json({
       success: false,
@@ -65,8 +50,7 @@ const validateCreateLecture = (req, res, next) => {
   if (
     duration_minutes !== undefined &&
     duration_minutes !== null &&
-    (!Number.isInteger(Number(duration_minutes)) ||
-      Number(duration_minutes) <= 0)
+    (!Number.isInteger(Number(duration_minutes)) || Number(duration_minutes) <= 0)
   ) {
     return res.status(400).json({
       success: false,
@@ -95,65 +79,26 @@ const validateCreateLecture = (req, res, next) => {
     });
   }
 
-  if (lecture_type === "LIVE" && !meet_url) {
-    return res.status(400).json({
-      success: false,
-      message: "meet_url is required for LIVE lectures",
-    });
-  }
-
-  if (lecture_type === "RECORDED" && recording_url) {
-    // Valid recorded lecture configuration
-  }
-
-  req.body.title = title.trim();
-
+  req.body.title = title;
   next();
 };
 
 const validateUpdateLecture = (req, res, next) => {
-  const {
-    title,
-    lecture_type,
-    status,
-    display_order,
-    duration_minutes,
-    recording_provider,
-    recording_status,
-  } = req.body;
+  const session_type = req.body.session_type || req.body.lecture_type;
+  const status = req.body.status;
+  const display_order = req.body.display_order;
+  const duration_minutes = req.body.duration_minutes;
+  const recording_provider = req.body.recording_provider;
+  const recording_status = req.body.recording_status;
 
-  if (
-    title !== undefined &&
-    (!title || !title.trim())
-  ) {
+  if (session_type && !["RECORDED", "LIVE"].includes(session_type)) {
     return res.status(400).json({
       success: false,
-      message: "Lecture title cannot be empty",
+      message: "Invalid session/lecture type",
     });
   }
 
-  if (
-    lecture_type !== undefined &&
-    !["RECORDED", "LIVE"].includes(lecture_type)
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid lecture type",
-    });
-  }
-
-  if (
-    status !== undefined &&
-    ![
-      "DRAFT",
-      "SCHEDULED",
-      "LIVE",
-      "COMPLETED",
-      "RECORDING_AVAILABLE",
-      "CANCELLED",
-      "PUBLISHED",
-    ].includes(status)
-  ) {
+  if (status !== undefined && !ALLOWED_STATUSES.includes(status)) {
     return res.status(400).json({
       success: false,
       message: "Invalid lecture status",
@@ -162,8 +107,7 @@ const validateUpdateLecture = (req, res, next) => {
 
   if (
     display_order !== undefined &&
-    (!Number.isInteger(Number(display_order)) ||
-      Number(display_order) < 0)
+    (!Number.isInteger(Number(display_order)) || Number(display_order) < 0)
   ) {
     return res.status(400).json({
       success: false,
@@ -174,8 +118,7 @@ const validateUpdateLecture = (req, res, next) => {
   if (
     duration_minutes !== undefined &&
     duration_minutes !== null &&
-    (!Number.isInteger(Number(duration_minutes)) ||
-      Number(duration_minutes) <= 0)
+    (!Number.isInteger(Number(duration_minutes)) || Number(duration_minutes) <= 0)
   ) {
     return res.status(400).json({
       success: false,
@@ -202,10 +145,6 @@ const validateUpdateLecture = (req, res, next) => {
       success: false,
       message: "Invalid recording status",
     });
-  }
-
-  if (title !== undefined) {
-    req.body.title = title.trim();
   }
 
   next();
@@ -214,11 +153,7 @@ const validateUpdateLecture = (req, res, next) => {
 const validateLectureId = (req, res, next) => {
   const { lectureId } = req.params;
 
-  if (
-    !lectureId ||
-    !Number.isInteger(Number(lectureId)) ||
-    Number(lectureId) <= 0
-  ) {
+  if (!lectureId || !Number.isInteger(Number(lectureId)) || Number(lectureId) <= 0) {
     return res.status(400).json({
       success: false,
       message: "Invalid lecture ID",
@@ -231,11 +166,7 @@ const validateLectureId = (req, res, next) => {
 const validateModuleId = (req, res, next) => {
   const { moduleId } = req.params;
 
-  if (
-    !moduleId ||
-    !Number.isInteger(Number(moduleId)) ||
-    Number(moduleId) <= 0
-  ) {
+  if (!moduleId || !Number.isInteger(Number(moduleId)) || Number(moduleId) <= 0) {
     return res.status(400).json({
       success: false,
       message: "Invalid module ID",
@@ -255,17 +186,7 @@ const validateLectureStatus = (req, res, next) => {
     });
   }
 
-  if (
-    ![
-      "DRAFT",
-      "SCHEDULED",
-      "LIVE",
-      "COMPLETED",
-      "RECORDING_AVAILABLE",
-      "CANCELLED",
-      "PUBLISHED",
-    ].includes(status)
-  ) {
+  if (!ALLOWED_STATUSES.includes(status)) {
     return res.status(400).json({
       success: false,
       message: "Invalid lecture status",

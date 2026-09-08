@@ -6,7 +6,6 @@ import {
   Users,
   ShieldCheck,
   BookOpen,
-  FolderTree,
   CalendarDays,
   CheckSquare,
   BarChart3,
@@ -50,9 +49,9 @@ export default function AdminSidebar({ isOpen = false, onClose }) {
   {
     label: 'Courses',
     items: [
-      { name: 'Categories', path: '/admin/course-categories', icon: FolderTree },
       { name: 'Courses', path: '/admin/courses', icon: BookOpen },
       { name: 'Batches', path: '/admin/batches', icon: CalendarDays },
+      { name: 'Course Content', path: '/admin/courses/content', icon: BookOpen },
     ],
   },
   {

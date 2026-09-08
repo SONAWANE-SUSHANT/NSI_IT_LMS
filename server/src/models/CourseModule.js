@@ -15,9 +15,20 @@ const CourseModule = sequelize.define(
       allowNull: false,
     },
 
-    title: {
+    name: {
       type: DataTypes.STRING(200),
       allowNull: false,
+    },
+
+    // Alias for backward compatibility
+    title: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue("name");
+      },
+      set(val) {
+        if (val) this.setDataValue("name", val);
+      },
     },
 
     description: {
@@ -28,22 +39,18 @@ const CourseModule = sequelize.define(
     display_order: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0,
+      defaultValue: 1,
+    },
+
+    duration: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
     },
 
     status: {
-      type: DataTypes.ENUM(
-        "DRAFT",
-        "PUBLISHED",
-        "ARCHIVED"
-      ),
+      type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
       allowNull: false,
-      defaultValue: "DRAFT",
-    },
-
-    published_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
+      defaultValue: "ACTIVE",
     },
 
     created_by: {

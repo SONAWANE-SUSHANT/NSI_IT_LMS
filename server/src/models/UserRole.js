@@ -11,7 +11,7 @@ const UserRole = sequelize.define(
     },
 
     name: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
     },
@@ -19,15 +19,17 @@ const UserRole = sequelize.define(
     created_by: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
+      defaultValue: 1,
     },
 
     updated_by: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
+      defaultValue: 1,
     },
   },
   {
-    tableName: "users_roles",
+    tableName: "user_roles",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",

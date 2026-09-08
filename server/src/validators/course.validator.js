@@ -1,96 +1,63 @@
 const validateCreateCourse = (req, res, next) => {
-  const {
-    course_code,
-    name,
-    category_id,
-    duration_value,
-    duration_unit,
-  } = req.body;
+  const code = (req.body.code || req.body.course_code || "").trim();
+  const name = (req.body.name || "").trim();
+  const duration = req.body.duration;
 
-  if (!course_code || !course_code.trim()) {
+  if (!code) {
     return res.status(400).json({
       success: false,
       message: "Course code is required",
     });
   }
 
-  if (course_code.trim().length > 50) {
+  if (code.length > 30) {
     return res.status(400).json({
       success: false,
-      message: "Course code must not exceed 50 characters",
+      message: "Course code must not exceed 30 characters",
     });
   }
 
-  if (!name || !name.trim()) {
+  if (!name) {
     return res.status(400).json({
       success: false,
       message: "Course name is required",
     });
   }
 
-  if (name.trim().length > 200) {
+  if (name.length > 200) {
     return res.status(400).json({
       success: false,
       message: "Course name must not exceed 200 characters",
     });
   }
 
-  if (category_id !== undefined && category_id !== null) {
-    if (!Number.isInteger(Number(category_id)) || Number(category_id) <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid category ID",
-      });
-    }
-  }
-
-  if (duration_value !== undefined && duration_value !== null) {
-    if (
-      !Number.isInteger(Number(duration_value)) ||
-      Number(duration_value) <= 0
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Duration value must be a positive integer",
-      });
-    }
-  }
-
-  if (duration_unit !== undefined && duration_unit !== null) {
-    const allowedUnits = ["DAYS", "WEEKS", "MONTHS"];
-
-    if (!allowedUnits.includes(duration_unit)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid duration unit",
-      });
-    }
+  if (duration && duration.length > 20) {
+    return res.status(400).json({
+      success: false,
+      message: "Duration must not exceed 20 characters",
+    });
   }
 
   next();
 };
 
 const validateUpdateCourse = (req, res, next) => {
-  const {
-    course_code,
-    name,
-    category_id,
-    duration_value,
-    duration_unit,
-  } = req.body;
+  const code = req.body.code !== undefined ? req.body.code : req.body.course_code;
+  const name = req.body.name;
+  const duration = req.body.duration;
 
-  if (course_code !== undefined) {
-    if (!course_code || !course_code.trim()) {
+  if (code !== undefined) {
+    if (!code || !code.trim()) {
       return res.status(400).json({
         success: false,
         message: "Course code cannot be empty",
       });
     }
 
-    if (course_code.trim().length > 50) {
+    if (code.trim().length > 30) {
       return res.status(400).json({
         success: false,
-        message: "Course code must not exceed 50 characters",
+        message: "Course code must not exceed 30 characters",
       });
     }
   }
@@ -111,36 +78,11 @@ const validateUpdateCourse = (req, res, next) => {
     }
   }
 
-  if (category_id !== undefined && category_id !== null) {
-    if (!Number.isInteger(Number(category_id)) || Number(category_id) <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid category ID",
-      });
-    }
-  }
-
-  if (duration_value !== undefined && duration_value !== null) {
-    if (
-      !Number.isInteger(Number(duration_value)) ||
-      Number(duration_value) <= 0
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Duration value must be a positive integer",
-      });
-    }
-  }
-
-  if (duration_unit !== undefined && duration_unit !== null) {
-    const allowedUnits = ["DAYS", "WEEKS", "MONTHS"];
-
-    if (!allowedUnits.includes(duration_unit)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid duration unit",
-      });
-    }
+  if (duration !== undefined && duration !== null && duration.length > 20) {
+    return res.status(400).json({
+      success: false,
+      message: "Duration must not exceed 20 characters",
+    });
   }
 
   next();

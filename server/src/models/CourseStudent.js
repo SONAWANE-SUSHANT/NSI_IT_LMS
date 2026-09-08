@@ -10,14 +10,9 @@ const CourseStudent = sequelize.define(
       autoIncrement: true,
     },
 
-    course_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-    },
-
     batch_id: {
       type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: true,
+      allowNull: false,
     },
 
     student_id: {
@@ -25,30 +20,20 @@ const CourseStudent = sequelize.define(
       allowNull: false,
     },
 
-    status: {
-      type: DataTypes.ENUM(
-        "ENROLLED",
-        "INACTIVE",
-        "COMPLETED",
-        "DROPPED"
-      ),
-      allowNull: false,
-      defaultValue: "ENROLLED",
-    },
-
-    enrolled_at: {
-      type: DataTypes.DATE,
+    enrollment_date: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
 
-    completed_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
+    status: {
+      type: DataTypes.ENUM("ACTIVE", "INACTIVE", "COMPLETED", "DROPPED"),
+      allowNull: false,
+      defaultValue: "ACTIVE",
     },
 
-    dropped_at: {
-      type: DataTypes.DATE,
+    completion_date: {
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
 
@@ -63,7 +48,7 @@ const CourseStudent = sequelize.define(
     },
   },
   {
-    tableName: "course_students",
+    tableName: "batch_students",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",

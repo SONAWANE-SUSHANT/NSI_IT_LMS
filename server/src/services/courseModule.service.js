@@ -1,13 +1,12 @@
-const {
-  Course,
-  CourseModule,
-} = require("../models");
+const { Course, CourseModule } = require("../models");
 
 const createModule = async ({
   courseId,
+  name,
   title,
   description,
   display_order,
+  duration,
   userId,
 }) => {
   const course = await Course.findByPk(courseId);
@@ -16,12 +15,15 @@ const createModule = async ({
     throw new Error("Course not found");
   }
 
+  const moduleName = (name || title || "").trim();
+
   const module = await CourseModule.create({
     course_id: courseId,
-    title,
+    name: moduleName,
     description: description || null,
-    display_order: display_order ?? 0,
-    status: "DRAFT",
+    display_order: display_order ?? 1,
+    duration: duration || null,
+    status: "ACTIVE",
     created_by: userId || null,
     updated_by: userId || null,
   });
@@ -30,7 +32,10 @@ const createModule = async ({
 };
 
 const getModulesByCourse = async (courseId) => {
-  const course = await Course.findByPk(courseId);
+  const course = await Course.findByPk(courseId, {
+    attributes: ["id"],
+    raw: true,
+  });
 
   if (!course) {
     throw new Error("Course not found");
@@ -44,6 +49,7 @@ const getModulesByCourse = async (courseId) => {
       ["display_order", "ASC"],
       ["id", "ASC"],
     ],
+    raw: true,
   });
 };
 
@@ -59,9 +65,11 @@ const getModuleById = async (moduleId) => {
 
 const updateModule = async ({
   moduleId,
+  name,
   title,
   description,
   display_order,
+  duration,
   userId,
 }) => {
   const module = await CourseModule.findByPk(moduleId);
@@ -70,8 +78,8 @@ const updateModule = async ({
     throw new Error("Course module not found");
   }
 
-  if (title !== undefined) {
-    module.title = title;
+  if (name !== undefined || title !== undefined) {
+    module.name = (name || title || "").trim();
   }
 
   if (description !== undefined) {
@@ -82,43 +90,36 @@ const updateModule = async ({
     module.display_order = display_order;
   }
 
-  module.updated_by = userId || null;
+  if (duration !== undefined) {
+    module.duration = duration;
+  }
 
+  module.updated_by = userId || null;
   await module.save();
 
   return module;
 };
 
-const updateModuleStatus = async ({
-  moduleId,
-  status,
-  userId,
-}) => {
+const updateModuleStatus = async ({ moduleId, status, userId }) => {
   const module = await CourseModule.findByPk(moduleId);
 
   if (!module) {
     throw new Error("Course module not found");
   }
 
+  if (!["ACTIVE", "INACTIVE"].includes(status)) {
+    throw new Error("Invalid status. Allowed values: ACTIVE, INACTIVE");
+  }
+
   module.status = status;
   module.updated_by = userId || null;
-
-  if (status === "PUBLISHED") {
-    module.published_at = new Date();
-  } else {
-    module.published_at = null;
-  }
 
   await module.save();
 
   return module;
 };
 
-const updateModuleOrder = async ({
-  moduleId,
-  display_order,
-  userId,
-}) => {
+const updateModuleOrder = async ({ moduleId, display_order, userId }) => {
   const module = await CourseModule.findByPk(moduleId);
 
   if (!module) {
@@ -133,17 +134,14 @@ const updateModuleOrder = async ({
   return module;
 };
 
-const deleteModule = async ({
-  moduleId,
-  userId,
-}) => {
+const deleteModule = async ({ moduleId, userId }) => {
   const module = await CourseModule.findByPk(moduleId);
 
   if (!module) {
     throw new Error("Course module not found");
   }
 
-  module.status = "ARCHIVED";
+  module.status = "INACTIVE";
   module.updated_by = userId || null;
 
   await module.save();

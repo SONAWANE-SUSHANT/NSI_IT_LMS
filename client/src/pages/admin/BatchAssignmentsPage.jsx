@@ -179,7 +179,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
         <label className="course-admin-label">Course
           <select value={selectedCourseId} onChange={(e) => setSelectedCourseId(e.target.value)} className="course-admin-select">
             <option value="">Select a course</option>
-            {courses.map((course) => <option key={course.id} value={course.id}>{course.course_code} - {course.name}</option>)}
+            {courses.map((course) => <option key={course.id} value={course.id}>{course.code || course.course_code} - {course.name}</option>)}
           </select>
         </label>
         <label className="course-admin-label">Batch

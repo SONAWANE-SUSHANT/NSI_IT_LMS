@@ -10,14 +10,9 @@ const CourseInstructor = sequelize.define(
       autoIncrement: true,
     },
 
-    course_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-    },
-
     batch_id: {
       type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: true,
+      allowNull: false,
     },
 
     instructor_id: {
@@ -37,7 +32,7 @@ const CourseInstructor = sequelize.define(
       defaultValue: DataTypes.NOW,
     },
 
-    created_by: {
+    assigned_by: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
     },
@@ -48,9 +43,9 @@ const CourseInstructor = sequelize.define(
     },
   },
   {
-    tableName: "course_instructors",
+    tableName: "batch_instructors",
     timestamps: true,
-    createdAt: "created_at",
+    createdAt: false, // assigned_at is used
     updatedAt: "updated_at",
   }
 );

@@ -1,8 +1,5 @@
 const { Op } = require("sequelize");
-const {
-  Course,
-  CourseBatch,
-} = require("../models");
+const { Course, CourseBatch } = require("../models");
 
 const createCourseBatch = async (courseId, batchData, adminId) => {
   const course = await Course.findByPk(courseId);
@@ -11,59 +8,40 @@ const createCourseBatch = async (courseId, batchData, adminId) => {
     throw new Error("Course not found");
   }
 
-  const batchCode = batchData.batch_code.trim();
-
-  const existingBatch = await CourseBatch.findOne({
-    where: {
-      course_id: courseId,
-      batch_code: batchCode,
-    },
-  });
-
-  if (existingBatch) {
-    throw new Error(
-      "Batch code already exists for this course"
-    );
-  }
-
   const batch = await CourseBatch.create({
     course_id: courseId,
-    batch_code: batchCode,
     name: batchData.name.trim(),
     description: batchData.description?.trim() || null,
-    start_date: batchData.start_date || null,
+    start_date: batchData.start_date,
     end_date: batchData.end_date || null,
-    status: batchData.status || "DRAFT",
+    batch_mode: batchData.batch_mode || "ONLINE",
+    batch_time: batchData.batch_time || "MORNING",
+    batch_schedule: batchData.batch_schedule || "WEEKDAYS",
+    status: batchData.status || "UPCOMING",
     created_by: adminId,
     updated_by: adminId,
   });
+
+  // Reload to get the generated batch_code
+  await batch.reload();
 
   return CourseBatch.findByPk(batch.id, {
     include: [
       {
         model: Course,
         as: "course",
-        attributes: [
-          "id",
-          "course_code",
-          "name",
-          "status",
-        ],
+        attributes: ["id", "code", "name", "status"],
       },
     ],
   });
 };
 
 const getCourseBatches = async (courseId, filters = {}) => {
-  const course = await Course.findByPk(courseId);
+  const where = {};
 
-  if (!course) {
-    throw new Error("Course not found");
+  if (courseId) {
+    where.course_id = courseId;
   }
-
-  const where = {
-    course_id: courseId,
-  };
 
   if (filters.status && filters.status !== "ALL") {
     where.status = filters.status;
@@ -90,15 +68,12 @@ const getCourseBatches = async (courseId, filters = {}) => {
       {
         model: Course,
         as: "course",
-        attributes: [
-          "id",
-          "course_code",
-          "name",
-          "status",
-        ],
+        attributes: ["id", "code", "name", "status"],
       },
     ],
     order: [["created_at", "DESC"]],
+    raw: true,
+    nest: true,
   });
 };
 
@@ -108,12 +83,7 @@ const getCourseBatchById = async (id) => {
       {
         model: Course,
         as: "course",
-        attributes: [
-          "id",
-          "course_code",
-          "name",
-          "status",
-        ],
+        attributes: ["id", "code", "name", "status"],
       },
     ],
   });
@@ -125,37 +95,11 @@ const getCourseBatchById = async (id) => {
   return batch;
 };
 
-const updateCourseBatch = async (
-  id,
-  batchData,
-  adminId
-) => {
+const updateCourseBatch = async (id, batchData, adminId) => {
   const batch = await CourseBatch.findByPk(id);
 
   if (!batch) {
     throw new Error("Batch not found");
-  }
-
-  if (batchData.batch_code !== undefined) {
-    const batchCode = batchData.batch_code.trim();
-
-    const existingBatch = await CourseBatch.findOne({
-      where: {
-        course_id: batch.course_id,
-        batch_code: batchCode,
-        id: {
-          [Op.ne]: id,
-        },
-      },
-    });
-
-    if (existingBatch) {
-      throw new Error(
-        "Batch code already exists for this course"
-      );
-    }
-
-    batch.batch_code = batchCode;
   }
 
   if (batchData.name !== undefined) {
@@ -163,38 +107,42 @@ const updateCourseBatch = async (
   }
 
   if (batchData.description !== undefined) {
-    batch.description =
-      batchData.description?.trim() || null;
+    batch.description = batchData.description?.trim() || null;
   }
 
   if (batchData.start_date !== undefined) {
-    batch.start_date = batchData.start_date || null;
+    batch.start_date = batchData.start_date;
   }
 
   if (batchData.end_date !== undefined) {
     batch.end_date = batchData.end_date || null;
   }
 
-  batch.updated_by = adminId;
+  if (batchData.batch_mode !== undefined) {
+    batch.batch_mode = batchData.batch_mode;
+  }
 
+  if (batchData.batch_time !== undefined) {
+    batch.batch_time = batchData.batch_time;
+  }
+
+  if (batchData.batch_schedule !== undefined) {
+    batch.batch_schedule = batchData.batch_schedule;
+  }
+
+  if (batchData.status !== undefined) {
+    batch.status = batchData.status;
+  }
+
+  batch.updated_by = adminId;
   await batch.save();
+  await batch.reload();
 
   return getCourseBatchById(id);
 };
 
-const updateCourseBatchStatus = async (
-  id,
-  status,
-  adminId
-) => {
-  const validStatuses = [
-    "DRAFT",
-    "UPCOMING",
-    "ACTIVE",
-    "COMPLETED",
-    "CANCELLED",
-    "ARCHIVED",
-  ];
+const updateCourseBatchStatus = async (id, status, adminId) => {
+  const validStatuses = ["UPCOMING", "ACTIVE", "COMPLETED", "CANCELLED"];
 
   if (!validStatuses.includes(status)) {
     throw new Error("Invalid batch status");

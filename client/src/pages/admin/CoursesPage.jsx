@@ -7,25 +7,21 @@ import EmptyState from '../../components/admin/EmptyState';
 import ErrorState from '../../components/admin/ErrorState';
 import {
   createCourse,
-  getCourseCategories,
   getCourses,
   updateCourse,
   updateCourseStatus,
 } from '../../services/courseAdminService';
 
 const emptyCourse = {
-  course_code: '',
+  code: '',
   name: '',
   description: '',
-  category_id: '',
   thumbnail_url: '',
-  duration_value: '',
-  duration_unit: 'WEEKS',
+  duration: '',
 };
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(emptyCourse);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,12 +33,8 @@ export default function CoursesPage() {
     setIsLoading(true);
     setError('');
     try {
-      const [courseRows, categoryRows] = await Promise.all([
-        getCourses(),
-        getCourseCategories({ status: 'ACTIVE' }),
-      ]);
-      setCourses(courseRows);
-      setCategories(categoryRows);
+      const courseRows = await getCourses();
+      setCourses(courseRows || []);
     } catch (err) {
       setError(err.message || 'Failed to load courses');
     } finally {
@@ -54,15 +46,11 @@ export default function CoursesPage() {
     loadData();
   }, [loadData]);
 
-  const categoryNameById = useMemo(() => {
-    return categories.reduce((map, category) => ({ ...map, [category.id]: category.name }), {});
-  }, [categories]);
-
   const filteredCourses = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return courses;
     return courses.filter((course) =>
-      `${course.course_code || ''} ${course.name || ''} ${course.description || ''} ${course.category?.name || ''}`.toLowerCase().includes(q)
+      `${course.code || course.course_code || ''} ${course.name || ''} ${course.description || ''} ${course.duration || ''}`.toLowerCase().includes(q)
     );
   }, [courses, searchQuery]);
 
@@ -72,13 +60,12 @@ export default function CoursesPage() {
   };
 
   const buildPayload = () => ({
-    course_code: form.course_code.trim(),
+    code: form.code.trim(),
+    course_code: form.code.trim(), // backward-compatible alias
     name: form.name.trim(),
     description: form.description.trim() || null,
-    category_id: form.category_id ? Number(form.category_id) : null,
     thumbnail_url: form.thumbnail_url.trim() || null,
-    duration_value: form.duration_value ? Number(form.duration_value) : null,
-    duration_unit: form.duration_value ? form.duration_unit : null,
+    duration: form.duration.trim() || null,
   });
 
   const handleSubmit = async (event) => {
@@ -102,13 +89,11 @@ export default function CoursesPage() {
   const handleEdit = (course) => {
     setEditing(course);
     setForm({
-      course_code: course.course_code || '',
+      code: course.code || course.course_code || '',
       name: course.name || '',
       description: course.description || '',
-      category_id: course.category_id || '',
       thumbnail_url: course.thumbnail_url || '',
-      duration_value: course.duration_value || '',
-      duration_unit: course.duration_unit || 'WEEKS',
+      duration: course.duration || '',
     });
   };
 
@@ -130,7 +115,7 @@ export default function CoursesPage() {
             <span>Courses</span>
           </div>
           <h1 className="course-admin-title">Courses</h1>
-          <p className="course-admin-subtitle">Manage core course information, duration, category, thumbnail, and availability.</p>
+          <p className="course-admin-subtitle">Manage core course information, duration, thumbnail, and availability.</p>
         </div>
         <button onClick={loadData} disabled={isLoading} className="course-admin-icon-btn">
           <RefreshCw size={17} className={isLoading ? 'animate-spin text-indigo-600' : ''} />
@@ -142,31 +127,50 @@ export default function CoursesPage() {
         <form onSubmit={handleSubmit} className="course-admin-panel">
           <h2 className="course-admin-panel-title">{editing ? 'Edit Course' : 'Add Course'}</h2>
           <div className="course-admin-form-grid">
-            <label className="course-admin-label">Code
-              <input value={form.course_code} onChange={(e) => setForm((p) => ({ ...p, course_code: e.target.value }))} required maxLength={50} className="course-admin-input" />
+            <label className="course-admin-label">Course Code
+              <input
+                value={form.code}
+                onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))}
+                required
+                maxLength={30}
+                placeholder="e.g. FS-MERN-101"
+                className="course-admin-input"
+              />
             </label>
-            <label className="course-admin-label">Name
-              <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required maxLength={200} className="course-admin-input" />
-            </label>
-            <label className="course-admin-label">Category
-              <select value={form.category_id} onChange={(e) => setForm((p) => ({ ...p, category_id: e.target.value }))} className="course-admin-select">
-                <option value="">No category</option>
-                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-              </select>
-            </label>
-            <label className="course-admin-label">Thumbnail URL
-              <input value={form.thumbnail_url} onChange={(e) => setForm((p) => ({ ...p, thumbnail_url: e.target.value }))} className="course-admin-input" />
+            <label className="course-admin-label">Course Name
+              <input
+                value={form.name}
+                onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                required
+                maxLength={200}
+                placeholder="e.g. Full Stack MERN Development"
+                className="course-admin-input"
+              />
             </label>
             <label className="course-admin-label">Duration
-              <div className="mt-1.5 grid grid-cols-[1fr_120px] gap-2">
-                <input type="number" min="1" value={form.duration_value} onChange={(e) => setForm((p) => ({ ...p, duration_value: e.target.value }))} className="course-admin-input mt-0" />
-                <select value={form.duration_unit} onChange={(e) => setForm((p) => ({ ...p, duration_unit: e.target.value }))} className="course-admin-select mt-0">
-                  <option>DAYS</option><option>WEEKS</option><option>MONTHS</option>
-                </select>
-              </div>
+              <input
+                value={form.duration}
+                onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
+                maxLength={20}
+                placeholder="e.g. 6 Months or 12 Weeks"
+                className="course-admin-input"
+              />
+            </label>
+            <label className="course-admin-label">Thumbnail URL
+              <input
+                value={form.thumbnail_url}
+                onChange={(e) => setForm((p) => ({ ...p, thumbnail_url: e.target.value }))}
+                placeholder="https://..."
+                className="course-admin-input"
+              />
             </label>
             <label className="course-admin-label sm:col-span-2 xl:col-span-1">Description
-              <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} className="course-admin-textarea" />
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                placeholder="Detailed overview of course curriculum and outcomes..."
+                className="course-admin-textarea"
+              />
             </label>
           </div>
           <div className="course-admin-form-actions">
@@ -180,35 +184,51 @@ export default function CoursesPage() {
 
         <div className="space-y-4">
           <div className="course-admin-toolbar">
-            <SearchBar value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onClear={() => setSearchQuery('')} placeholder="Search courses by code, name, or category..." />
+            <SearchBar
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery('')}
+              placeholder="Search courses by code or name..."
+            />
           </div>
 
-          {isLoading ? <LoadingState rows={6} /> : error ? <ErrorState title="Unable to load courses" message={error} onRetry={loadData} /> : filteredCourses.length === 0 ? (
+          {isLoading ? (
+            <LoadingState rows={6} />
+          ) : error ? (
+            <ErrorState title="Unable to load courses" message={error} onRetry={loadData} />
+          ) : filteredCourses.length === 0 ? (
             <EmptyState title="No courses found" description="Create a course before adding batches or assignments." icon={<BookOpen size={32} />} />
           ) : (
             <div className="course-admin-table-wrap">
               <div className="course-admin-table-scroll">
-              <table className="course-admin-table">
-                <thead>
-                  <tr><th className="px-5 py-3">Course</th><th className="px-5 py-3">Category</th><th className="px-5 py-3">Duration</th><th className="px-5 py-3">Status</th><th className="px-5 py-3 text-right">Actions</th></tr>
-                </thead>
-                <tbody>
-                  {filteredCourses.map((course) => (
-                    <tr key={course.id} className="course-admin-table-row">
-                      <td><p className="course-admin-row-title">{course.name}</p><p className="course-admin-row-meta">{course.course_code}</p></td>
-                      <td className="course-admin-muted">{course.category?.name || categoryNameById[course.category_id] || 'Unassigned'}</td>
-                      <td className="course-admin-muted">{course.duration_value ? `${course.duration_value} ${course.duration_unit?.toLowerCase()}` : 'Not set'}</td>
-                      <td><StatusBadge status={course.status} /></td>
-                      <td className="course-admin-actions">
-                        <button onClick={() => handleEdit(course)} className="course-admin-text-btn">Edit</button>
-                        {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'].filter((s) => s !== course.status).map((status) => (
-                          <button key={status} onClick={() => setStatus(course, status)} className="course-admin-neutral-btn">{status}</button>
-                        ))}
-                      </td>
+                <table className="course-admin-table">
+                  <thead>
+                    <tr>
+                      <th className="px-5 py-3">Course</th>
+                      <th className="px-5 py-3">Duration</th>
+                      <th className="px-5 py-3">Status</th>
+                      <th className="px-5 py-3 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredCourses.map((course) => (
+                      <tr key={course.id} className="course-admin-table-row">
+                        <td>
+                          <p className="course-admin-row-title">{course.name}</p>
+                          <p className="course-admin-row-meta">{course.code || course.course_code}</p>
+                        </td>
+                        <td className="course-admin-muted">{course.duration || 'Not set'}</td>
+                        <td><StatusBadge status={course.status} /></td>
+                        <td className="course-admin-actions">
+                          <button onClick={() => handleEdit(course)} className="course-admin-text-btn">Edit</button>
+                          {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'].filter((s) => s !== course.status).map((status) => (
+                            <button key={status} onClick={() => setStatus(course, status)} className="course-admin-neutral-btn">{status}</button>
+                          ))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

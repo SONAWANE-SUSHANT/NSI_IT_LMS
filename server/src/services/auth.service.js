@@ -1,10 +1,14 @@
+const { Op } = require("sequelize");
 const { User, UserRole } = require("../models");
 const { comparePassword } = require("../utils/password");
 
 const loginUser = async (username, password) => {
   const user = await User.findOne({
     where: {
-      username,
+      [Op.or]: [
+        { username: username },
+        { email: username },
+      ],
     },
     include: [
       {
@@ -25,7 +29,7 @@ const loginUser = async (username, password) => {
 
   const validPassword = await comparePassword(
     password,
-    user.password_hash
+    user.password
   );
 
   if (!validPassword) {

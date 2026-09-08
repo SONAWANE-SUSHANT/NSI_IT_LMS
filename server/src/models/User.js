@@ -28,11 +28,12 @@ const User = sequelize.define(
 
     username: {
       type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: true,
+      // Generated stored column in MySQL: CONCAT(LOWER(first_name), '@nsi')
+      // Excluded on write/insert in Sequelize if not manually provided
+      allowNull: true,
     },
 
-    password_hash: {
+    password: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
@@ -42,20 +43,30 @@ const User = sequelize.define(
       allowNull: false,
     },
 
-    device_code: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-
-    profile_photo: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
-    },
-
     status: {
       type: DataTypes.ENUM("ACTIVE", "INACTIVE", "SUSPENDED"),
       allowNull: false,
       defaultValue: "ACTIVE",
+    },
+
+    photo: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    contact_no: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
+    gender: {
+      type: DataTypes.ENUM("MALE", "FEMALE", "OTHER"),
+      allowNull: false,
     },
 
     created_by: {
