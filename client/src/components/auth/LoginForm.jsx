@@ -37,11 +37,15 @@ export default function LoginForm({ onBack }) {
 
     try {
       const user = await login(username, password);
-      if (user?.role?.toUpperCase() === 'STUDENT') {
+      const role = user?.role?.toUpperCase();
+      if (role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (role === 'INSTRUCTOR') {
+        navigate('/instructor', { replace: true });
+      } else if (role === 'STUDENT') {
         navigate('/student', { replace: true });
       } else {
-        const from = location.state?.from?.pathname || '/portal-selection';
-        navigate(from, { replace: true });
+        navigate('/login', { replace: true });
       }
     } catch (err) {
       setErrorMessage(err.message || 'Invalid username or password.');

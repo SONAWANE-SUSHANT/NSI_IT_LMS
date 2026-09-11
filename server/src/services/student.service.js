@@ -126,6 +126,8 @@ const getBatchCourseContent = async (batchId, studentId) => {
           {
             model: LectureNote,
             as: "notes",
+            where: { status: "ACTIVE" },
+            required: false,
           },
         ],
       },

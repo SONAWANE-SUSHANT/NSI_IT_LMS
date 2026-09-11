@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 
 const courseModuleController = require("../controllers/courseModule.controller");
+const authenticate = require("../middleware/auth.middleware");
+const authorizeRoles = require("../middleware/role.middleware");
 
 const {
   createModuleValidator,
@@ -13,9 +15,12 @@ const {
   updateModuleOrderValidator,
 } = require("../validators/courseModule.validator");
 
+const auth = [authenticate, authorizeRoles("ADMIN", "INSTRUCTOR")];
+
 // Create module
 router.post(
   "/courses/:courseId/modules",
+  auth,
   createModuleValidator,
   courseModuleController.createModule
 );
@@ -23,6 +28,7 @@ router.post(
 // Get all modules of a course
 router.get(
   "/courses/:courseId/modules",
+  auth,
   courseIdValidator,
   courseModuleController.getModulesByCourse
 );
@@ -30,6 +36,7 @@ router.get(
 // Get single module
 router.get(
   "/modules/:moduleId",
+  auth,
   moduleIdValidator,
   courseModuleController.getModuleById
 );
@@ -37,6 +44,7 @@ router.get(
 // Update module
 router.put(
   "/modules/:moduleId",
+  auth,
   updateModuleValidator,
   courseModuleController.updateModule
 );
@@ -44,6 +52,7 @@ router.put(
 // Update module status
 router.patch(
   "/modules/:moduleId/status",
+  auth,
   updateModuleStatusValidator,
   courseModuleController.updateModuleStatus
 );
@@ -51,6 +60,7 @@ router.patch(
 // Change module order
 router.patch(
   "/modules/:moduleId/order",
+  auth,
   updateModuleOrderValidator,
   courseModuleController.updateModuleOrder
 );
@@ -58,6 +68,7 @@ router.patch(
 // Archive module
 router.delete(
   "/modules/:moduleId",
+  auth,
   moduleIdValidator,
   courseModuleController.deleteModule
 );

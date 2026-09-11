@@ -27,20 +27,27 @@ const createLecture = async ({
     throw new Error("Course module not found");
   }
 
+  const resolvedSessionType = session_type || lecture_type || "LIVE";
+  const rawRecordingUrl = recording_url || (resolvedSessionType === "RECORDED" ? (session_url || meet_url) : null);
+  const resolvedSessionUrl = resolvedSessionType === "RECORDED" ? null : (session_url || meet_url || null);
+  const resolvedRecordingStatus = rawRecordingUrl
+    ? (recording_status && recording_status !== "NOT_AVAILABLE" ? recording_status : "AVAILABLE")
+    : (recording_status || "NOT_AVAILABLE");
+
   const lecture = await Lecture.create({
     module_id: moduleId,
     instructor_id: instructorId || null,
     title,
     description: description || null,
-    session_type: session_type || lecture_type || "LIVE",
+    session_type: resolvedSessionType,
     status: status || "DRAFT",
     display_order: display_order ?? 0,
     scheduled_at: scheduled_at || null,
     duration_minutes: duration_minutes || null,
-    session_url: session_url || meet_url || null,
-    recording_url: recording_url || null,
+    session_url: resolvedSessionUrl,
+    recording_url: rawRecordingUrl || null,
     recording_provider: recording_provider || null,
-    recording_status: recording_status || "NOT_AVAILABLE",
+    recording_status: resolvedRecordingStatus,
     published_at: status === "PUBLISHED" ? new Date() : null,
     created_by: userId || null,
     updated_by: userId || null,
@@ -183,6 +190,8 @@ const updateLecture = async ({
     lecture.duration_minutes = duration_minutes;
   }
 
+  const effectiveSessionType = session_type || lecture_type || lecture.session_type;
+
   if (session_url !== undefined || meet_url !== undefined) {
     lecture.session_url = session_url || meet_url;
   }
@@ -197,6 +206,17 @@ const updateLecture = async ({
 
   if (recording_status !== undefined) {
     lecture.recording_status = recording_status;
+  }
+
+  // If lecture is or became RECORDED, ensure recording_url is preserved and session_url is not a live link
+  if (effectiveSessionType === "RECORDED") {
+    if (!lecture.recording_url && lecture.session_url) {
+      lecture.recording_url = lecture.session_url;
+    }
+    lecture.session_url = null;
+    if (lecture.recording_url && (!lecture.recording_status || lecture.recording_status === "NOT_AVAILABLE")) {
+      lecture.recording_status = "AVAILABLE";
+    }
   }
 
   lecture.updated_by = userId || null;

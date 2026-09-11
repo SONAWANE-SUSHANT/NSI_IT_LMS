@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Eye, Edit, CheckCircle, XCircle, AlertOctagon } from 'lucide-react';
+import { MoreVertical, Eye, Edit, CheckCircle, XCircle, AlertOctagon, LayoutDashboard } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import RoleBadge from './RoleBadge';
 
@@ -11,6 +11,7 @@ import RoleBadge from './RoleBadge';
  * @param {Function} props.onViewDetails
  * @param {Function} props.onEditUser
  * @param {Function} props.onUpdateStatus - (user, newStatus)
+ * @param {Function} [props.onViewPortal] - (user)
  */
 export default function UserTable({
   users = [],
@@ -18,6 +19,7 @@ export default function UserTable({
   onViewDetails,
   onEditUser,
   onUpdateStatus,
+  onViewPortal,
 }) {
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const dropdownRef = useRef(null);
@@ -157,6 +159,20 @@ export default function UserTable({
                             <Eye size={14} />
                             <span>View Details</span>
                           </button>
+
+                          {onViewPortal && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveDropdownId(null);
+                                onViewPortal(user);
+                              }}
+                              className="w-full px-3.5 py-2 text-xs font-medium text-teal-700 hover:bg-teal-50 hover:text-teal-800 flex items-center gap-2 transition"
+                            >
+                              <LayoutDashboard size={14} className="text-teal-600" />
+                              <span>View Portal</span>
+                            </button>
+                          )}
 
                           <button
                             type="button"

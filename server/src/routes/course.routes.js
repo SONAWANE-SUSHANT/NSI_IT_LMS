@@ -21,14 +21,14 @@ const router = express.Router();
 router.get(
   "/",
   authenticate,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "INSTRUCTOR"),
   getAll
 );
 
 router.get(
   "/:id",
   authenticate,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "INSTRUCTOR"),
   getOne
 );
 

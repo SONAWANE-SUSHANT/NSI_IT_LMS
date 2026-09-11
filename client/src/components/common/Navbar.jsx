@@ -1,37 +1,24 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import RoleBadge from './RoleBadge';
 import nsiLogo from '../../assets/NSI_LOGO.png';
-import { LogOut, LayoutGrid, User, Shield, BookOpen, GraduationCap } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
+import { getDefaultRouteForRole } from '../../utils/roleUtils';
 
-export default function Navbar({ currentPortal }) {
-  const { user, allowedPortals, logout } = useAuth();
+export default function Navbar() {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const portalIcons = {
-    student: <GraduationCap size={16} />,
-    instructor: <BookOpen size={16} />,
-    admin: <Shield size={16} />,
-  };
-
-  const portalLabels = {
-    student: 'Student Portal',
-    instructor: 'Instructor Portal',
-    admin: 'Admin Portal',
-  };
-
   const fullName = user
     ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username
     : 'User';
 
-  const showPortalLinks = allowedPortals.length > 1;
-  const brandHomeLink = user?.role?.toUpperCase() === 'STUDENT' ? '/student' : '/portal-selection';
+  const brandHomeLink = getDefaultRouteForRole(user?.role);
 
   return (
     <header className="navbar">
@@ -44,29 +31,6 @@ export default function Navbar({ currentPortal }) {
             <span className="navbar-subtitle">Nityashree Infosystems</span>
           </div>
         </Link>
-
-        {/* Portal navigation links if multiple available */}
-        {showPortalLinks && (
-          <nav className="navbar-portals">
-            <Link
-              to="/portal-selection"
-              className={`portal-nav-link ${location.pathname === '/portal-selection' ? 'active' : ''}`}
-            >
-              <LayoutGrid size={16} />
-              <span>All Portals</span>
-            </Link>
-            {allowedPortals.map((portal) => (
-              <Link
-                key={portal}
-                to={`/${portal}`}
-                className={`portal-nav-link ${currentPortal === portal ? 'active' : ''}`}
-              >
-                {portalIcons[portal]}
-                <span>{portalLabels[portal]}</span>
-              </Link>
-            ))}
-          </nav>
-        )}
 
         {/* User Info & Logout */}
         <div className="navbar-user-section">

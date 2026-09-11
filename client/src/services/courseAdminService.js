@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL } from '../config/apiConfig';
 const TOKEN_KEY = 'nsi_lms_token';
 
 function getToken() {
@@ -190,3 +190,32 @@ export const deleteLecture = (lectureId) =>
   request(`/lectures/${lectureId}`, {
     method: 'DELETE',
   }, 'Failed to archive lecture');
+
+// ─── Lecture Notes & Materials ────────────────────────────────────────────────
+
+export const getLectureNotes = (lectureId) =>
+  request(`/lectures/${lectureId}/notes`, {}, 'Failed to load notes');
+
+export const createLectureNote = (lectureId, data) =>
+  request(`/lectures/${lectureId}/notes`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }, 'Failed to create note');
+
+export const updateLectureNote = (noteId, data) =>
+  request(`/notes/${noteId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }, 'Failed to update note');
+
+export const updateLectureNoteStatus = (noteId, status) =>
+  request(`/notes/${noteId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  }, 'Failed to update note status');
+
+export const deleteLectureNote = (noteId) =>
+  request(`/notes/${noteId}`, {
+    method: 'DELETE',
+  }, 'Failed to delete note');
+

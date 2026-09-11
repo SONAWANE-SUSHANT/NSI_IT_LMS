@@ -179,6 +179,10 @@ const createBatchSession = async (batchId, sessionData, instructorId) => {
     throw new Error("You are not authorized to create sessions for this batch");
   }
 
+  const isRecorded = sessionData.session_type === "RECORDED";
+  const recordingUrl = sessionData.recording_url || (isRecorded ? sessionData.session_url : null);
+  const sessionUrl = isRecorded ? null : (sessionData.session_url || null);
+
   const session = await Lecture.create({
     module_id: sessionData.module_id,
     instructor_id: instructorId,
@@ -189,8 +193,9 @@ const createBatchSession = async (batchId, sessionData, instructorId) => {
     display_order: sessionData.display_order || 0,
     scheduled_at: sessionData.scheduled_at || new Date(),
     duration_minutes: sessionData.duration_minutes || 60,
-    session_url: sessionData.session_url || null,
-    recording_url: sessionData.recording_url || null,
+    session_url: sessionUrl,
+    recording_url: recordingUrl,
+    recording_status: recordingUrl ? "AVAILABLE" : "NOT_AVAILABLE",
     created_by: instructorId,
     updated_by: instructorId,
   });

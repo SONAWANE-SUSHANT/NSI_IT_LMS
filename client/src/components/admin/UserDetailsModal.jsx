@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { X, Mail, Clock, Check, AtSign, Smartphone, Calendar, History, UserCog } from 'lucide-react';
+import { X, Mail, Clock, Check, AtSign, Smartphone, Calendar, History, UserCog, LayoutDashboard } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import RoleBadge from './RoleBadge';
 
@@ -10,8 +10,9 @@ import RoleBadge from './RoleBadge';
  * @param {object|null} props.user
  * @param {Function} props.onClose
  * @param {Function} [props.onEdit]
+ * @param {Function} [props.onViewPortal]
  */
-export default function UserDetailsModal({ isOpen, user, onClose, onEdit }) {
+export default function UserDetailsModal({ isOpen, user, onClose, onEdit, onViewPortal }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -247,6 +248,20 @@ return (
         >
           Close
         </button>
+
+        {onViewPortal && (
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onViewPortal(user);
+            }}
+            className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-teal-700 hover:shadow-md active:scale-[0.98] sm:w-auto"
+          >
+            <LayoutDashboard size={16} />
+            <span>View Portal</span>
+          </button>
+        )}
 
         {onEdit && (
           <button

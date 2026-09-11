@@ -1,12 +1,15 @@
-import { getAuthToken } from '../utils/token';
+import { getAuthToken, getViewingInstructorId } from '../utils/token';
+import { API_BASE_URL as ROOT_API_URL } from '../config/apiConfig';
 
-const API_BASE_URL = 'http://localhost:5000/api/instructor';
+const API_BASE_URL = `${ROOT_API_URL}/instructor`;
 
 const getHeaders = () => {
   const token = getAuthToken();
+  const viewingInstructorId = getViewingInstructorId();
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(viewingInstructorId ? { 'x-instructor-id': String(viewingInstructorId) } : {}),
   };
 };
 

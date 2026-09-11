@@ -8,12 +8,27 @@ export function getAllowedPortalsForRole(role) {
   const normalized = String(role).toUpperCase().trim();
   switch (normalized) {
     case 'ADMIN':
-      return ['student', 'instructor', 'admin'];
+      return ['admin'];
     case 'INSTRUCTOR':
       return ['instructor'];
     case 'STUDENT':
       return ['student'];
     default:
       return [];
+  }
+}
+
+export function getDefaultRouteForRole(role) {
+  if (!role) return '/login';
+  const normalized = String(role).toUpperCase().trim();
+  switch (normalized) {
+    case 'ADMIN':
+      return '/admin';
+    case 'INSTRUCTOR':
+      return '/instructor';
+    case 'STUDENT':
+      return '/student';
+    default:
+      return '/login';
   }
 }

@@ -28,9 +28,9 @@ export default function UnauthorizedPage() {
           </div>
 
           <div className="unauthorized-actions">
-            <Link to="/portal-selection" className="btn-primary">
+            <Link to={user?.role?.toUpperCase() === 'ADMIN' ? '/admin' : user?.role?.toUpperCase() === 'INSTRUCTOR' ? '/instructor' : '/student'} className="btn-primary">
               <ArrowLeft size={18} />
-              <span>Return to Allowed Portals</span>
+              <span>Return to Dashboard</span>
             </Link>
           </div>
         </div>

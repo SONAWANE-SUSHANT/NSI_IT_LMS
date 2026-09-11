@@ -64,15 +64,6 @@ export default function StudentHeader({ activeTab, setActiveTab }) {
 
           {/* User Controls & Logout */}
           <div className="flex items-center gap-3">
-            {allowedPortals.length > 1 && (
-              <Link
-                to="/portal-selection"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Switch Portal</span>
-              </Link>
-            )}
 
             <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
               <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs border border-amber-200">

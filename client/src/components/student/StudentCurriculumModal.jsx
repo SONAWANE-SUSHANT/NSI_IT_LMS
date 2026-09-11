@@ -13,12 +13,14 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { fetchBatchCourseContent } from '../../services/studentService';
+import VideoPlayerModal from '../shared/VideoPlayerModal';
 
 export default function StudentCurriculumModal({ batch, onClose }) {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedModules, setExpandedModules] = useState({});
+  const [playingLecture, setPlayingLecture] = useState(null);
 
   useEffect(() => {
     if (!batch) return;
@@ -193,27 +195,57 @@ export default function StudentCurriculumModal({ batch, onClose }) {
                                   </div>
                                 </div>
 
-                                {lec.session_url ? (
-                                  <a
-                                    href={lec.session_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs"
-                                  >
-                                    <span>Join Class</span>
-                                    <ExternalLink className="w-3 h-3" />
-                                  </a>
-                                ) : lec.recording_url ? (
-                                  <a
-                                    href={lec.recording_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors"
-                                  >
-                                    <span>Recording</span>
-                                    <ExternalLink className="w-3 h-3" />
-                                  </a>
-                                ) : null}
+                                {(() => {
+                                  const isLive = (lec.session_type || lec.lecture_type) === 'LIVE';
+                                  const meetUrl = isLive ? (lec.session_url || lec.meet_url) : null;
+                                  const recUrl = lec.recording_url || (!isLive ? (lec.session_url || lec.meet_url) : null);
+
+                                  if (isLive) {
+                                    if (meetUrl) {
+                                      return (
+                                        <a
+                                          href={meetUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs"
+                                        >
+                                          <span>Join Class</span>
+                                          <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                      );
+                                    }
+                                    if (recUrl) {
+                                      return (
+                                        <button
+                                          type="button"
+                                          onClick={() => setPlayingLecture({ ...lec, recording_url: recUrl })}
+                                          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 hover:text-indigo-700 transition-colors cursor-pointer"
+                                        >
+                                          <Video className="w-3.5 h-3.5 text-indigo-600" />
+                                          <span>Watch Recording</span>
+                                        </button>
+                                      );
+                                    }
+                                    return null;
+                                  }
+
+                                  // RECORDED
+                                  if (recUrl) {
+                                    return (
+                                      <button
+                                        type="button"
+                                        onClick={() => setPlayingLecture({ ...lec, recording_url: recUrl })}
+                                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer shadow-2xs"
+                                      >
+                                        <Video className="w-3.5 h-3.5" />
+                                        <span>Watch Recording</span>
+                                      </button>
+                                    );
+                                  }
+                                  return (
+                                    <span className="shrink-0 text-[11px] text-slate-400 italic">Pending upload</span>
+                                  );
+                                })()}
                               </div>
 
                               {/* Notes */}
@@ -256,6 +288,14 @@ export default function StudentCurriculumModal({ batch, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* ── In-LMS Video Player Modal ── */}
+      <VideoPlayerModal
+        isOpen={!!playingLecture}
+        onClose={() => setPlayingLecture(null)}
+        lecture={playingLecture}
+        courseName={batch?.course?.name || batch?.name}
+      />
     </div>
   );
 }

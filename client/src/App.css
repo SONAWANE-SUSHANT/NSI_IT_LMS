@@ -1235,3 +1235,193 @@
 .content-form-heading {
   @apply font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)];
 }
+
+/* Schedule / Calendar Page
+   ========================================================================== */
+
+.schedule-layout {
+  @apply grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px];
+}
+
+/* Calendar panel */
+.schedule-calendar-panel {
+  @apply rounded-2xl border bg-white p-5;
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-md);
+}
+
+.schedule-month-nav {
+  @apply mb-4 flex items-center justify-between;
+}
+
+.schedule-month-title {
+  @apply font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--text-primary)];
+}
+
+.schedule-nav-btn {
+  @apply flex h-9 w-9 items-center justify-center rounded-xl border bg-white text-[var(--text-muted)] transition hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)];
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.schedule-day-headers {
+  @apply mb-2 grid grid-cols-7 gap-0.5;
+}
+
+.schedule-day-header {
+  @apply py-2 text-center text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)];
+}
+
+.schedule-grid {
+  @apply grid grid-cols-7 gap-0.5;
+}
+
+.schedule-day-cell {
+  @apply relative flex min-h-[72px] flex-col items-center rounded-xl border border-transparent p-1.5 transition duration-150 hover:border-[var(--border-subtle)] hover:bg-[var(--bg-page)];
+}
+
+.schedule-day--other {
+  @apply opacity-35;
+}
+
+.schedule-day--today .schedule-day-num {
+  @apply rounded-full px-1.5 text-white;
+  background: var(--admin-primary);
+}
+
+.schedule-day--selected {
+  border-color: var(--admin-primary) !important;
+  background: var(--admin-light) !important;
+}
+
+.schedule-day-num {
+  @apply text-sm font-bold text-[var(--text-primary)] leading-6 min-w-[24px] text-center;
+}
+
+.schedule-dot-row {
+  @apply mt-1 flex flex-wrap justify-center gap-0.5;
+}
+
+.schedule-event-dot {
+  @apply inline-block h-1.5 w-1.5 rounded-full;
+}
+
+.schedule-more {
+  @apply text-[9px] font-extrabold text-[var(--text-muted)];
+}
+
+.schedule-legend {
+  @apply mt-4 flex items-center gap-4 border-t pt-3;
+  border-color: var(--border-subtle);
+}
+
+.schedule-legend-item {
+  @apply flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)];
+}
+
+/* Detail panel */
+.schedule-detail-panel {
+  @apply flex flex-col gap-5 rounded-2xl border bg-white p-5;
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-md);
+}
+
+.schedule-detail-header {
+  @apply flex items-center gap-2.5 border-b pb-3;
+  border-color: var(--border-subtle);
+}
+
+.schedule-detail-date {
+  @apply font-[family-name:var(--font-display)] text-base font-semibold text-[var(--text-primary)] flex-1;
+}
+
+.schedule-day-count {
+  @apply rounded-full px-2 py-0.5 text-[11px] font-extrabold;
+  background: var(--admin-light);
+  color: var(--admin-dark);
+}
+
+.schedule-no-events {
+  @apply flex flex-col items-center justify-center gap-2 py-10 text-center text-sm font-semibold text-[var(--text-muted)];
+}
+
+.schedule-lecture-list {
+  @apply flex flex-col gap-3;
+}
+
+/* Lecture card (in detail panel) */
+.schedule-lecture-card {
+  @apply flex flex-col gap-2.5 rounded-xl border bg-[var(--bg-page)] p-4;
+  border-color: var(--border-subtle);
+  border-left-width: 3px;
+}
+
+.schedule-lecture-header {
+  @apply flex items-center gap-2;
+}
+
+.schedule-type-pill {
+  @apply rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider;
+}
+
+.schedule-lecture-status {
+  @apply ml-auto text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)];
+}
+
+.schedule-lecture-title {
+  @apply font-bold text-[var(--text-primary)] leading-snug;
+}
+
+.schedule-lecture-desc {
+  @apply text-xs leading-5 text-[var(--text-muted)];
+}
+
+.schedule-lecture-meta {
+  @apply flex flex-wrap items-center gap-2 border-t pt-2.5;
+  border-color: var(--border-subtle);
+}
+
+.schedule-meta-item {
+  @apply flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)];
+}
+
+.schedule-meet-link {
+  @apply flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold text-white transition hover:opacity-90;
+  background: var(--admin-primary);
+}
+
+.schedule-recording-link {
+  @apply flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold text-white transition hover:opacity-90;
+  background: var(--instructor-primary);
+}
+
+/* Upcoming section */
+.schedule-upcoming {
+  @apply flex flex-col gap-2 border-t pt-4;
+  border-color: var(--border-subtle);
+}
+
+.schedule-upcoming-heading {
+  @apply text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)];
+}
+
+.schedule-upcoming-list {
+  @apply flex flex-col gap-1.5;
+}
+
+.schedule-upcoming-item {
+  @apply flex items-center gap-2 rounded-lg border bg-[var(--bg-page)] px-3 py-2 text-xs;
+  border-color: var(--border-subtle);
+}
+
+.schedule-upcoming-date {
+  @apply shrink-0 font-bold text-[var(--text-muted)];
+}
+
+.schedule-upcoming-time {
+  @apply shrink-0 font-bold text-[var(--admin-primary)];
+}
+
+.schedule-upcoming-title {
+  @apply flex-1 font-semibold text-[var(--text-primary)];
+}

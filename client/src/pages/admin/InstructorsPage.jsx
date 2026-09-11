@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserPlus, RefreshCw, Users, BookOpen } from 'lucide-react';
 import { getUsers, updateUserStatus } from '../../services/adminUserService';
 import UserTable from '../../components/admin/UserTable';
@@ -13,11 +14,17 @@ import EmptyState from '../../components/admin/EmptyState';
 import ErrorState from '../../components/admin/ErrorState';
 
 export default function InstructorsPage() {
+  const navigate = useNavigate();
   const [instructors, setInstructors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const handleViewPortal = useCallback((user) => {
+    if (!user?.id) return;
+    navigate(`/admin/instructors/${user.id}/portal`);
+  }, [navigate]);
 
   // Modals & Dialogs
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -180,6 +187,7 @@ export default function InstructorsPage() {
           onViewDetails={(user) => setSelectedUserForDetails(user)}
           onEditUser={(user) => setSelectedUserForEdit(user)}
           onUpdateStatus={handleStatusChangeRequest}
+          onViewPortal={handleViewPortal}
         />
       )}
 
@@ -198,6 +206,7 @@ export default function InstructorsPage() {
         user={selectedUserForDetails}
         onClose={() => setSelectedUserForDetails(null)}
         onEdit={(user) => setSelectedUserForEdit(user)}
+        onViewPortal={handleViewPortal}
       />
 
       <EditUserModal

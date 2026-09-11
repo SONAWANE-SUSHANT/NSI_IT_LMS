@@ -53,7 +53,13 @@ export default function InstructorScheduleSessionModal({ batch, onClose, onSucce
 
     try {
       setSubmitting(true);
-      await createBatchSession(batch.id, formData);
+      const isRecorded = formData.session_type === 'RECORDED';
+      const payload = {
+        ...formData,
+        recording_url: isRecorded ? (formData.session_url?.trim() || null) : null,
+        session_url: isRecorded ? null : (formData.session_url?.trim() || null),
+      };
+      await createBatchSession(batch.id, payload);
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
@@ -65,6 +71,8 @@ export default function InstructorScheduleSessionModal({ batch, onClose, onSucce
 
   if (!batch) return null;
 
+  const isRecorded = formData.session_type === 'RECORDED';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
@@ -75,7 +83,9 @@ export default function InstructorScheduleSessionModal({ batch, onClose, onSucce
               <Video className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">Schedule Live Session</h2>
+              <h2 className="text-base font-bold text-slate-900">
+                {isRecorded ? 'Add Pre-recorded Lecture' : 'Schedule Session'}
+              </h2>
               <p className="text-xs text-slate-500 font-medium">
                 Batch: {batch.name} ({batch.batch_code})
               </p>
@@ -185,13 +195,19 @@ export default function InstructorScheduleSessionModal({ batch, onClose, onSucce
           {/* Meeting / Session URL */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Live Meeting URL (Google Meet, Zoom, Teams)
+              {isRecorded
+                ? 'Recorded Video URL (YouTube, Google Drive, Vimeo, MP4)'
+                : 'Live Meeting URL (Google Meet, Zoom, Teams)'}
             </label>
             <div className="relative">
               <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
                 type="url"
-                placeholder="https://meet.google.com/xyz-abc-def"
+                placeholder={
+                  isRecorded
+                    ? 'https://youtu.be/... or https://drive.google.com/...'
+                    : 'https://meet.google.com/xyz-abc-def'
+                }
                 value={formData.session_url}
                 onChange={(e) => setFormData({ ...formData, session_url: e.target.value })}
                 className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-teal-500"

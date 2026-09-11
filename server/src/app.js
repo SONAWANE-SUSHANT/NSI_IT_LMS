@@ -12,8 +12,11 @@ const courseInstructorRoutes = require("./routes/courseInstructor.routes");
 const courseStudentRoutes = require("./routes/courseStudent.routes");
 const courseModuleRoutes = require("./routes/courseModule.routes");
 const lectureRoutes = require("./routes/lecture.routes");
+const lectureNoteRoutes = require("./routes/lectureNote.routes");
 const instructorRoutes = require("./routes/instructor.routes");
 const studentRoutes = require("./routes/student.routes");
+const adminInstructorPortalRoutes = require("./routes/adminInstructorPortal.routes");
+const adminStudentPortalRoutes = require("./routes/adminStudentPortal.routes");
 
 const app = express();
 
@@ -74,8 +77,11 @@ app.use("/api/test", testRoutes);
 app.use("/api/admin", courseBatchRoutes);
 app.use("/api/admin", courseInstructorRoutes);
 app.use("/api/admin", courseStudentRoutes);
+app.use("/api/admin", adminInstructorPortalRoutes);
+app.use("/api/admin", adminStudentPortalRoutes);
 app.use("/api", courseModuleRoutes);
 app.use("/api", lectureRoutes);
+app.use("/api", lectureNoteRoutes);
 app.use("/api/instructor", instructorRoutes);
 app.use("/api/student", studentRoutes);
 

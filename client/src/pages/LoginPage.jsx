@@ -10,17 +10,19 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // If user is already logged in, redirect to portal selection or target page
+  // If user is already logged in, redirect directly to their role's dashboard
   useEffect(() => {
-    if (isAuthenticated) {
-      if (user?.role?.toUpperCase() === 'STUDENT') {
+    if (isAuthenticated && user) {
+      const role = user.role?.toUpperCase();
+      if (role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (role === 'INSTRUCTOR') {
+        navigate('/instructor', { replace: true });
+      } else if (role === 'STUDENT') {
         navigate('/student', { replace: true });
-      } else {
-        const from = location.state?.from?.pathname || '/portal-selection';
-        navigate(from, { replace: true });
       }
     }
-  }, [isAuthenticated, user, navigate, location]);
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <div className="auth-page-wrapper">

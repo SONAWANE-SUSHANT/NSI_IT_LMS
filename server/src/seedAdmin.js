@@ -27,8 +27,9 @@ const seedUsers = async () => {
       const passwordHash = await bcrypt.hash("Admin@123", 10);
       admin = await User.create({
         first_name: "Admin",
+
         last_name: "Administrator",
-        email: "admin@nsiit.com",
+        email: "sushant@nsi",
         password: passwordHash,
         role_id: adminRole.id,
         contact_no: "9999999999",
