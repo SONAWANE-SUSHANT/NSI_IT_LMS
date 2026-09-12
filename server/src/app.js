@@ -5,6 +5,7 @@ const compression = require("compression");
 
 const authRoutes = require("./routes/auth.routes");
 const adminUserRoutes = require("./routes/adminUser.routes");
+const deviceRoutes = require("./routes/device.routes");
 const courseRoutes = require("./routes/course.routes");
 const testRoutes = require("./routes/test.routes");
 const courseBatchRoutes = require("./routes/courseBatch.routes");
@@ -20,25 +21,21 @@ const adminStudentPortalRoutes = require("./routes/adminStudentPortal.routes");
 
 const app = express();
 
-// Security HTTP headers
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
-// Disable x-powered-by header for security and small bandwidth reduction
 app.disable("x-powered-by");
 
-// Enable Gzip/Deflate compression for all responses
 app.use(
   compression({
-    level: 6, // optimal balance of CPU and compression ratio
-    threshold: 1024, // only compress responses > 1KB
+    level: 6,
+    threshold: 1024,
   })
 );
 
-// CORS configuration (supports comma-separated origins or default fallback)
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map((url) => url.trim())
   : ["http://localhost:5173", "http://localhost:3000"];
@@ -46,7 +43,6 @@ const allowedOrigins = process.env.CLIENT_URL
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
         return callback(null, true);
       }
@@ -59,7 +55,6 @@ app.use(
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
-// Fast Health Check
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
@@ -69,9 +64,9 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Mount Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin/users", adminUserRoutes);
+app.use("/api/admin/users", deviceRoutes);
 app.use("/api/admin/courses", courseRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/admin", courseBatchRoutes);
@@ -85,7 +80,6 @@ app.use("/api", lectureNoteRoutes);
 app.use("/api/instructor", instructorRoutes);
 app.use("/api/student", studentRoutes);
 
-// Catch 404 for undefined routes
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -93,7 +87,6 @@ app.use((req, res) => {
   });
 });
 
-// Centralized Global Error Handler
 app.use((err, req, res, next) => {
   const isProduction = process.env.NODE_ENV === "production";
   console.error("Unhandled Error:", err);
