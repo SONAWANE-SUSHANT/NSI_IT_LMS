@@ -6,6 +6,10 @@ const {
   updateUserStatusByAdmin,
   importStudentsByAdmin,
 } = require("../services/adminUser.service");
+const {
+  getUserDevices,
+  revokeUserDevice,
+} = require("../services/device.service");
 
 const createUser = async (req, res) => {
   try {
@@ -135,6 +139,40 @@ const importStudents = async (req, res) => {
   }
 };
 
+const getUserDeviceList = async (req, res) => {
+  try {
+    const devices = await getUserDevices(req.params.id);
+
+    return res.json({
+      success: true,
+      data: devices,
+      active_count: devices.filter((device) => device.status === "ACTIVE").length,
+      max_active_devices: 2,
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to retrieve user devices",
+    });
+  }
+};
+
+const removeUserDevice = async (req, res) => {
+  try {
+    await revokeUserDevice(req.params.id, req.params.deviceId);
+
+    return res.json({
+      success: true,
+      message: "Device removed successfully. The device slot is now available for the user's next login.",
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to remove user device",
+    });
+  }
+};
+
 module.exports = {
   createUser,
   getUsers,
@@ -142,4 +180,6 @@ module.exports = {
   updateUser,
   updateUserStatus,
   importStudents,
+  getUserDeviceList,
+  removeUserDevice,
 };
