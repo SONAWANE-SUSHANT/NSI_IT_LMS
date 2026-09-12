@@ -1,8 +1,5 @@
 const { loginUser } = require("../services/auth.service");
-const {
-  handleStudentDeviceLogin,
-  isStudent,
-} = require("../services/device.service");
+const { handleStudentDeviceLogin } = require("../services/device.service");
 const { generateToken } = require("../utils/jwt");
 
 const login = async (req, res) => {
@@ -27,7 +24,6 @@ const login = async (req, res) => {
       message: "Login successful",
       data: {
         token,
-
         user: {
           id: user.id,
           first_name: user.first_name,
