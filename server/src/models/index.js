@@ -1,5 +1,6 @@
 const User = require("./User");
 const UserRole = require("./UserRole");
+const UserDevice = require("./UserDevice");
 const Course = require("./Course");
 const CourseBatch = require("./CourseBatch");
 const CourseInstructor = require("./CourseInstructor");
@@ -20,6 +21,17 @@ UserRole.hasMany(User, {
 User.belongsTo(UserRole, {
   foreignKey: "role_id",
   as: "role",
+});
+
+// 1b. User ↔ Devices
+User.hasMany(UserDevice, {
+  foreignKey: "user_id",
+  as: "devices",
+});
+
+UserDevice.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
 });
 
 // 2. Course ↔ Batches
@@ -155,6 +167,7 @@ QuizOption.belongsTo(QuizQuestion, {
 module.exports = {
   User,
   UserRole,
+  UserDevice,
   Course,
   CourseBatch,
   CourseInstructor,
