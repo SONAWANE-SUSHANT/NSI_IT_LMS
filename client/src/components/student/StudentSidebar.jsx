@@ -9,6 +9,7 @@ import {
   X,
   GraduationCap,
   ArrowLeft,
+  Award,
 } from 'lucide-react';
 
 const ADMIN_PRIMARY = '#3c4cb8';
@@ -52,6 +53,7 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
       items: [
         { name: 'My Courses', path: `${basePath}/courses`, icon: BookOpen },
         { name: 'Class Schedule', path: `${basePath}/schedule`, icon: CalendarDays },
+        { name: 'Tests', path: `${basePath}/quizzes`, icon: Award },
       ],
     },
   ];

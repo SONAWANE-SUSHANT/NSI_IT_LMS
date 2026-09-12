@@ -32,6 +32,15 @@ import CourseContentPage from './pages/admin/CourseContentPage';
 import AdminInstructorPortalWrapper from './components/admin/AdminInstructorPortalWrapper';
 import AdminStudentPortalWrapper from './components/admin/AdminStudentPortalWrapper';
 
+// Quizzes / Assessments
+import InstructorQuizzesPage from './pages/instructor/InstructorQuizzesPage';
+import QuizBuilderPage from './pages/instructor/QuizBuilderPage';
+import QuizAttemptsPage from './pages/instructor/QuizAttemptsPage';
+import StudentQuizzesPage from './pages/student/StudentQuizzesPage';
+import StudentQuizDetailPage from './pages/student/StudentQuizDetailPage';
+import StudentQuizTakingPage from './pages/student/StudentQuizTakingPage';
+import StudentQuizResultPage from './pages/student/StudentQuizResultPage';
+
 // Student portal
 import StudentLayout from './components/student/StudentLayout';
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -69,6 +78,10 @@ export default function App() {
         <Route index element={<StudentDashboard />} />
         <Route path="courses" element={<StudentCoursesPage />} />
         <Route path="schedule" element={<StudentSchedulePage />} />
+        <Route path="quizzes" element={<StudentQuizzesPage />} />
+        <Route path="quizzes/:quizId" element={<StudentQuizDetailPage />} />
+        <Route path="quizzes/:quizId/attempt/:attemptId" element={<StudentQuizTakingPage />} />
+        <Route path="quizzes/:quizId/results/:attemptId" element={<StudentQuizResultPage />} />
       </Route>
 
       {/* ── Instructor Portal ── */}
@@ -84,6 +97,10 @@ export default function App() {
         <Route path="batches" element={<InstructorBatchesPage />} />
         <Route path="schedule" element={<InstructorSchedulePage />} />
         <Route path="content" element={<CourseContentPage />} />
+        <Route path="quizzes" element={<InstructorQuizzesPage />} />
+        <Route path="quizzes/builder" element={<QuizBuilderPage />} />
+        <Route path="quizzes/builder/:quizId" element={<QuizBuilderPage />} />
+        <Route path="quizzes/:quizId/attempts" element={<QuizAttemptsPage />} />
       </Route>
 
       {/* ── View Instructor Portal (Admin View Context) ── */}
@@ -99,6 +116,10 @@ export default function App() {
         <Route path="batches" element={<InstructorBatchesPage />} />
         <Route path="schedule" element={<InstructorSchedulePage />} />
         <Route path="content" element={<CourseContentPage />} />
+        <Route path="quizzes" element={<InstructorQuizzesPage />} />
+        <Route path="quizzes/builder" element={<QuizBuilderPage />} />
+        <Route path="quizzes/builder/:quizId" element={<QuizBuilderPage />} />
+        <Route path="quizzes/:quizId/attempts" element={<QuizAttemptsPage />} />
       </Route>
 
       {/* ── View Student Portal (Admin View Context) ── */}
@@ -113,6 +134,10 @@ export default function App() {
         <Route index element={<StudentDashboard />} />
         <Route path="courses" element={<StudentCoursesPage />} />
         <Route path="schedule" element={<StudentSchedulePage />} />
+        <Route path="quizzes" element={<StudentQuizzesPage />} />
+        <Route path="quizzes/:quizId" element={<StudentQuizDetailPage />} />
+        <Route path="quizzes/:quizId/attempt/:attemptId" element={<StudentQuizTakingPage />} />
+        <Route path="quizzes/:quizId/results/:attemptId" element={<StudentQuizResultPage />} />
       </Route>
 
       {/* ── Admin Portal ── */}
@@ -134,6 +159,10 @@ export default function App() {
         <Route path="courses" element={<CoursesPage />} />
         <Route path="batches" element={<BatchesPage />} />
         <Route path="courses/content" element={<CourseContentPage />} />
+        <Route path="quizzes" element={<InstructorQuizzesPage basePathOverride="/admin" />} />
+        <Route path="quizzes/builder" element={<QuizBuilderPage basePathOverride="/admin" />} />
+        <Route path="quizzes/builder/:quizId" element={<QuizBuilderPage basePathOverride="/admin" />} />
+        <Route path="quizzes/:quizId/attempts" element={<QuizAttemptsPage basePathOverride="/admin" />} />
 
         {/* Assignments */}
         <Route path="batch-instructors" element={<BatchAssignmentsPage mode="instructors" />} />

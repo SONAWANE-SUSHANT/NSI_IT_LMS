@@ -14,6 +14,8 @@ const {
   updateUser,
   updateUserStatus,
   importStudents,
+  getDevices,
+  removeDevice,
 } = require("../controllers/adminUser.controller");
 
 const router = express.Router();
@@ -65,6 +67,22 @@ router.patch(
   authenticate,
   authorizeRoles("ADMIN"),
   updateUserStatus
+);
+
+// GET user devices
+router.get(
+  "/:id/devices",
+  authenticate,
+  authorizeRoles("ADMIN"),
+  getDevices
+);
+
+// DELETE/revoke user device
+router.delete(
+  "/:id/devices/:deviceId",
+  authenticate,
+  authorizeRoles("ADMIN"),
+  removeDevice
 );
 
 module.exports = router;

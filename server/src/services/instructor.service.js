@@ -7,6 +7,7 @@ const {
   CourseModule,
   Lecture,
   LectureNote,
+  Quiz,
   User,
 } = require("../models");
 
@@ -151,7 +152,17 @@ const getBatchCourseContent = async (batchId, instructorId) => {
             model: LectureNote,
             as: "notes",
           },
+          {
+            model: Quiz,
+            as: "quizzes",
+            required: false,
+          },
         ],
+      },
+      {
+        model: Quiz,
+        as: "quizzes",
+        required: false,
       },
     ],
   });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   X,
   BookOpen,
@@ -11,11 +12,14 @@ import {
   Clock,
   Calendar,
   AlertCircle,
+  Award,
+  Play,
 } from 'lucide-react';
 import { fetchBatchCourseContent } from '../../services/studentService';
 import VideoPlayerModal from '../shared/VideoPlayerModal';
 
 export default function StudentCurriculumModal({ batch, onClose }) {
+  const navigate = useNavigate();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -268,6 +272,59 @@ export default function StudentCurriculumModal({ batch, onClose }) {
                               )}
                             </div>
                           ))}
+                        </div>
+                      )}
+
+                      {/* Module Assessments */}
+                      {mod.quizzes && mod.quizzes.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+                          <h5 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <Award className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Module Assessments & Tests</span>
+                          </h5>
+                          {mod.quizzes.map((quiz) => {
+                            const attempt = quiz.attempts?.[0];
+                            const hasPassed = attempt?.passed;
+                            return (
+                              <div
+                                key={quiz.id}
+                                className="p-3 rounded-xl border border-amber-200/80 bg-gradient-to-r from-amber-50/50 to-orange-50/30 flex items-center justify-between gap-3 shadow-2xs"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs font-bold text-xs">
+                                    <Award className="w-4 h-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h6 className="text-xs font-bold text-slate-900 truncate">{quiz.title}</h6>
+                                    <div className="flex items-center gap-2 text-[10px] text-slate-500 font-medium mt-0.5">
+                                      {quiz.duration_minutes && <span>{quiz.duration_minutes} mins</span>}
+                                      {quiz.total_marks && <span>&bull; {Number(quiz.total_marks)} Marks</span>}
+                                      {quiz.passing_marks && <span>&bull; Pass: {Number(quiz.passing_marks)}</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    onClose();
+                                    navigate(`/student/quizzes/${quiz.id}`);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-colors shadow-2xs shrink-0 cursor-pointer"
+                                >
+                                  <Play className="w-3 h-3 fill-current" />
+                                  <span>
+                                    {hasPassed
+                                      ? 'View Result'
+                                      : attempt
+                                      ? attempt.status === 'IN_PROGRESS'
+                                        ? 'Resume'
+                                        : 'Retake'
+                                      : 'Take Test'}
+                                  </span>
+                                </button>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

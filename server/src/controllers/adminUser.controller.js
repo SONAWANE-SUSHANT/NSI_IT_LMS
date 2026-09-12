@@ -135,6 +135,42 @@ const importStudents = async (req, res) => {
   }
 };
 
+const { getUserDevices, revokeUserDevice, deleteUserDevice } = require("../services/device.service");
+
+const getDevices = async (req, res) => {
+  try {
+    const devices = await getUserDevices(Number(req.params.id));
+    return res.json({
+      success: true,
+      data: devices,
+      count: devices.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to load user devices",
+    });
+  }
+};
+
+const removeDevice = async (req, res) => {
+  try {
+    const { id, deviceId } = req.params;
+    const result = await revokeUserDevice(Number(id), Number(deviceId));
+    return res.json({
+      success: true,
+      message: "Device removed successfully",
+      data: result,
+    });
+  } catch (error) {
+    const status = error.message === "Device not found" ? 404 : 400;
+    return res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createUser,
   getUsers,
@@ -142,4 +178,6 @@ module.exports = {
   updateUser,
   updateUserStatus,
   importStudents,
+  getDevices,
+  removeDevice,
 };

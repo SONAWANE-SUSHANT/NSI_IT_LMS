@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CalendarDays,
   ChevronLeft,
@@ -11,6 +12,9 @@ import {
   User,
   FileText,
   Filter,
+  Award,
+  Play,
+  CheckCircle2,
 } from 'lucide-react';
 
 import VideoPlayerModal from '../../components/shared/VideoPlayerModal';
@@ -82,10 +86,12 @@ function formatDate(dt) {
 }
 
 export default function ScheduleCalendarPage({ role = 'student' }) {
+  const navigate = useNavigate();
   const today = useMemo(() => new Date(), []);
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(today);
   const [allLectures, setAllLectures] = useState([]);
+  const [allQuizzes, setAllQuizzes] = useState([]);
   const [courses, setCourses] = useState([]);
   const [selectedCourseFilter, setSelectedCourseFilter] = useState('ALL');
   const [isLoading, setIsLoading] = useState(false);
@@ -200,8 +206,24 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
         fetchedLectures = content.flat().filter((l) => l.scheduled_at);
       }
 
+      // Fetch scheduled tests/quizzes
+      let fetchedQuizzes = [];
+      if (role === 'student') {
+        fetchedQuizzes = await apiFetch('/student/quizzes').catch(() => []);
+      } else {
+        fetchedQuizzes = await apiFetch('/quizzes').catch(() => []);
+      }
+      const mappedQuizzes = (Array.isArray(fetchedQuizzes) ? fetchedQuizzes : fetchedQuizzes?.quizzes || []).map((q) => ({
+        ...q,
+        _itemType: 'quiz',
+        scheduled_at: q.available_from || q.created_at,
+        _courseName: q.course_name || q.course?.name || q.Course?.name || 'Course',
+        _moduleName: q.module_name || q.module?.name || q.CourseModule?.name || 'Curriculum Module',
+      }));
+
       setCourses(fetchedCourses);
       setAllLectures(fetchedLectures);
+      setAllQuizzes(mappedQuizzes);
     } catch (err) {
       setError('Unable to load lecture timetable. Please try again.');
     } finally {
@@ -223,6 +245,16 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
         l._batchCode === selectedCourseFilter
     );
   }, [allLectures, selectedCourseFilter]);
+
+  // Filtered tests/quizzes
+  const filteredQuizzes = useMemo(() => {
+    if (selectedCourseFilter === 'ALL') return allQuizzes;
+    return allQuizzes.filter(
+      (q) =>
+        q._courseName === selectedCourseFilter ||
+        q.course_id === Number(selectedCourseFilter)
+    );
+  }, [allQuizzes, selectedCourseFilter]);
 
   // Calendar Grid Math
   const year = viewDate.getFullYear();
@@ -280,6 +312,13 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
       (l) => l.scheduled_at && isSameDay(new Date(l.scheduled_at), selectedDate)
     );
   }, [filteredLectures, selectedDate]);
+
+  // Tests for selected day
+  const selectedDayQuizzes = useMemo(() => {
+    return filteredQuizzes.filter(
+      (q) => q.scheduled_at && isSameDay(new Date(q.scheduled_at), selectedDate)
+    );
+  }, [filteredQuizzes, selectedDate]);
 
   return (
     <div className="space-y-6">
@@ -398,16 +437,20 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
               const dayLectures = filteredLectures.filter(
                 (l) => l.scheduled_at && isSameDay(new Date(l.scheduled_at), date)
               );
+              const dayQuizzes = filteredQuizzes.filter(
+                (q) => q.scheduled_at && isSameDay(new Date(q.scheduled_at), date)
+              );
+              const totalEvents = dayLectures.length + dayQuizzes.length;
               const isToday = isSameDay(date, today);
               const isSelected = isSameDay(date, selectedDate);
-              const hasLectures = dayLectures.length > 0;
+              const hasEvents = totalEvents > 0;
 
               return (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setSelectedDate(date)}
-                  className={`min-h-[64px] sm:min-h-[76px] p-2 rounded-xl text-left flex flex-col justify-between transition-all border ${
+                  className={`min-h-[68px] sm:min-h-[80px] p-2 rounded-xl text-left flex flex-col justify-between transition-all border ${
                     isSelected
                       ? 'border-[#3c4cb8] bg-[#EEF0FB] ring-2 ring-[#3c4cb8]/30 shadow-xs'
                       : isToday
@@ -432,20 +475,43 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                       {date.getDate()}
                     </span>
 
-                    {hasLectures && (
-                      <span
-                        className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white"
-                        style={{ background: ADMIN_PRIMARY }}
-                      >
-                        {dayLectures.length}
-                      </span>
+                    {hasEvents && (
+                      <div className="flex items-center gap-1">
+                        {dayQuizzes.length > 0 && (
+                          <span
+                            className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full text-white bg-amber-500 shadow-2xs"
+                            title={`${dayQuizzes.length} test(s)`}
+                          >
+                            📝 {dayQuizzes.length}
+                          </span>
+                        )}
+                        {dayLectures.length > 0 && (
+                          <span
+                            className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white"
+                            style={{ background: ADMIN_PRIMARY }}
+                            title={`${dayLectures.length} class(es)`}
+                          >
+                            {dayLectures.length}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
 
-                  {/* Lecture Badges on day cell */}
-                  {hasLectures ? (
+                  {/* Badges on day cell */}
+                  {hasEvents ? (
                     <div className="mt-1 space-y-0.5 overflow-hidden">
-                      {dayLectures.slice(0, 2).map((l) => (
+                      {dayQuizzes.slice(0, 1).map((q) => (
+                        <div
+                          key={`day-q-${q.id}`}
+                          className="truncate text-[9.5px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100/90 border border-amber-300 text-amber-900 shadow-2xs flex items-center gap-1"
+                          title={`Test: ${q.title}`}
+                        >
+                          <Award className="w-2.5 h-2.5 text-amber-700 shrink-0" />
+                          <span className="truncate">{q.title}</span>
+                        </div>
+                      ))}
+                      {dayLectures.slice(0, dayQuizzes.length > 0 ? 1 : 2).map((l) => (
                         <div
                           key={l.id}
                           className="truncate text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-800 shadow-2xs"
@@ -454,9 +520,9 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                           {l.title}
                         </div>
                       ))}
-                      {dayLectures.length > 2 && (
+                      {totalEvents > 2 && (
                         <span className="text-[9px] font-bold text-slate-400 block px-1">
-                          +{dayLectures.length - 2} more
+                          +{totalEvents - 2} more
                         </span>
                       )}
                     </div>
@@ -483,11 +549,13 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               {selectedDayLectures.length}{' '}
-              {selectedDayLectures.length === 1 ? 'class session' : 'class sessions'} scheduled
+              {selectedDayLectures.length === 1 ? 'class session' : 'class sessions'} &bull;{' '}
+              {selectedDayQuizzes.length}{' '}
+              {selectedDayQuizzes.length === 1 ? 'test' : 'tests'} scheduled
             </p>
           </div>
 
-          {/* List of Lectures on Selected Date */}
+          {/* List of Lectures & Tests on Selected Date */}
           <div className="flex-1 overflow-y-auto space-y-3 max-h-[580px] pr-1">
             {isLoading ? (
               <div className="space-y-3">
@@ -495,16 +563,113 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                   <div key={i} className="h-32 bg-slate-100 animate-pulse rounded-2xl" />
                 ))}
               </div>
-            ) : selectedDayLectures.length === 0 ? (
+            ) : selectedDayLectures.length === 0 && selectedDayQuizzes.length === 0 ? (
               <div className="text-center py-16">
                 <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-slate-700">No Lectures on this Day</h4>
+                <h4 className="text-sm font-bold text-slate-700">No Events on this Day</h4>
                 <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                  There are no live or recorded sessions scheduled for {formatDate(selectedDate)}.
+                  There are no scheduled live sessions or module tests on {formatDate(selectedDate)}.
                 </p>
               </div>
             ) : (
-              selectedDayLectures.map((lec) => {
+              <>
+                {/* ── Scheduled Tests Section ── */}
+                {selectedDayQuizzes.length > 0 && (
+                  <div className="space-y-2.5 mb-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+                        <Award className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Scheduled Tests & Exams ({selectedDayQuizzes.length})</span>
+                      </span>
+                    </div>
+
+                    {selectedDayQuizzes.map((quiz) => {
+                      const attempt = quiz.attempts?.[0];
+                      const hasPassed = attempt?.passed;
+                      const inProgress = attempt && attempt.status === 'IN_PROGRESS';
+                      const isCompleted = attempt && attempt.status === 'COMPLETED';
+
+                      return (
+                        <div
+                          key={`detail-quiz-${quiz.id}`}
+                          className="p-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/60 via-white to-orange-50/40 hover:shadow-xs transition-all flex flex-col justify-between gap-3 shadow-2xs"
+                          style={{ borderLeft: '4px solid #f59e0b' }}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200 flex items-center gap-1">
+                                <Award className="w-3 h-3 text-amber-600" />
+                                <span>MODULE TEST</span>
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-500">
+                                {quiz.duration_minutes ? `${quiz.duration_minutes} Mins` : 'No Timer'}
+                              </span>
+                            </div>
+
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                              {quiz.title}
+                            </h4>
+
+                            {quiz.description && (
+                              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                                {quiz.description}
+                              </p>
+                            )}
+
+                            <div className="mt-3 space-y-1 text-xs text-slate-600 font-medium">
+                              <div className="flex items-center gap-1.5 text-slate-500">
+                                <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <span className="truncate">
+                                  {quiz._courseName} {quiz._moduleName ? `• ${quiz._moduleName}` : ''}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-3 text-[11px] text-slate-500 pt-1">
+                                <span>Total Marks: <strong className="text-slate-800">{Number(quiz.total_marks || 0)}</strong></span>
+                                {quiz.passing_marks && (
+                                  <span>Pass Score: <strong className="text-emerald-700">{Number(quiz.passing_marks)}</strong></span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-amber-200/60 flex items-center gap-2">
+                            {role === 'student' ? (
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
+                                className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
+                              >
+                                <Play className="w-3.5 h-3.5 fill-current" />
+                                <span>
+                                  {hasPassed
+                                    ? 'View Test Results'
+                                    : inProgress
+                                    ? 'Resume Test'
+                                    : isCompleted
+                                    ? 'View Results / Retake'
+                                    : 'Take Test Now'}
+                                </span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/instructor/quizzes/${quiz.id}/builder`)}
+                                className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
+                              >
+                                <Award className="w-3.5 h-3.5" />
+                                <span>Edit Test In Builder</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* ── Class Lectures Section ── */}
+                {selectedDayLectures.map((lec) => {
                 const isLive = (lec.session_type || lec.lecture_type) === 'LIVE';
                 const meetLink = isLive ? (lec.session_url || lec.meet_url) : null;
                 const recLink = lec.recording_url || (!isLive ? (lec.session_url || lec.meet_url) : null);
@@ -637,8 +802,9 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                     </div>
                   </div>
                 );
-              })
-            )}
+              })}
+            </>
+          )}
           </div>
         </div>
       </div>

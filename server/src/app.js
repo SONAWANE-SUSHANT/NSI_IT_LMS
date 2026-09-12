@@ -17,6 +17,8 @@ const instructorRoutes = require("./routes/instructor.routes");
 const studentRoutes = require("./routes/student.routes");
 const adminInstructorPortalRoutes = require("./routes/adminInstructorPortal.routes");
 const adminStudentPortalRoutes = require("./routes/adminStudentPortal.routes");
+const quizRoutes = require("./routes/quiz.routes");
+const studentQuizRoutes = require("./routes/studentQuiz.routes");
 
 const app = express();
 
@@ -73,6 +75,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/courses", courseRoutes);
+app.use("/api/courses", courseRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/admin", courseBatchRoutes);
 app.use("/api/admin", courseInstructorRoutes);
@@ -84,6 +87,8 @@ app.use("/api", lectureRoutes);
 app.use("/api", lectureNoteRoutes);
 app.use("/api/instructor", instructorRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api", quizRoutes);
+app.use("/api/student", studentQuizRoutes);
 
 // Catch 404 for undefined routes
 app.use((req, res) => {

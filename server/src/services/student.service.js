@@ -7,6 +7,8 @@ const {
   CourseModule,
   Lecture,
   LectureNote,
+  Quiz,
+  QuizAttempt,
   User,
 } = require("../models");
 
@@ -127,6 +129,34 @@ const getBatchCourseContent = async (batchId, studentId) => {
             model: LectureNote,
             as: "notes",
             where: { status: "ACTIVE" },
+            required: false,
+          },
+          {
+            model: Quiz,
+            as: "quizzes",
+            where: { status: "PUBLISHED" },
+            required: false,
+            include: [
+              {
+                model: QuizAttempt,
+                as: "attempts",
+                where: { student_id: studentId },
+                required: false,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        model: Quiz,
+        as: "quizzes",
+        where: { status: "PUBLISHED" },
+        required: false,
+        include: [
+          {
+            model: QuizAttempt,
+            as: "attempts",
+            where: { student_id: studentId },
             required: false,
           },
         ],

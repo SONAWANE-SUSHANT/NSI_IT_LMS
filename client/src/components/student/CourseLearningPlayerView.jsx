@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Play,
@@ -22,8 +23,10 @@ import {
   Bell,
   Check,
   Radio,
+  Award,
 } from 'lucide-react';
 import { parseVideoUrl } from '../../utils/videoUtils';
+import { useStudentPortal } from '../../context/StudentPortalContext';
 
 const PRIMARY_COLOR = '#4f46e5'; // Indigo matching the design
 
@@ -32,6 +35,10 @@ export default function CourseLearningPlayerView({
   courseContent,
   onBack,
 }) {
+  const navigate = useNavigate();
+  const { isViewingAsAdmin, baseRoute } = useStudentPortal();
+  const basePath = isViewingAsAdmin ? (baseRoute || '/student') : '/student';
+
   const course = courseContent?.course || batch?.course || {};
   const modules = courseContent?.modules || [];
   const instructors = courseContent?.instructors || [];
@@ -52,8 +59,9 @@ export default function CourseLearningPlayerView({
     return list;
   }, [modules]);
 
-  // Selected active lecture
+  // Selected active lecture or quiz
   const [selectedLecture, setSelectedLecture] = useState(null);
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [expandedModules, setExpandedModules] = useState({});
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'author' | 'notes' | 'announcements' | 'reviews'
   const [shareCopied, setShareCopied] = useState(false);
@@ -200,10 +208,130 @@ export default function CourseLearningPlayerView({
 
       {/* ── Main Two-Column Layout ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ── LEFT COLUMN (Cinema Player & Tabs) ~68% ── */}
+        {/* ── LEFT COLUMN (Cinema Player & Tabs OR Assessment View) ~68% ── */}
         <div className="lg:col-span-8 space-y-5">
-          {/* Video Player Box (16:9) */}
-          <div className="bg-black rounded-2xl sm:rounded-3xl shadow-lg border border-slate-800 overflow-hidden relative aspect-video flex items-center justify-center">
+          {selectedQuiz ? (
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 p-6 sm:p-8 space-y-6 shadow-xs animate-fadeIn">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shrink-0">
+                    <Award className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200">
+                        Module Assessment
+                      </span>
+                      <span className="text-xs text-slate-500 font-semibold">
+                        {selectedQuiz.moduleName || 'Curriculum Assessment'}
+                      </span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-1.5">
+                      {selectedQuiz.title}
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                      Course: {selectedQuiz.courseName || course.name}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`${basePath}/quizzes/${selectedQuiz.id}`)}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md hover:shadow-lg transition-all self-start sm:self-center cursor-pointer shrink-0"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>
+                    {selectedQuiz.attempts && selectedQuiz.attempts.length > 0
+                      ? selectedQuiz.attempts[0].status === 'IN_PROGRESS'
+                        ? 'Resume Assessment'
+                        : 'View Results / Retake'
+                      : 'Start Assessment'}
+                  </span>
+                </button>
+              </div>
+
+              {/* Metadata Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/80">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Duration</span>
+                  <span className="text-sm font-extrabold text-slate-900 mt-1 block">
+                    {selectedQuiz.duration_minutes ? `${selectedQuiz.duration_minutes} Mins` : 'No Time Limit'}
+                  </span>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/80">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Total Marks</span>
+                  <span className="text-sm font-extrabold text-slate-900 mt-1 block">
+                    {Number(selectedQuiz.total_marks || 0)} Marks
+                  </span>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/80">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Passing Marks</span>
+                  <span className="text-sm font-extrabold text-emerald-600 mt-1 block">
+                    {selectedQuiz.passing_marks ? `${Number(selectedQuiz.passing_marks)} Marks` : 'N/A'}
+                  </span>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/80">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Max Attempts</span>
+                  <span className="text-sm font-extrabold text-slate-900 mt-1 block">
+                    {selectedQuiz.max_attempts || 1} Attempt{selectedQuiz.max_attempts > 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description & Instructions */}
+              {selectedQuiz.description && (
+                <div className="space-y-1.5">
+                  <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">About This Assessment</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    {selectedQuiz.description}
+                  </p>
+                </div>
+              )}
+
+              {selectedQuiz.instructions && (
+                <div className="space-y-1.5">
+                  <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Test Instructions</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed bg-indigo-50/40 p-4 rounded-2xl border border-indigo-100/80">
+                    {selectedQuiz.instructions}
+                  </p>
+                </div>
+              )}
+
+              {/* Attempt History */}
+              {selectedQuiz.attempts && selectedQuiz.attempts.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Your Past Attempts</h4>
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs">
+                    {selectedQuiz.attempts.map((att) => (
+                      <div key={att.id} className="p-4 bg-white flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                          <span className="font-bold text-slate-900">Attempt #{att.attempt_number}</span>
+                          <span className="text-slate-400 text-[11px] ml-2">
+                            {att.submitted_at ? new Date(att.submitted_at).toLocaleDateString() : 'In Progress'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-slate-900">
+                            Score: {att.score ?? 0} / {att.total_marks ?? selectedQuiz.total_marks}
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            att.passed ? 'bg-emerald-100 text-emerald-800' : att.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                          }`}>
+                            {att.passed ? 'PASSED' : att.status === 'IN_PROGRESS' ? 'IN PROGRESS' : 'FAILED'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Video Player Box (16:9) */}
+              <div className="bg-black rounded-2xl sm:rounded-3xl shadow-lg border border-slate-800 overflow-hidden relative aspect-video flex items-center justify-center">
             {!selectedLecture ? (
               <div className="text-center p-8 text-slate-400">
                 <BookOpen className="w-12 h-12 mx-auto mb-3 text-slate-600 opacity-60" />
@@ -548,7 +676,9 @@ export default function CourseLearningPlayerView({
               </div>
             )}
           </div>
-        </div>
+        </>
+      )}
+    </div>
 
         {/* ── RIGHT COLUMN ("Course content" Sidebar) ~32% ── */}
         <div className="lg:col-span-4 sticky top-6">
@@ -607,66 +737,121 @@ export default function CourseLearningPlayerView({
                         </div>
                       </div>
 
-                      {/* Nested Lecture Items */}
+                      {/* Nested Lecture Items & Module Assessments */}
                       {isExpanded && (
                         <div className="bg-slate-50/40 divide-y divide-slate-100/60 border-t border-slate-100">
-                          {lectures.length === 0 ? (
+                          {lectures.length === 0 && (!mod.quizzes || mod.quizzes.length === 0) ? (
                             <div className="p-4 text-center text-xs text-slate-400 italic">
-                              No lectures in this unit yet
+                              No lectures or assessments in this unit yet
                             </div>
                           ) : (
-                            lectures.map((lec) => {
-                              const isSelected = selectedLecture?.id === lec.id;
-                              const isLecLive =
-                                lec.session_type === 'LIVE' || lec.lecture_type === 'LIVE';
+                            <>
+                              {lectures.map((lec) => {
+                                const isSelected = selectedLecture?.id === lec.id && !selectedQuiz;
+                                const isLecLive =
+                                  lec.session_type === 'LIVE' || lec.lecture_type === 'LIVE';
 
-                              return (
-                                <div
-                                  key={lec.id}
-                                  onClick={() => setSelectedLecture(lec)}
-                                  className={`px-5 py-3 flex items-center justify-between cursor-pointer transition-all ${
-                                    isSelected
-                                      ? 'bg-indigo-50/90 border-l-4 border-[#4f46e5] text-indigo-900 font-bold'
-                                      : 'hover:bg-white text-slate-700 font-medium'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-3 min-w-0 pr-2">
-                                    <div
-                                      className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                                        isSelected
-                                          ? 'bg-indigo-600 text-white'
-                                          : isLecLive
-                                          ? 'bg-rose-100 text-rose-600'
-                                          : 'bg-slate-200/80 text-slate-600'
-                                      }`}
-                                    >
-                                      {isLecLive ? (
-                                        <Radio className="w-3 h-3" />
-                                      ) : (
-                                        <Play className="w-2.5 h-2.5 ml-0.5 fill-current" />
-                                      )}
-                                    </div>
-                                    <span className="text-xs truncate" title={lec.title}>
-                                      {lec.title}
-                                    </span>
-                                  </div>
-
-                                  <span
-                                    className={`text-[11px] shrink-0 ${
+                                return (
+                                  <div
+                                    key={lec.id}
+                                    onClick={() => {
+                                      setSelectedLecture(lec);
+                                      setSelectedQuiz(null);
+                                    }}
+                                    className={`px-5 py-3 flex items-center justify-between cursor-pointer transition-all ${
                                       isSelected
-                                        ? 'text-indigo-600 font-bold'
-                                        : 'text-slate-400 font-normal'
+                                        ? 'bg-indigo-50/90 border-l-4 border-[#4f46e5] text-indigo-900 font-bold'
+                                        : 'hover:bg-white text-slate-700 font-medium'
                                     }`}
                                   >
-                                    {lec.duration_minutes
-                                      ? `${lec.duration_minutes} min`
-                                      : isLecLive
-                                      ? 'Live'
-                                      : ''}
-                                  </span>
-                                </div>
-                              );
-                            })
+                                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                                      <div
+                                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                                          isSelected
+                                            ? 'bg-indigo-600 text-white'
+                                            : isLecLive
+                                            ? 'bg-rose-100 text-rose-600'
+                                            : 'bg-slate-200/80 text-slate-600'
+                                        }`}
+                                      >
+                                        {isLecLive ? (
+                                          <Radio className="w-3 h-3" />
+                                        ) : (
+                                          <Play className="w-2.5 h-2.5 ml-0.5 fill-current" />
+                                        )}
+                                      </div>
+                                      <span className="text-xs truncate" title={lec.title}>
+                                        {lec.title}
+                                      </span>
+                                    </div>
+
+                                    <span
+                                      className={`text-[11px] shrink-0 ${
+                                        isSelected
+                                          ? 'text-indigo-600 font-bold'
+                                          : 'text-slate-400 font-normal'
+                                      }`}
+                                    >
+                                      {lec.duration_minutes
+                                        ? `${lec.duration_minutes} min`
+                                        : isLecLive
+                                        ? 'Live'
+                                        : ''}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+
+                              {/* Module Assessments */}
+                              {mod.quizzes && mod.quizzes.map((quiz) => {
+                                const isQuizSelected = selectedQuiz?.id === quiz.id;
+                                const attempt = quiz.attempts?.[0];
+                                const hasPassed = attempt?.passed;
+
+                                return (
+                                  <div
+                                    key={`quiz-${quiz.id}`}
+                                    onClick={() => {
+                                      setSelectedQuiz({ ...quiz, moduleName: mod.name, courseName: course.name });
+                                      setSelectedLecture(null);
+                                    }}
+                                    className={`px-5 py-3 flex items-center justify-between cursor-pointer transition-all ${
+                                      isQuizSelected
+                                        ? 'bg-amber-50/90 border-l-4 border-amber-500 text-amber-950 font-bold shadow-2xs'
+                                        : 'bg-amber-50/25 hover:bg-amber-50/60 text-slate-700 font-medium'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-2xs ${
+                                        isQuizSelected ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700'
+                                      }`}>
+                                        <Award className="w-3.5 h-3.5" />
+                                      </div>
+                                      <div className="min-w-0">
+                                        <span className="text-xs truncate block font-bold text-slate-900" title={quiz.title}>
+                                          {quiz.title}
+                                        </span>
+                                        <span className="text-[10px] text-amber-700 font-semibold block">
+                                          Module Test {quiz.total_marks ? `• ${Number(quiz.total_marks)} Marks` : ''}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <span
+                                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
+                                        hasPassed
+                                          ? 'bg-emerald-100 text-emerald-800'
+                                          : attempt
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-amber-100 text-amber-800'
+                                      }`}
+                                    >
+                                      {hasPassed ? 'PASSED' : attempt ? (attempt.status === 'IN_PROGRESS' ? 'IN PROGRESS' : 'COMPLETED') : 'TAKE TEST'}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </>
                           )}
                         </div>
                       )}

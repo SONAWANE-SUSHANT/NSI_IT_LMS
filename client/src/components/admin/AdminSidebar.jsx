@@ -14,6 +14,7 @@ import {
   LogOut,
   X,
   UserCheck,
+  Award,
 } from 'lucide-react';
 
 /**
@@ -52,6 +53,7 @@ export default function AdminSidebar({ isOpen = false, onClose }) {
       { name: 'Courses', path: '/admin/courses', icon: BookOpen },
       { name: 'Batches', path: '/admin/batches', icon: CalendarDays },
       { name: 'Course Content', path: '/admin/courses/content', icon: BookOpen },
+      { name: 'Quizzes & Tests', path: '/admin/quizzes', icon: Award },
     ],
   },
   {

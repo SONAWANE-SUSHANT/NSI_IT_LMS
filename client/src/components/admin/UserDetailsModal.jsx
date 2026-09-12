@@ -1,7 +1,25 @@
-import { useEffect } from 'react';
-import { X, Mail, Clock, Check, AtSign, Smartphone, Calendar, History, UserCog, LayoutDashboard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import {
+  X,
+  Mail,
+  Clock,
+  Check,
+  AtSign,
+  Smartphone,
+  Calendar,
+  History,
+  UserCog,
+  LayoutDashboard,
+  Laptop,
+  Monitor,
+  Tablet,
+  Trash2,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import RoleBadge from './RoleBadge';
+import { fetchUserDevices, removeUserDevice } from '../../services/adminUserService';
 
 /**
  * UserDetailsModal component for inspecting user profile and audit info
@@ -13,6 +31,25 @@ import RoleBadge from './RoleBadge';
  * @param {Function} [props.onViewPortal]
  */
 export default function UserDetailsModal({ isOpen, user, onClose, onEdit, onViewPortal }) {
+  const [devices, setDevices] = useState([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
+  const [removingDeviceId, setRemovingDeviceId] = useState(null);
+  const [deviceError, setDeviceError] = useState('');
+
+  const loadDevices = async () => {
+    if (!user?.id) return;
+    try {
+      setLoadingDevices(true);
+      setDeviceError('');
+      const data = await fetchUserDevices(user.id);
+      setDevices(data || []);
+    } catch (err) {
+      setDeviceError(err.message || 'Failed to load registered devices');
+    } finally {
+      setLoadingDevices(false);
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -23,7 +60,46 @@ export default function UserDetailsModal({ isOpen, user, onClose, onEdit, onView
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (isOpen && user?.id) {
+      loadDevices();
+    } else {
+      setDevices([]);
+      setDeviceError('');
+    }
+  }, [isOpen, user?.id]);
+
   if (!isOpen || !user) return null;
+
+  const handleRemoveDevice = async (deviceId) => {
+    if (!window.confirm('Are you sure you want to remove and revoke this device? This will immediately free up one active device slot for this student.')) {
+      return;
+    }
+    try {
+      setRemovingDeviceId(deviceId);
+      setDeviceError('');
+      await removeUserDevice(user.id, deviceId);
+      await loadDevices();
+    } catch (err) {
+      setDeviceError(err.message || 'Failed to remove device');
+    } finally {
+      setRemovingDeviceId(null);
+    }
+  };
+
+  const getDeviceIcon = (deviceType) => {
+    switch (deviceType) {
+      case 'MOBILE':
+        return <Smartphone size={18} className="text-indigo-600" />;
+      case 'TABLET':
+        return <Tablet size={18} className="text-indigo-600" />;
+      case 'DESKTOP':
+        return <Monitor size={18} className="text-indigo-600" />;
+      case 'LAPTOP':
+      default:
+        return <Laptop size={18} className="text-indigo-600" />;
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -53,6 +129,8 @@ export default function UserDetailsModal({ isOpen, user, onClose, onEdit, onView
   const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username;
   const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
   const isActive = (user.status || '').toLowerCase() === 'active';
+  const isStudent = (user.role && (user.role === 'student' || user.role.name === 'STUDENT' || user.role === 'STUDENT')) || user.role_id === 3;
+  const activeDevicesCount = devices.filter((d) => d.status === 'ACTIVE').length;
 
   const statItems = [
     { label: 'Created', value: formatDate(user.created_at), icon: Calendar },
@@ -206,22 +284,138 @@ return (
               </div>
             </div>
 
-            {/* Device */}
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-colors hover:bg-slate-50">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-slate-50">
-                <Smartphone size={16} className="text-slate-400" />
+          </div>
+
+          {/* Registered Devices (Student 2-Device Limit Management) */}
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <div className="mb-3.5 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-base font-bold text-slate-900">
+                    Registered Devices
+                  </p>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    activeDevicesCount >= 2 
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  }`}>
+                    {activeDevicesCount}/2 Active
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Auto-registered on student login. Max 2 active devices permitted.
+                </p>
               </div>
 
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                  Device code
-                </p>
-
-                <p className="mt-1 truncate font-mono text-sm font-semibold text-slate-700">
-                  {user.device_code || "No device linked"}
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={loadDevices}
+                disabled={loadingDevices}
+                className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-indigo-600 disabled:opacity-50 transition-colors p-1 rounded-lg hover:bg-slate-100"
+                title="Refresh devices"
+              >
+                <RefreshCw size={14} className={loadingDevices ? 'animate-spin' : ''} />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
             </div>
+
+            {deviceError && (
+              <div className="mb-3 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-700">
+                <AlertCircle size={15} className="shrink-0 text-rose-500" />
+                <span>{deviceError}</span>
+              </div>
+            )}
+
+            {loadingDevices && devices.length === 0 ? (
+              <div className="flex items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-8 text-xs text-slate-400">
+                <RefreshCw size={16} className="mr-2 animate-spin text-indigo-500" />
+                Loading registered devices...
+              </div>
+            ) : devices.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center">
+                <Smartphone size={24} className="mx-auto text-slate-300 mb-2" />
+                <p className="text-xs font-medium text-slate-600">No registered devices</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Devices are registered automatically when the student logs in from a phone, tablet, or computer.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {devices.map((device) => {
+                  const isActiveDevice = device.status === 'ACTIVE';
+                  const isRemoving = removingDeviceId === device.id;
+
+                  return (
+                    <div
+                      key={device.id}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 shadow-sm transition-all ${
+                        isActiveDevice
+                          ? 'border-slate-200 bg-white hover:border-indigo-200 hover:shadow-md'
+                          : 'border-slate-100 bg-slate-50/70 opacity-75'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
+                          isActiveDevice
+                            ? 'border-indigo-100 bg-indigo-50/70 text-indigo-600'
+                            : 'border-slate-200 bg-slate-100 text-slate-400'
+                        }`}>
+                          {getDeviceIcon(device.device_type)}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="truncate text-sm font-semibold text-slate-900">
+                              {device.device_name || `${device.device_type || 'Unknown'} Device`}
+                            </p>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                isActiveDevice
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : 'bg-slate-100 text-slate-500 border border-slate-200'
+                              }`}
+                            >
+                              {device.status}
+                            </span>
+                          </div>
+
+                          <p className="mt-0.5 text-xs text-slate-500 truncate">
+                            {[
+                              device.browser,
+                              device.operating_system,
+                              device.last_ip_address ? `IP: ${device.last_ip_address}` : null
+                            ].filter(Boolean).join(' • ')}
+                          </p>
+
+                          <p className="mt-1 text-[11px] text-slate-400">
+                            Last active: {formatDateTime(device.last_active_at || device.last_login_at)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center self-end sm:self-center shrink-0">
+                        {isActiveDevice ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveDevice(device.id)}
+                            disabled={isRemoving}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition-all hover:bg-rose-100 hover:border-rose-300 disabled:opacity-50 active:scale-95"
+                            title="Revoke device access and free up active slot"
+                          >
+                            <Trash2 size={13} className={isRemoving ? 'animate-pulse' : ''} />
+                            <span>{isRemoving ? 'Removing...' : 'Remove Device'}</span>
+                          </button>
+                        ) : (
+                          <span className="text-xs italic text-slate-400 px-2 py-1">
+                            Revoked
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Timestamp */}

@@ -9,6 +9,7 @@ import {
   X,
   Users,
   ArrowLeft,
+  Award,
 } from 'lucide-react';
 
 const ADMIN_PRIMARY = '#3c4cb8';
@@ -53,6 +54,7 @@ export default function InstructorSidebar({ isOpen = false, onClose }) {
         { name: 'My Batches', path: `${basePath}/batches`, icon: Users },
         { name: 'Lecture Schedule', path: `${basePath}/schedule`, icon: CalendarDays },
         { name: 'Course Content', path: `${basePath}/content`, icon: BookOpen },
+        { name: 'Quizzes & Tests', path: `${basePath}/quizzes`, icon: Award },
       ],
     },
   ];

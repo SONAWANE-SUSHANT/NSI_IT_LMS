@@ -10,6 +10,7 @@ const LectureNote = require("./LectureNote");
 const Quiz = require("./Quiz");
 const QuizQuestion = require("./QuizQuestion");
 const QuizOption = require("./QuizOption");
+const UserDevice = require("./UserDevice");
 
 // 1. User ↔ Role
 UserRole.hasMany(User, {
@@ -130,6 +131,28 @@ Quiz.belongsTo(Lecture, {
   as: "session",
 });
 
+// Module ↔ Quizzes
+CourseModule.hasMany(Quiz, {
+  foreignKey: "module_id",
+  as: "quizzes",
+});
+
+Quiz.belongsTo(CourseModule, {
+  foreignKey: "module_id",
+  as: "module",
+});
+
+// Course ↔ Quizzes
+Course.hasMany(Quiz, {
+  foreignKey: "course_id",
+  as: "quizzes",
+});
+
+Quiz.belongsTo(Course, {
+  foreignKey: "course_id",
+  as: "course",
+});
+
 // 10. Quiz ↔ QuizQuestions
 Quiz.hasMany(QuizQuestion, {
   foreignKey: "quiz_id",
@@ -152,6 +175,75 @@ QuizOption.belongsTo(QuizQuestion, {
   as: "question",
 });
 
+// 12. Quiz ↔ QuizAttempts
+const QuizAttempt = require("./QuizAttempt");
+const QuizAttemptAnswer = require("./QuizAttemptAnswer");
+
+Quiz.hasMany(QuizAttempt, {
+  foreignKey: "quiz_id",
+  as: "attempts",
+});
+
+QuizAttempt.belongsTo(Quiz, {
+  foreignKey: "quiz_id",
+  as: "quiz",
+});
+
+// 13. Student (User) ↔ QuizAttempts
+User.hasMany(QuizAttempt, {
+  foreignKey: "student_id",
+  as: "quizAttempts",
+});
+
+QuizAttempt.belongsTo(User, {
+  foreignKey: "student_id",
+  as: "student",
+});
+
+// 14. QuizAttempt ↔ QuizAttemptAnswers
+QuizAttempt.hasMany(QuizAttemptAnswer, {
+  foreignKey: "attempt_id",
+  as: "answers",
+});
+
+QuizAttemptAnswer.belongsTo(QuizAttempt, {
+  foreignKey: "attempt_id",
+  as: "attempt",
+});
+
+// 15. QuizQuestion ↔ QuizAttemptAnswers
+QuizQuestion.hasMany(QuizAttemptAnswer, {
+  foreignKey: "question_id",
+  as: "attemptAnswers",
+});
+
+QuizAttemptAnswer.belongsTo(QuizQuestion, {
+  foreignKey: "question_id",
+  as: "question",
+});
+
+// 16. QuizOption ↔ QuizAttemptAnswers
+QuizOption.hasMany(QuizAttemptAnswer, {
+  foreignKey: "selected_option_id",
+  as: "selectedInAnswers",
+});
+
+QuizAttemptAnswer.belongsTo(QuizOption, {
+  foreignKey: "selected_option_id",
+  as: "selectedOption",
+});
+
+// 17. User ↔ UserDevices
+User.hasMany(UserDevice, {
+  foreignKey: "user_id",
+  as: "devices",
+});
+
+UserDevice.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
 module.exports = {
   User,
   UserRole,
@@ -165,4 +257,7 @@ module.exports = {
   Quiz,
   QuizQuestion,
   QuizOption,
+  QuizAttempt,
+  QuizAttemptAnswer,
+  UserDevice,
 };

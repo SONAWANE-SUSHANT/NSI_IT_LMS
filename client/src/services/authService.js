@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../config/apiConfig';
+import { getClientDeviceInfo } from '../utils/deviceInfo';
 
 /**
  * Authenticates user credentials with the backend
@@ -8,6 +9,8 @@ import { API_BASE_URL } from '../config/apiConfig';
  */
 export async function loginApi(username, password) {
   try {
+    const deviceInfo = getClientDeviceInfo();
+
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -16,6 +19,7 @@ export async function loginApi(username, password) {
       body: JSON.stringify({
         username: username.trim(),
         password: password,
+        ...deviceInfo,
       }),
     });
 
@@ -24,7 +28,9 @@ export async function loginApi(username, password) {
     if (!response.ok) {
       const errorMessage =
         data?.message ||
-        (response.status === 401
+        (response.status === 403
+          ? 'Maximum device limit reached (2 active devices). Please contact an administrator.'
+          : response.status === 401
           ? 'Invalid username or password.'
           : response.status === 400
           ? 'Please provide both username and password.'

@@ -12,7 +12,17 @@ const Quiz = sequelize.define(
 
     session_id: {
       type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
+      allowNull: true,
+    },
+
+    module_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+    },
+
+    course_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
     },
 
     title: {

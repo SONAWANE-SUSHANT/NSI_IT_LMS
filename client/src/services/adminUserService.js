@@ -262,3 +262,57 @@ export async function importStudents(rows) {
     throw error;
   }
 }
+
+/**
+ * Fetch all registered devices for a user.
+ * @param {number|string} userId
+ * @returns {Promise<Array>}
+ */
+export async function fetchUserDevices(userId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/devices`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      await handleResponseError(response, 'Failed to fetch user devices');
+    }
+
+    const json = await response.json();
+    return json.data || [];
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Cannot connect to LMS server. Please ensure the backend is running.');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Remove or revoke a registered device for a user.
+ * @param {number|string} userId
+ * @param {number|string} deviceId
+ * @returns {Promise<object>}
+ */
+export async function removeUserDevice(userId, deviceId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/devices/${deviceId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      await handleResponseError(response, 'Failed to remove device');
+    }
+
+    const json = await response.json();
+    return json.data;
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Cannot connect to LMS server. Please ensure the backend is running.');
+    }
+    throw error;
+  }
+}
+
