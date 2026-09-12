@@ -1,7 +1,11 @@
 import { API_BASE_URL } from '../config/apiConfig';
+import { getDeviceInfo } from '../utils/deviceInfo';
 
 /**
- * Authenticates user credentials with the backend
+ * Authenticates user credentials with the backend.
+ * The browser/device identifier is persistent so returning users are
+ * recognized as the same device instead of consuming another slot.
+ *
  * @param {string} username - The username
  * @param {string} password - The password
  * @returns {Promise<{token: string, user: object}>}
@@ -15,7 +19,8 @@ export async function loginApi(username, password) {
       },
       body: JSON.stringify({
         username: username.trim(),
-        password: password,
+        password,
+        device: getDeviceInfo(),
       }),
     });
 
@@ -26,6 +31,8 @@ export async function loginApi(username, password) {
         data?.message ||
         (response.status === 401
           ? 'Invalid username or password.'
+          : response.status === 403
+          ? 'This account has reached its device limit. Please contact an administrator.'
           : response.status === 400
           ? 'Please provide both username and password.'
           : 'Unable to connect to the server. Please try again later.');
@@ -44,4 +51,3 @@ export async function loginApi(username, password) {
     throw error;
   }
 }
-
