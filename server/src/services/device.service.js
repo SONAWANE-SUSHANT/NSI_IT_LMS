@@ -1,8 +1,6 @@
-const { Op } = require("sequelize");
 const sequelize = require("../config/database");
 const { UserDevice, User } = require("../models");
 
-const STUDENT_ROLE = "STUDENT";
 const MAX_STUDENT_DEVICES = 2;
 
 const DEVICE_LIMIT_MESSAGE =
@@ -58,10 +56,6 @@ const normalizeDeviceData = (deviceData = {}, userAgent = "") => {
   };
 };
 
-const isStudent = (user) =>
-  String(user?.role?.name || user?.role || "").toUpperCase() === STUDENT_ROLE ||
-  Number(user?.role_id) === 3;
-
 const handleStudentDeviceLogin = async (user, deviceData, ipAddress, userAgent) => {
   const normalized = normalizeDeviceData(deviceData, userAgent);
 
@@ -74,8 +68,8 @@ const handleStudentDeviceLogin = async (user, deviceData, ipAddress, userAgent) 
   const now = new Date();
 
   return sequelize.transaction(async (transaction) => {
-    // Lock the user row so concurrent first-time device logins cannot both
-    // observe fewer than two active devices and bypass the limit.
+    // Lock the user row so concurrent new-device logins cannot both observe
+    // fewer than two active devices and bypass the limit.
     const lockedUser = await User.findByPk(user.id, {
       attributes: ["id", "role_id"],
       transaction,
@@ -115,7 +109,7 @@ const handleStudentDeviceLogin = async (user, deviceData, ipAddress, userAgent) 
     }
 
     // Only STUDENT accounts are blocked at two active devices. Other roles
-    // are still tracked for auditing but can continue logging in.
+    // are tracked for auditing but are never blocked by the device limit.
     if (Number(lockedUser.role_id) === 3) {
       const activeCount = await UserDevice.count({
         where: {
@@ -192,7 +186,6 @@ module.exports = {
   DEVICE_LIMIT_MESSAGE,
   parseUserAgent,
   normalizeDeviceData,
-  isStudent,
   handleStudentDeviceLogin,
   getUserDevices,
   revokeUserDevice,
