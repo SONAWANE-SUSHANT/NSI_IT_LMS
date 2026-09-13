@@ -10,26 +10,26 @@ NSI-IT-LMS follows a decoupled, three-tier architecture:
 
 ```mermaid
 flowchart TD
-    subgraph Client Tier [Frontend Client (React 19 + Vite)]
-        SPA[React 19 Single Page App]
-        Router[React Router v7 Route Guards]
-        Context[Auth, Student, Instructor Contexts]
-        Services[Axios / Fetch API Client Services]
+    subgraph ClientTier["Frontend Client (React 19 + Vite)"]
+        SPA["React 19 Single Page App"]
+        Router["React Router v7 Route Guards"]
+        Context["Auth, Student, Instructor Contexts"]
+        Services["Axios / Fetch API Client Services"]
     end
 
-    subgraph API Tier [Backend REST API (Node.js + Express 5)]
-        ExpressApp[Express 5 Application]
-        Security[Helmet, CORS, Rate Limit, Compression]
-        AuthMid[Auth & Role-Based Middleware]
-        Controllers[Resource Controllers]
-        BizServices[Business Logic & Report Aggregation]
-        Judge0[Judge0 Code Execution Client]
+    subgraph APITier["Backend REST API (Node.js + Express 5)"]
+        ExpressApp["Express 5 Application"]
+        Security["Helmet, CORS, Rate Limit, Compression"]
+        AuthMid["Auth & Role-Based Middleware"]
+        Controllers["Resource Controllers"]
+        BizServices["Business Logic & Report Aggregation"]
+        Judge0["Judge0 Code Execution Client"]
     end
 
-    subgraph Persistence Tier [Data & Storage]
-        Sequelize[Sequelize 6.37 ORM]
-        MySQL[(MySQL 8.0 Engine utf8mb4)]
-        DiskStorage[Uploads Folder / Binary Blobs]
+    subgraph PersistenceTier["Data & Storage"]
+        Sequelize["Sequelize 6.37 ORM"]
+        MySQL[("MySQL 8.0 Engine utf8mb4")]
+        DiskStorage["Uploads Folder / Binary Blobs"]
     end
 
     SPA --> Router
@@ -121,11 +121,11 @@ The quiz and programming assessment engine is structured to support both multipl
 
 ```mermaid
 flowchart LR
-    subgraph Quiz Pipeline
-        Student[Student in Monaco Editor] --> SubmitCode[POST /api/student/attempts/:id/run-code]
-        SubmitCode --> Controller[studentQuiz.controller.js]
-        Controller --> J0Service[judge0.service.js]
-        J0Service --> Judge0API[Judge0 Cloud / Self-Hosted Compiler]
+    subgraph QuizPipeline["Quiz Pipeline"]
+        Student["Student in Monaco Editor"] --> SubmitCode["POST /api/student/attempts/:id/run-code"]
+        SubmitCode --> Controller["studentQuiz.controller.js"]
+        Controller --> J0Service["judge0.service.js"]
+        J0Service --> Judge0API["Judge0 Cloud / Self-Hosted Compiler"]
         Judge0API -- "STDOUT, Memory, Execution Time" --> J0Service
         J0Service -- "Evaluated Output" --> Controller
         Controller --> Student
