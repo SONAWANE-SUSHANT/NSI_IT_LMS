@@ -244,6 +244,130 @@ UserDevice.belongsTo(User, {
   as: "user",
 });
 
+// 18. Session (Lecture) ↔ SessionProgress
+const SessionProgress = require("./SessionProgress");
+const CourseProgress = require("./CourseProgress");
+
+Lecture.hasMany(SessionProgress, {
+  foreignKey: "session_id",
+  as: "sessionProgress",
+});
+
+SessionProgress.belongsTo(Lecture, {
+  foreignKey: "session_id",
+  as: "session",
+});
+
+// 19. Student (User) ↔ SessionProgress
+User.hasMany(SessionProgress, {
+  foreignKey: "student_id",
+  as: "sessionProgress",
+});
+
+SessionProgress.belongsTo(User, {
+  foreignKey: "student_id",
+  as: "student",
+});
+
+// 20. Course ↔ CourseProgress
+Course.hasMany(CourseProgress, {
+  foreignKey: "course_id",
+  as: "courseProgress",
+});
+
+CourseProgress.belongsTo(Course, {
+  foreignKey: "course_id",
+  as: "course",
+});
+
+// 21. Student (User) ↔ CourseProgress
+User.hasMany(CourseProgress, {
+  foreignKey: "student_id",
+  as: "courseProgress",
+});
+
+CourseProgress.belongsTo(User, {
+  foreignKey: "student_id",
+  as: "student",
+});
+
+// 22. Announcement ↔ Course
+const Announcement = require("./Announcement");
+const Notification = require("./Notification");
+
+Announcement.belongsTo(Course, {
+  foreignKey: "course_id",
+  as: "course",
+});
+
+Course.hasMany(Announcement, {
+  foreignKey: "course_id",
+  as: "announcements",
+});
+
+// 23. Announcement ↔ Batch
+Announcement.belongsTo(CourseBatch, {
+  foreignKey: "batch_id",
+  as: "batch",
+});
+
+CourseBatch.hasMany(Announcement, {
+  foreignKey: "batch_id",
+  as: "announcements",
+});
+
+// 24. Announcement ↔ Creator / Updater
+Announcement.belongsTo(User, {
+  foreignKey: "created_by",
+  as: "creator",
+});
+
+Announcement.belongsTo(User, {
+  foreignKey: "updated_by",
+  as: "updater",
+});
+
+User.hasMany(Announcement, {
+  foreignKey: "created_by",
+  as: "createdAnnouncements",
+});
+
+// 25. Notification ↔ User
+Notification.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
+User.hasMany(Notification, {
+  foreignKey: "user_id",
+  as: "notifications",
+});
+
+// 26. CourseReview ↔ Course & Student (User)
+const CourseReview = require("./CourseReview");
+
+Course.hasMany(CourseReview, {
+  foreignKey: "course_id",
+  as: "reviews",
+});
+
+CourseReview.belongsTo(Course, {
+  foreignKey: "course_id",
+  as: "course",
+});
+
+User.hasMany(CourseReview, {
+  foreignKey: "student_id",
+  as: "courseReviews",
+});
+
+CourseReview.belongsTo(User, {
+  foreignKey: "student_id",
+  as: "student",
+});
+
+const Setting = require("./Setting");
+
 module.exports = {
   User,
   UserRole,
@@ -260,4 +384,10 @@ module.exports = {
   QuizAttempt,
   QuizAttemptAnswer,
   UserDevice,
+  SessionProgress,
+  CourseProgress,
+  Announcement,
+  Notification,
+  CourseReview,
+  Setting,
 };

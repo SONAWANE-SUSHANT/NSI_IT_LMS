@@ -28,7 +28,7 @@ const User = sequelize.define(
 
     username: {
       type: DataTypes.STRING(100),
-      // Generated stored column in MySQL: CONCAT(LOWER(first_name), '@nsi')
+      // Generated stored column in MySQL: CONCAT(LOWER(REPLACE(first_name, ' ', '')), '.', LOWER(REPLACE(last_name, ' ', '')), '@nsi')
       // Excluded on write/insert in Sequelize if not manually provided
       allowNull: true,
     },

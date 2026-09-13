@@ -89,6 +89,7 @@ export default function AdminHeader({ title, onToggleSidebar }) {
     if (path.includes('/admin/courses/content')) return 'Course Content';
     if (path.includes('/admin/courses')) return 'Courses';
     if (path.includes('/admin/scheduling')) return 'Scheduling';
+    if (path.includes('/admin/announcements')) return 'Announcements';
     if (path.includes('/admin/attendance')) return 'Attendance';
     if (path.includes('/admin/reports')) return 'Reports';
     if (path.includes('/admin/notifications')) return 'Notifications';

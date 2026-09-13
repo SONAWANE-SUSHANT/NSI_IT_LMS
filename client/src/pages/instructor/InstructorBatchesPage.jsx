@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Users,
   Calendar,
@@ -13,6 +14,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { fetchMyBatches } from '../../services/instructorService';
+import { useInstructorPortal } from '../../context/InstructorPortalContext';
 import InstructorScheduleSessionModal from '../../components/instructor/InstructorScheduleSessionModal';
 import InstructorStudentsModal from '../../components/instructor/InstructorStudentsModal';
 import InstructorCurriculumModal from '../../components/instructor/InstructorCurriculumModal';
@@ -22,6 +24,10 @@ const ADMIN_LIGHT = '#e7e9fb';
 const ADMIN_DARK = '#2e3a8c';
 
 export default function InstructorBatchesPage() {
+  const navigate = useNavigate();
+  const { isViewingAsAdmin, baseRoute } = useInstructorPortal();
+  const basePath = isViewingAsAdmin ? (baseRoute || '/instructor') : '/instructor';
+
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

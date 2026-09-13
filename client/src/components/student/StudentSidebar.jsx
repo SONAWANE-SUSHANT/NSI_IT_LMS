@@ -10,6 +10,8 @@ import {
   GraduationCap,
   ArrowLeft,
   Award,
+  Megaphone,
+  User,
 } from 'lucide-react';
 
 const ADMIN_PRIMARY = '#3c4cb8';
@@ -54,6 +56,8 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
         { name: 'My Courses', path: `${basePath}/courses`, icon: BookOpen },
         { name: 'Class Schedule', path: `${basePath}/schedule`, icon: CalendarDays },
         { name: 'Tests', path: `${basePath}/quizzes`, icon: Award },
+        { name: 'Announcements', path: `${basePath}/announcements`, icon: Megaphone },
+        { name: 'My Profile', path: `${basePath}/profile`, icon: User },
       ],
     },
   ];
@@ -167,18 +171,26 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
         {/* User profile footer */}
         <div className="p-3 border-t border-slate-100 flex-shrink-0 bg-white">
           <div className="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/60">
-            <div className="flex items-center gap-2.5 overflow-hidden">
+            <NavLink
+              to={`${basePath}/profile`}
+              className="flex items-center gap-2.5 overflow-hidden hover:opacity-80 transition-opacity"
+              title="View & Edit Profile"
+            >
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
+                className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xs shrink-0"
                 style={{ background: ADMIN_LIGHT, color: ADMIN_PRIMARY }}
               >
-                {initials}
+                {activeStudent?.photo ? (
+                  <img src={activeStudent.photo} alt={fullName} className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
               <div className="overflow-hidden">
                 <p className="text-xs font-bold text-slate-800 truncate leading-tight">{fullName}</p>
                 <p className="text-[11px] text-slate-400 truncate leading-tight">@{activeStudent?.username || 'student'}</p>
               </div>
-            </div>
+            </NavLink>
             <button
               onClick={handleLogout}
               title={isViewingAsAdmin ? "Return to Admin Portal" : "Sign Out"}

@@ -16,10 +16,19 @@ export default function EmptyState({
   actionLabel,
   onAction,
 }) {
+  const renderIcon = () => {
+    if (!icon) return <Inbox size={28} className="text-slate-400" />;
+    if (typeof icon === 'function') {
+      const IconComponent = icon;
+      return <IconComponent size={28} className="text-slate-400" />;
+    }
+    return icon;
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center bg-white rounded-xl border border-slate-200 shadow-2xs">
       <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-3 shadow-2xs">
-        {icon || <Inbox size={28} className="text-slate-400" />}
+        {renderIcon()}
       </div>
       <h3 className="text-base font-bold text-slate-800 tracking-tight">{title}</h3>
       <p className="mt-1 text-sm text-slate-500 max-w-sm">{description}</p>

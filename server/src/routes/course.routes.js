@@ -15,8 +15,24 @@ const {
   update,
   updateStatus,
 } = require("../controllers/course.controller");
+const courseReviewController = require("../controllers/courseReview.controller");
 
 const router = express.Router();
+
+// Public & Student Course Reviews Summary
+router.get("/:courseId/reviews/summary", courseReviewController.getCourseReviewSummary);
+
+// Course Reviews: Admin gets all (including HIDDEN), public/student gets ACTIVE only
+router.get("/:courseId/reviews", (req, res, next) => {
+  if (req.baseUrl && req.baseUrl.includes("/admin")) {
+    return authenticate(req, res, () => {
+      return authorizeRoles("ADMIN")(req, res, () => {
+        return courseReviewController.getAdminCourseReviews(req, res, next);
+      });
+    });
+  }
+  return courseReviewController.getCourseReviews(req, res, next);
+});
 
 router.get(
   "/",

@@ -29,6 +29,9 @@ import BatchesPage from './pages/admin/BatchesPage';
 import BatchAssignmentsPage from './pages/admin/BatchAssignmentsPage';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import CourseContentPage from './pages/admin/CourseContentPage';
+import AdminReportsPage from './pages/admin/AdminReportsPage';
+import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import AdminInstructorPortalWrapper from './components/admin/AdminInstructorPortalWrapper';
 import AdminStudentPortalWrapper from './components/admin/AdminStudentPortalWrapper';
 
@@ -54,6 +57,12 @@ import InstructorSchedulePage from './pages/instructor/InstructorSchedulePage';
 import InstructorBatchesPage from './pages/instructor/InstructorBatchesPage';
 
 import ScheduleCalendarPage from './pages/shared/ScheduleCalendarPage';
+
+// Announcements
+import StudentAnnouncementsPage from './pages/student/StudentAnnouncementsPage';
+import InstructorAnnouncementsPage from './pages/instructor/InstructorAnnouncementsPage';
+import AdminAnnouncementsPage from './pages/admin/AdminAnnouncementsPage';
+import UserProfilePage from './pages/shared/UserProfilePage';
 
 import './App.css';
 
@@ -82,6 +91,8 @@ export default function App() {
         <Route path="quizzes/:quizId" element={<StudentQuizDetailPage />} />
         <Route path="quizzes/:quizId/attempt/:attemptId" element={<StudentQuizTakingPage />} />
         <Route path="quizzes/:quizId/results/:attemptId" element={<StudentQuizResultPage />} />
+        <Route path="announcements" element={<StudentAnnouncementsPage />} />
+        <Route path="profile" element={<UserProfilePage role="STUDENT" />} />
       </Route>
 
       {/* ── Instructor Portal ── */}
@@ -101,6 +112,8 @@ export default function App() {
         <Route path="quizzes/builder" element={<QuizBuilderPage />} />
         <Route path="quizzes/builder/:quizId" element={<QuizBuilderPage />} />
         <Route path="quizzes/:quizId/attempts" element={<QuizAttemptsPage />} />
+        <Route path="announcements" element={<InstructorAnnouncementsPage />} />
+        <Route path="profile" element={<UserProfilePage role="INSTRUCTOR" />} />
       </Route>
 
       {/* ── View Instructor Portal (Admin View Context) ── */}
@@ -120,6 +133,8 @@ export default function App() {
         <Route path="quizzes/builder" element={<QuizBuilderPage />} />
         <Route path="quizzes/builder/:quizId" element={<QuizBuilderPage />} />
         <Route path="quizzes/:quizId/attempts" element={<QuizAttemptsPage />} />
+        <Route path="announcements" element={<InstructorAnnouncementsPage />} />
+        <Route path="profile" element={<UserProfilePage role="INSTRUCTOR" />} />
       </Route>
 
       {/* ── View Student Portal (Admin View Context) ── */}
@@ -138,6 +153,8 @@ export default function App() {
         <Route path="quizzes/:quizId" element={<StudentQuizDetailPage />} />
         <Route path="quizzes/:quizId/attempt/:attemptId" element={<StudentQuizTakingPage />} />
         <Route path="quizzes/:quizId/results/:attemptId" element={<StudentQuizResultPage />} />
+        <Route path="announcements" element={<StudentAnnouncementsPage />} />
+        <Route path="profile" element={<UserProfilePage role="STUDENT" />} />
       </Route>
 
       {/* ── Admin Portal ── */}
@@ -171,11 +188,12 @@ export default function App() {
         {/* Scheduling Calendar */}
         <Route path="scheduling" element={<ScheduleCalendarPage role="admin" />} />
 
-        {/* Phase 3 placeholders */}
+        {/* Operations & Communications */}
+        <Route path="announcements" element={<AdminAnnouncementsPage />} />
+        <Route path="notifications" element={<AdminNotificationsPage />} />
         <Route path="attendance" element={<AdminPlaceholderPage title="Attendance Tracking" phase="Phase 3" description="Daily attendance logging, session reports, and biometric reconciliation." />} />
-        <Route path="reports" element={<AdminPlaceholderPage title="Analytics & Reports" phase="Phase 3" description="Platform utilization metrics, student performance analytics, and audit logs." />} />
-        <Route path="notifications" element={<AdminPlaceholderPage title="System Notifications" phase="Phase 3" description="Broadcast announcements, email triggers, and push notifications." />} />
-        <Route path="settings" element={<AdminPlaceholderPage title="Platform Settings" phase="Phase 3" description="Security settings, database backup configuration, and LMS portal branding." />} />
+        <Route path="reports" element={<AdminReportsPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
 
       {/* ── Access Denied ── */}

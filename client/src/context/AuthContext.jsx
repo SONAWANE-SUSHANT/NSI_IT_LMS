@@ -66,6 +66,15 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(USER_KEY);
   }, []);
 
+  const updateUser = useCallback((updatedFields) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const nextUser = { ...prev, ...updatedFields };
+      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      return nextUser;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       token,
@@ -76,8 +85,9 @@ export function AuthProvider({ children }) {
       hasPortalAccess,
       login,
       logout,
+      updateUser,
     }),
-    [token, user, isAuthenticated, isLoading, allowedPortals, hasPortalAccess, logout]
+    [token, user, isAuthenticated, isLoading, allowedPortals, hasPortalAccess, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -229,6 +229,21 @@ export default function StudentDashboard() {
                       <p className="text-xs text-slate-500 mt-1">
                         Mode: {b.batch_mode} &bull; Schedule: {b.batch_schedule} &bull; {b.module_count || 0} Modules
                       </p>
+                      {b.course_progress && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="w-28 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                b.course_progress.progress_percentage >= 100 ? 'bg-emerald-500' : 'bg-indigo-600'
+                              }`}
+                              style={{ width: `${Math.min(100, Math.max(0, b.course_progress.progress_percentage || 0))}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-bold text-indigo-600">
+                            {Math.round(b.course_progress.progress_percentage || 0)}% Complete
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <Link

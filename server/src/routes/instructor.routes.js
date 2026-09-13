@@ -20,4 +20,19 @@ router.get("/batches/:batchId/content", instructorController.getBatchCourseConte
 // Schedule live session for a batch module
 router.post("/batches/:batchId/sessions", instructorController.createBatchSession);
 
+// Announcement management for Instructor
+const announcementController = require("../controllers/announcement.controller");
+router.post("/announcements", announcementController.createAnnouncement);
+router.get("/announcements", announcementController.getInstructorAnnouncements);
+router.get("/announcements/:id", announcementController.getAnnouncementById);
+router.put("/announcements/:id", announcementController.updateAnnouncement);
+router.patch("/announcements/:id/publish", announcementController.publishAnnouncement);
+router.put("/announcements/:id/publish", announcementController.publishAnnouncement);
+router.patch("/announcements/:id/archive", announcementController.archiveAnnouncement);
+router.put("/announcements/:id/archive", announcementController.archiveAnnouncement);
+
+// Instructor Course Reviews
+const courseReviewController = require("../controllers/courseReview.controller");
+router.get("/courses/:courseId/reviews", courseReviewController.getInstructorCourseReviews);
+
 module.exports = router;

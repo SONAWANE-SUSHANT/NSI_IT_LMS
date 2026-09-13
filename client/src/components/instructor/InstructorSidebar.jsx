@@ -10,6 +10,8 @@ import {
   Users,
   ArrowLeft,
   Award,
+  Megaphone,
+  User,
 } from 'lucide-react';
 
 const ADMIN_PRIMARY = '#3c4cb8';
@@ -46,6 +48,7 @@ export default function InstructorSidebar({ isOpen = false, onClose }) {
       label: 'Main',
       items: [
         { name: 'Dashboard', path: basePath, icon: LayoutDashboard, isExact: true },
+        { name: 'My Profile', path: `${basePath}/profile`, icon: User },
       ],
     },
     {
@@ -55,6 +58,7 @@ export default function InstructorSidebar({ isOpen = false, onClose }) {
         { name: 'Lecture Schedule', path: `${basePath}/schedule`, icon: CalendarDays },
         { name: 'Course Content', path: `${basePath}/content`, icon: BookOpen },
         { name: 'Quizzes & Tests', path: `${basePath}/quizzes`, icon: Award },
+        { name: 'Announcements', path: `${basePath}/announcements`, icon: Megaphone },
       ],
     },
   ];
@@ -168,22 +172,36 @@ export default function InstructorSidebar({ isOpen = false, onClose }) {
         {/* User profile footer */}
         <div className="p-3 border-t border-slate-100 flex-shrink-0 bg-white">
           <div className="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/60">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
-                style={{ background: ADMIN_LIGHT, color: ADMIN_PRIMARY }}
-              >
-                {initials}
-              </div>
+            <NavLink
+              to={`${basePath}/profile`}
+              title="View / Edit Profile"
+              className="flex items-center gap-2.5 overflow-hidden flex-1 group cursor-pointer hover:opacity-85 transition-opacity"
+            >
+              {activeInstructor?.photo ? (
+                <img
+                  src={activeInstructor.photo.startsWith('http') || activeInstructor.photo.startsWith('data:') ? activeInstructor.photo : `${window.location.origin}${activeInstructor.photo}`}
+                  alt={fullName}
+                  className="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-200"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              ) : null}
+              {!activeInstructor?.photo && (
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
+                  style={{ background: ADMIN_LIGHT, color: ADMIN_PRIMARY }}
+                >
+                  {initials}
+                </div>
+              )}
               <div className="overflow-hidden">
-                <p className="text-xs font-bold text-slate-800 truncate leading-tight">{fullName}</p>
+                <p className="text-xs font-bold text-slate-800 truncate leading-tight group-hover:text-indigo-600 transition-colors">{fullName}</p>
                 <p className="text-[11px] text-slate-400 truncate leading-tight">@{activeInstructor?.username || 'instructor'}</p>
               </div>
-            </div>
+            </NavLink>
             <button
               onClick={handleLogout}
               title={isViewingAsAdmin ? "Return to Admin Portal" : "Sign Out"}
-              className={`p-1.5 rounded-lg transition-colors shrink-0 ${
+              className={`p-1.5 rounded-lg transition-colors shrink-0 ml-1 ${
                 isViewingAsAdmin
                   ? 'text-amber-600 hover:text-amber-800 hover:bg-amber-50'
                   : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'

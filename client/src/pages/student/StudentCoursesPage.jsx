@@ -19,10 +19,43 @@ import {
 import { fetchMyBatches, fetchBatchCourseContent } from '../../services/studentService';
 import VideoPlayerModal from '../../components/shared/VideoPlayerModal';
 import CourseLearningPlayerView from '../../components/student/CourseLearningPlayerView';
+import StarRating from '../../components/common/StarRating';
+import { fetchCourseReviewSummary } from '../../services/courseReviewService';
 
 const ADMIN_PRIMARY = '#3c4cb8';
 const ADMIN_LIGHT = '#e7e9fb';
 const ADMIN_DARK = '#2e3a8c';
+
+function CourseCardRating({ courseId }) {
+  const [ratingInfo, setRatingInfo] = useState(null);
+
+  useEffect(() => {
+    if (!courseId) return;
+    let mounted = true;
+    fetchCourseReviewSummary(courseId)
+      .then((data) => {
+        if (mounted && data) setRatingInfo(data);
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, [courseId]);
+
+  if (!ratingInfo || ratingInfo.total_reviews === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mt-1">
+      <StarRating rating={ratingInfo.average_rating} size="sm" />
+      <span className="text-[11px] font-extrabold text-slate-800">
+        {Number(ratingInfo.average_rating).toFixed(2)}
+      </span>
+      <span className="text-[10px] text-slate-400 font-normal">
+        ({ratingInfo.total_reviews} {ratingInfo.total_reviews === 1 ? 'review' : 'reviews'})
+      </span>
+    </div>
+  );
+}
 
 export default function StudentCoursesPage() {
   const location = useLocation();
@@ -239,6 +272,7 @@ export default function StudentCoursesPage() {
                         <h3 className="text-base font-bold text-slate-900 mt-0.5 leading-snug line-clamp-2">
                           {course.name || batch.name}
                         </h3>
+                        <CourseCardRating courseId={course.id || batch.course_id} />
                         <p className="text-xs text-slate-600 font-medium mt-1">
                           Cohort: {batch.name}
                         </p>
@@ -284,6 +318,50 @@ export default function StudentCoursesPage() {
                           </span>
                         </div>
                       </div>
+
+                      {/* Course Progress */}
+                      {batch.course_progress && (
+                        <div className="mt-3 pt-3 border-t border-slate-100">
+                          <div className="flex items-center justify-between text-xs mb-1.5">
+                            <span className="font-bold text-slate-700">Course Progress</span>
+                            <span className="font-extrabold text-indigo-600">
+                              {Math.round(batch.course_progress.progress_percentage || 0)}%
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                batch.course_progress.progress_percentage >= 100
+                                  ? 'bg-emerald-500'
+                                  : 'bg-indigo-600'
+                              }`}
+                              style={{
+                                width: `${Math.min(100, Math.max(0, batch.course_progress.progress_percentage || 0))}%`,
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
+                            <span>
+                              {batch.course_progress.completed_sessions || 0} / {batch.course_progress.total_sessions || 0} Sessions Completed
+                            </span>
+                            <span
+                              className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
+                                batch.course_progress.status === 'COMPLETED'
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : batch.course_progress.status === 'IN_PROGRESS'
+                                  ? 'bg-indigo-50 text-indigo-700'
+                                  : 'bg-slate-100 text-slate-500'
+                              }`}
+                            >
+                              {batch.course_progress.status === 'COMPLETED'
+                                ? 'Completed'
+                                : batch.course_progress.status === 'IN_PROGRESS'
+                                ? 'In Progress'
+                                : 'Not Started'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action */}
@@ -295,7 +373,13 @@ export default function StudentCoursesPage() {
                         style={{ background: ADMIN_PRIMARY }}
                       >
                         <BookOpen className="w-4 h-4" />
-                        <span>Access Course & Study Materials</span>
+                        <span>
+                          {batch.course_progress?.status === 'COMPLETED'
+                            ? 'Review Course Materials'
+                            : batch.course_progress?.status === 'IN_PROGRESS'
+                            ? 'Continue Learning'
+                            : 'Access Course & Study Materials'}
+                        </span>
                         <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                       </button>
                     </div>

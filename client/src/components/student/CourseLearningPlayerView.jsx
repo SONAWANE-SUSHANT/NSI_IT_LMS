@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { parseVideoUrl } from '../../utils/videoUtils';
 import { useStudentPortal } from '../../context/StudentPortalContext';
+import { recordSessionAccess, markSessionComplete } from '../../services/progressService';
+import CourseReviewsSection from './CourseReviewsSection';
 
 const PRIMARY_COLOR = '#4f46e5'; // Indigo matching the design
 
@@ -59,6 +61,30 @@ export default function CourseLearningPlayerView({
     return list;
   }, [modules]);
 
+  // Session progress map: sessionId -> { completed, completed_at, last_accessed_at }
+  const [sessionProgressMap, setSessionProgressMap] = useState(() => {
+    const map = {};
+    modules.forEach((mod) => {
+      (mod.lectures || []).forEach((lec) => {
+        const prog = lec.sessionProgress?.[0];
+        if (prog) {
+          map[lec.id] = {
+            completed: Boolean(prog.completed),
+            completed_at: prog.completed_at,
+            last_accessed_at: prog.updated_at || prog.last_accessed_at,
+          };
+        }
+      });
+    });
+    return map;
+  });
+
+  const [courseProgress, setCourseProgress] = useState(
+    courseContent?.course_progress || null
+  );
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [completeError, setCompleteError] = useState('');
+
   // Selected active lecture or quiz
   const [selectedLecture, setSelectedLecture] = useState(null);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
@@ -67,22 +93,98 @@ export default function CourseLearningPlayerView({
   const [shareCopied, setShareCopied] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
 
-  // Initialize selected lecture to the first lecture with a video URL or the first lecture
+  // Resume / Initialize selected lecture:
+  // 1. Incomplete last accessed session from course progress
+  // 2. Incomplete accessed session
+  // 3. First incomplete session
+  // 4. Fallback to first session
   useEffect(() => {
     if (allLectures.length > 0 && !selectedLecture) {
-      const preferred =
-        allLectures.find((l) => l.recording_url || l.session_url) || allLectures[0];
-      setSelectedLecture(preferred);
+      let targetLecture = null;
 
-      // Expand the module containing the preferred lecture
-      if (preferred) {
+      const lastSessionId = courseProgress?.last_session_id;
+      if (lastSessionId) {
+        const found = allLectures.find((l) => l.id === lastSessionId);
+        if (found && !sessionProgressMap[found.id]?.completed) {
+          targetLecture = found;
+        }
+      }
+
+      if (!targetLecture) {
+        targetLecture = allLectures.find(
+          (l) => sessionProgressMap[l.id]?.last_accessed_at && !sessionProgressMap[l.id]?.completed
+        );
+      }
+
+      if (!targetLecture) {
+        targetLecture = allLectures.find((l) => !sessionProgressMap[l.id]?.completed);
+      }
+
+      if (!targetLecture) {
+        targetLecture =
+          allLectures.find((l) => l.recording_url || l.session_url) || allLectures[0];
+      }
+
+      if (targetLecture) {
+        setSelectedLecture(targetLecture);
         setExpandedModules((prev) => ({
           ...prev,
-          [preferred.module_id]: true,
+          [targetLecture.module_id]: true,
         }));
       }
     }
-  }, [allLectures, selectedLecture]);
+  }, [allLectures, selectedLecture, courseProgress]);
+
+  // Record session access on lecture select
+  useEffect(() => {
+    if (selectedLecture?.id) {
+      recordSessionAccess(selectedLecture.id)
+        .then((data) => {
+          if (data) {
+            setSessionProgressMap((prev) => ({
+              ...prev,
+              [selectedLecture.id]: {
+                ...prev[selectedLecture.id],
+                completed: Boolean(data.completed),
+                completed_at: data.completed_at,
+                last_accessed_at: data.last_accessed_at,
+              },
+            }));
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to record session access:', err);
+        });
+    }
+  }, [selectedLecture?.id]);
+
+  const handleCompleteSession = async (sessionId) => {
+    if (!sessionId || isCompleting) return;
+    try {
+      setIsCompleting(true);
+      setCompleteError('');
+      const res = await markSessionComplete(sessionId);
+
+      if (res?.session_progress) {
+        setSessionProgressMap((prev) => ({
+          ...prev,
+          [sessionId]: {
+            completed: Boolean(res.session_progress.completed),
+            completed_at: res.session_progress.completed_at,
+            last_accessed_at: res.session_progress.last_accessed_at,
+          },
+        }));
+      }
+
+      if (res?.course_progress) {
+        setCourseProgress(res.course_progress);
+      }
+    } catch (err) {
+      setCompleteError(err.message || 'Failed to mark session as completed');
+    } finally {
+      setIsCompleting(false);
+    }
+  };
 
   // Reset loading whenever selected lecture changes
   useEffect(() => {
@@ -115,6 +217,12 @@ export default function CourseLearningPlayerView({
   const isSelectedLive =
     selectedLecture &&
     (selectedLecture.session_type === 'LIVE' || selectedLecture.lecture_type === 'LIVE');
+
+  const handleOpenLiveMeeting = () => {
+    if (selectedLecture?.session_url) {
+      window.open(selectedLecture.session_url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   const selectedRecUrl = selectedLecture
     ? selectedLecture.recording_url ||
@@ -204,6 +312,60 @@ export default function CourseLearningPlayerView({
             </div>
           </div>
         </div>
+
+        {/* Course Progress Header Bar */}
+        {courseProgress && (
+          <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-slate-800">Course Progress</span>
+                  <span
+                    className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      courseProgress.status === 'COMPLETED'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                        : courseProgress.status === 'IN_PROGRESS'
+                        ? 'bg-indigo-100 text-indigo-800 border-indigo-200'
+                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                    }`}
+                  >
+                    {courseProgress.status === 'COMPLETED'
+                      ? 'COMPLETED'
+                      : courseProgress.status === 'IN_PROGRESS'
+                      ? 'IN PROGRESS'
+                      : 'NOT STARTED'}
+                  </span>
+                  {courseProgress.status === 'COMPLETED' && (
+                    <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Course Completed
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-slate-500 mt-0.5">
+                  {courseProgress.completed_sessions || 0} of {courseProgress.total_sessions || allLectures.length} Sessions Completed ({courseProgress.progress_percentage || 0}%)
+                </span>
+              </div>
+            </div>
+
+            <div className="w-full sm:w-64">
+              <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                <span>Overall Completion</span>
+                <span className="text-indigo-600 font-extrabold">{Math.round(courseProgress.progress_percentage || 0)}%</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div
+                  className={`h-full transition-all duration-500 rounded-full ${
+                    courseProgress.progress_percentage >= 100
+                      ? 'bg-emerald-500'
+                      : 'bg-gradient-to-r from-indigo-500 to-indigo-600'
+                  }`}
+                  style={{ width: `${Math.min(100, Math.max(0, courseProgress.progress_percentage || 0))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Main Two-Column Layout ── */}
@@ -351,7 +513,7 @@ export default function CourseLearningPlayerView({
                   {selectedLecture.title}
                 </h3>
                 {selectedLecture.scheduled_at && (
-                  <p className="text-xs text-slate-300 font-medium mb-5 flex items-center gap-1.5">
+                  <p className="text-xs text-slate-300 font-medium mb-4 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-indigo-400" />
                     Scheduled:{' '}
                     {new Date(selectedLecture.scheduled_at).toLocaleString([], {
@@ -361,22 +523,24 @@ export default function CourseLearningPlayerView({
                   </p>
                 )}
 
-                {selectedLecture.session_url ? (
-                  <a
-                    href={selectedLecture.session_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 transition-all shadow-lg hover:scale-105"
-                  >
-                    <Video className="w-4 h-4" />
-                    <span>Join Live Meeting Now</span>
-                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                  </a>
-                ) : (
-                  <span className="text-xs text-slate-400 italic bg-white/10 px-4 py-2 rounded-xl">
-                    Live link will be activated right before class begins
-                  </span>
-                )}
+                {/* Action: Open Live Google Meet */}
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-1">
+                  {selectedLecture.session_url ? (
+                    <button
+                      type="button"
+                      onClick={handleOpenLiveMeeting}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 transition-all shadow-lg hover:scale-105 cursor-pointer"
+                    >
+                      <Video className="w-4 h-4" />
+                      <span>Join Live Meeting Now</span>
+                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                    </button>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic bg-white/10 px-4 py-2 rounded-xl">
+                      Live link will be activated right before class begins
+                    </span>
+                  )}
+                </div>
               </div>
             ) : selectedRecUrl && parsedVideo ? (
               /* RECORDED VIDEO STREAM */
@@ -423,6 +587,80 @@ export default function CourseLearningPlayerView({
               </div>
             )}
           </div>
+
+          {/* ── Lesson Title & Explicit Mark as Completed Action ── */}
+          {selectedLecture && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                    {selectedLecture.module_name || 'Lesson'}
+                  </span>
+                  {isSelectedLive ? (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100 flex items-center gap-1">
+                      <Radio className="w-2.5 h-2.5" />
+                      Live Session
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                      Recorded Lesson
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">
+                  {selectedLecture.title}
+                </h2>
+              </div>
+
+              {/* Live Session Action: Join Live Meeting */}
+              {isSelectedLive && selectedLecture.session_url && (
+                <div className="shrink-0 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleOpenLiveMeeting}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-98 text-white text-xs font-bold transition-all shadow-xs hover:shadow-md cursor-pointer"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Join Live Meeting Now</span>
+                    <ExternalLink className="w-3 h-3 opacity-80" />
+                  </button>
+                </div>
+              )}
+
+              {/* Completion Control: Explicit Mark as Completed for recorded sessions */}
+              {!isSelectedLive && (
+                <div className="shrink-0 flex items-center gap-2">
+                  {sessionProgressMap[selectedLecture.id]?.completed ? (
+                    <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold shadow-2xs">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Completed</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleCompleteSession(selectedLecture.id)}
+                      disabled={isCompleting}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white text-xs font-bold transition-all shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                    >
+                      <div className="w-3.5 h-3.5 border-2 border-white rounded-xs flex items-center justify-center">
+                        {isCompleting && <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />}
+                      </div>
+                      <span>{isCompleting ? 'Saving...' : 'Mark as Completed'}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {completeError && (
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-xs font-semibold text-rose-700">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{completeError}</span>
+            </div>
+          )}
+
+
 
           {/* ── Navigation Tabs ── */}
           <div className="flex items-center gap-1 sm:gap-2 border-b border-slate-200 overflow-x-auto no-scrollbar py-1">
@@ -629,51 +867,10 @@ export default function CourseLearningPlayerView({
             )}
 
             {activeTab === 'reviews' && (
-              <div className="space-y-5">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-amber-50/50 border border-amber-200/60">
-                  <div className="text-center">
-                    <span className="text-3xl font-black text-slate-900">4.8</span>
-                    <div className="flex text-amber-500 text-xs justify-center mt-0.5">
-                      {'★★★★★'}
-                    </div>
-                  </div>
-                  <div className="border-l border-amber-200/60 pl-4">
-                    <h4 className="text-xs font-bold text-slate-900">Learner Satisfaction</h4>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      97% of students enrolled reported positive mastery of the syllabus outcomes.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {[
-                    {
-                      name: 'Aarav Sharma',
-                      date: '3 days ago',
-                      comment:
-                        'The video quality and explanation depth are superb! Having both the recorded videos and notes right beside the lessons is really convenient.',
-                    },
-                    {
-                      name: 'Sneha Patel',
-                      date: '1 week ago',
-                      comment:
-                        'Great pacing throughout the modules. The in-app video playback makes self-paced review seamless.',
-                    },
-                  ].map((rev, i) => (
-                    <div
-                      key={i}
-                      className="p-4 rounded-xl border border-slate-100 bg-slate-50/60 space-y-1"
-                    >
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                        <span>{rev.name}</span>
-                        <span className="text-[11px] text-slate-400 font-normal">{rev.date}</span>
-                      </div>
-                      <div className="flex text-amber-400 text-xs">{'★★★★★'}</div>
-                      <p className="text-xs text-slate-600 mt-1">{rev.comment}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CourseReviewsSection
+                courseId={course?.id || batch?.course_id}
+                isEnrolled={true}
+              />
             )}
           </div>
         </>
@@ -691,6 +888,11 @@ export default function CourseLearningPlayerView({
                   {modules.length} Modules &bull; {allLectures.length} Lessons
                 </span>
               </div>
+              {courseProgress && (
+                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  {courseProgress.completed_sessions || 0}/{courseProgress.total_sessions || allLectures.length} Done
+                </span>
+              )}
             </div>
 
             {/* Accordion Module List */}
@@ -750,6 +952,8 @@ export default function CourseLearningPlayerView({
                                 const isSelected = selectedLecture?.id === lec.id && !selectedQuiz;
                                 const isLecLive =
                                   lec.session_type === 'LIVE' || lec.lecture_type === 'LIVE';
+                                const isLecCompleted = sessionProgressMap[lec.id]?.completed;
+                                const isLecAccessed = !!sessionProgressMap[lec.id]?.last_accessed_at;
 
                                 return (
                                   <div
@@ -767,15 +971,23 @@ export default function CourseLearningPlayerView({
                                     <div className="flex items-center gap-3 min-w-0 pr-2">
                                       <div
                                         className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                                          isSelected
+                                          isLecCompleted
+                                            ? 'bg-emerald-100 text-emerald-700 font-bold'
+                                            : isSelected
                                             ? 'bg-indigo-600 text-white'
                                             : isLecLive
                                             ? 'bg-rose-100 text-rose-600'
+                                            : isLecAccessed
+                                            ? 'bg-indigo-50 text-indigo-600 border border-indigo-200'
                                             : 'bg-slate-200/80 text-slate-600'
                                         }`}
                                       >
-                                        {isLecLive ? (
+                                        {isLecCompleted ? (
+                                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                        ) : isLecLive ? (
                                           <Radio className="w-3 h-3" />
+                                        ) : isLecAccessed ? (
+                                          <Clock className="w-3 h-3" />
                                         ) : (
                                           <Play className="w-2.5 h-2.5 ml-0.5 fill-current" />
                                         )}
@@ -785,19 +997,26 @@ export default function CourseLearningPlayerView({
                                       </span>
                                     </div>
 
-                                    <span
-                                      className={`text-[11px] shrink-0 ${
-                                        isSelected
-                                          ? 'text-indigo-600 font-bold'
-                                          : 'text-slate-400 font-normal'
-                                      }`}
-                                    >
-                                      {lec.duration_minutes
-                                        ? `${lec.duration_minutes} min`
-                                        : isLecLive
-                                        ? 'Live'
-                                        : ''}
-                                    </span>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      {isLecCompleted && (
+                                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                          ✓ Done
+                                        </span>
+                                      )}
+                                      <span
+                                        className={`text-[11px] ${
+                                          isSelected
+                                            ? 'text-indigo-600 font-bold'
+                                            : 'text-slate-400 font-normal'
+                                        }`}
+                                      >
+                                        {lec.duration_minutes
+                                          ? `${lec.duration_minutes} min`
+                                          : isLecLive
+                                          ? 'Live'
+                                          : ''}
+                                      </span>
+                                    </div>
                                   </div>
                                 );
                               })}

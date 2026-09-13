@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     username VARCHAR(100) GENERATED ALWAYS AS (
-        CONCAT(LOWER(first_name), '@nsi')
+        CONCAT(LOWER(REPLACE(first_name, ' ', '')), '.', LOWER(REPLACE(last_name, ' ', '')), '@nsi')
     ) STORED,
     password VARCHAR(255) NOT NULL,
     role_id INT UNSIGNED NOT NULL,

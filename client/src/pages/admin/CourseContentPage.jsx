@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BookOpen, ChevronRight, Layers, Plus, RefreshCw, Trash2, Video, X, AlertCircle, FileText, ExternalLink, ChevronDown,
+  BookOpen, ChevronRight, Layers, Plus, RefreshCw, Trash2, Video, X, AlertCircle, FileText, ExternalLink, ChevronDown, Star,
 } from 'lucide-react';
 import StatusBadge from '../../components/admin/StatusBadge';
 import LoadingState from '../../components/admin/LoadingState';
@@ -9,6 +9,7 @@ import ErrorState from '../../components/admin/ErrorState';
 import { useAuth } from '../../context/useAuth';
 import { fetchMyBatches } from '../../services/instructorService';
 import VideoPlayerModal from '../../components/shared/VideoPlayerModal';
+import AdminCourseReviewsModal from '../../components/admin/AdminCourseReviewsModal';
 import {
   getCourses,
   getModulesByCourse,
@@ -755,6 +756,7 @@ export default function CourseContentPage() {
   const [assignedCourseIds, setAssignedCourseIds] = useState(new Set());
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedModuleId, setSelectedModuleId] = useState(null);
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
   const [courseError, setCourseError] = useState('');
   const [playingLecture, setPlayingLecture] = useState(null);
@@ -878,6 +880,16 @@ export default function CourseContentPage() {
             {selectedCourse.status && <StatusBadge status={selectedCourse.status} />}
           </div>
         )}
+        {selectedCourse && (
+          <button
+            type="button"
+            onClick={() => setShowReviewsModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors shadow-2xs cursor-pointer ml-auto"
+          >
+            <Star size={14} className="text-amber-500 fill-amber-500" />
+            <span>Course Reviews</span>
+          </button>
+        )}
       </div>
 
       <div className="content-two-panel-grid">
@@ -899,6 +911,13 @@ export default function CourseContentPage() {
         onClose={() => setPlayingLecture(null)}
         lecture={playingLecture}
         courseName={selectedCourse?.name}
+      />
+
+      {/* ── Admin Course Reviews & Moderation Modal ── */}
+      <AdminCourseReviewsModal
+        isOpen={showReviewsModal}
+        course={selectedCourse}
+        onClose={() => setShowReviewsModal(false)}
       />
     </div>
   );

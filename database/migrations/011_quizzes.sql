@@ -3,7 +3,9 @@
 
 CREATE TABLE IF NOT EXISTS quizzes (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    session_id INT UNSIGNED NOT NULL,
+    session_id INT UNSIGNED DEFAULT NULL,
+    module_id INT UNSIGNED DEFAULT NULL,
+    course_id INT UNSIGNED DEFAULT NULL,
     title VARCHAR(250) NOT NULL,
     description TEXT,
     instructions TEXT,
@@ -20,12 +22,18 @@ CREATE TABLE IF NOT EXISTS quizzes (
     updated_by INT UNSIGNED DEFAULT NULL,
     PRIMARY KEY (id),
     KEY fk_quizzes_sessions (session_id),
+    KEY fk_quizzes_modules (module_id),
+    KEY fk_quizzes_courses (course_id),
     KEY fk_quizzes_created_by (created_by),
     KEY fk_quizzes_updated_by (updated_by),
     CONSTRAINT fk_quizzes_created_by FOREIGN KEY (created_by)
         REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_quizzes_sessions FOREIGN KEY (session_id)
-        REFERENCES sessions (id) ON DELETE CASCADE ON UPDATE CASCADE,
+        REFERENCES sessions (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_quizzes_modules FOREIGN KEY (module_id)
+        REFERENCES course_modules (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_quizzes_courses FOREIGN KEY (course_id)
+        REFERENCES courses (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_quizzes_updated_by FOREIGN KEY (updated_by)
         REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

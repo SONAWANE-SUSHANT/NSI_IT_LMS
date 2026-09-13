@@ -15,6 +15,7 @@ import {
   X,
   UserCheck,
   Award,
+  Megaphone,
 } from 'lucide-react';
 
 /**
@@ -67,6 +68,7 @@ export default function AdminSidebar({ isOpen = false, onClose }) {
     label: 'Operations',
     items: [
       { name: 'Scheduling', path: '/admin/scheduling', icon: CalendarDays },
+      { name: 'Announcements', path: '/admin/announcements', icon: Megaphone },
       { name: 'Attendance', path: '/admin/attendance', icon: CheckSquare },
     ],
   },

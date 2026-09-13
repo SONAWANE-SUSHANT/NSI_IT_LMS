@@ -13,12 +13,22 @@ const runMigrationsAndSeed = async () => {
     await sequelize.query("SET FOREIGN_KEY_CHECKS = 0;");
 
     const tablesToDrop = [
+      // Leaf / dependent child tables
+      "quiz_attempt_answers",
+      "quiz_attempts",
       "quiz_options",
       "quiz_questions",
       "quizzes",
+      "session_attendance",
+      "session_progress",
+      "course_progress",
+      "course_reviews",
+      "notifications",
+      "announcements",
+      "user_devices",
       "session_notes",
-      "sessions",
       "lecture_notes",
+      "sessions",
       "lectures",
       "course_modules",
       "batch_students",
@@ -29,6 +39,7 @@ const runMigrationsAndSeed = async () => {
       "course_batches",
       "courses",
       "course_categories",
+      "settings",
       "users",
       "users_roles",
       "user_roles",

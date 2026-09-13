@@ -10,7 +10,10 @@ const {
   Quiz,
   QuizAttempt,
   User,
+  SessionProgress,
+  CourseProgress,
 } = require("../models");
+const { recalculateCourseProgress } = require("./progress.service");
 
 /**
  * Get all batches the student is enrolled in
@@ -59,12 +62,20 @@ const getMyBatches = async (studentId) => {
         where: { course_id: batch.course_id, status: "ACTIVE" },
       });
 
+      let progress = null;
+      try {
+        progress = await recalculateCourseProgress(studentId, batch.course_id);
+      } catch {
+        progress = null;
+      }
+
       return {
         enrollment_id: e.id,
         enrollment_date: e.enrollment_date,
         enrollment_status: e.status,
         ...batch,
         module_count: moduleCount,
+        course_progress: progress,
       };
     })
   );
@@ -132,6 +143,12 @@ const getBatchCourseContent = async (batchId, studentId) => {
             required: false,
           },
           {
+            model: SessionProgress,
+            as: "sessionProgress",
+            where: { student_id: studentId },
+            required: false,
+          },
+          {
             model: Quiz,
             as: "quizzes",
             where: { status: "PUBLISHED" },
@@ -164,6 +181,13 @@ const getBatchCourseContent = async (batchId, studentId) => {
     ],
   });
 
+  let courseProgress = null;
+  try {
+    courseProgress = await recalculateCourseProgress(studentId, courseId);
+  } catch {
+    courseProgress = null;
+  }
+
   return {
     enrollment: {
       id: enrollment.id,
@@ -174,6 +198,7 @@ const getBatchCourseContent = async (batchId, studentId) => {
     course: enrollment.batch.course,
     instructors: enrollment.batch.instructors?.map((bi) => bi.instructor).filter(Boolean) || [],
     modules,
+    course_progress: courseProgress,
   };
 };
 

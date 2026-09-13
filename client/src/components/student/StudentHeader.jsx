@@ -66,13 +66,29 @@ export default function StudentHeader({ activeTab, setActiveTab }) {
           <div className="flex items-center gap-3">
 
             <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs border border-amber-200">
-                {user?.first_name ? user.first_name[0].toUpperCase() : <User className="w-4 h-4" />}
-              </div>
-              <div className="hidden lg:block text-left">
-                <p className="text-xs font-semibold text-slate-800 leading-tight">{fullName}</p>
-                <p className="text-[11px] text-slate-500 leading-tight">@{user?.username}</p>
-              </div>
+              <Link
+                to="/student/profile"
+                title="My Profile"
+                className="flex items-center gap-2.5 hover:opacity-85 transition-opacity cursor-pointer group"
+              >
+                {user?.photo ? (
+                  <img
+                    src={user.photo.startsWith('http') || user.photo.startsWith('data:') ? user.photo : `${window.location.origin}${user.photo}`}
+                    alt={fullName}
+                    className="w-8 h-8 rounded-full object-cover border border-amber-300 shrink-0"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : null}
+                {!user?.photo && (
+                  <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs border border-amber-200 shrink-0">
+                    {user?.first_name ? user.first_name[0].toUpperCase() : <User className="w-4 h-4" />}
+                  </div>
+                )}
+                <div className="hidden lg:block text-left">
+                  <p className="text-xs font-semibold text-slate-800 leading-tight group-hover:text-amber-700 transition-colors">{fullName}</p>
+                  <p className="text-[11px] text-slate-500 leading-tight">@{user?.username}</p>
+                </div>
+              </Link>
               <button
                 onClick={handleLogout}
                 title="Log out"

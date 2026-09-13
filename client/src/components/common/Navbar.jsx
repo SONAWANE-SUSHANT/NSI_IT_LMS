@@ -4,6 +4,7 @@ import RoleBadge from './RoleBadge';
 import nsiLogo from '../../assets/NSI_LOGO.png';
 import { LogOut, User } from 'lucide-react';
 import { getDefaultRouteForRole } from '../../utils/roleUtils';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -34,6 +35,8 @@ export default function Navbar() {
 
         {/* User Info & Logout */}
         <div className="navbar-user-section">
+          <NotificationBell />
+
           <div className="user-profile-summary">
             <div className="user-avatar">
               <User size={18} />

@@ -1,0 +1,14 @@
+-- Migration 023: settings
+-- Source table: settings
+
+CREATE TABLE IF NOT EXISTS settings (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    setting_key VARCHAR(100) NOT NULL,
+    setting_value TEXT NOT NULL,
+    category ENUM('GENERAL','ACADEMIC','SECURITY','NOTIFICATION') NOT NULL DEFAULT 'GENERAL',
+    description VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_settings_key (setting_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

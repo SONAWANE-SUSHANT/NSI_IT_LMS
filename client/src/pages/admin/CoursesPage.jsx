@@ -11,6 +11,7 @@ import {
   updateCourse,
   updateCourseStatus,
 } from '../../services/courseAdminService';
+import AdminCourseReviewsModal from '../../components/admin/AdminCourseReviewsModal';
 
 const emptyCourse = {
   code: '',
@@ -24,6 +25,7 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
   const [form, setForm] = useState(emptyCourse);
   const [editing, setEditing] = useState(null);
+  const [reviewModalCourse, setReviewModalCourse] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -220,6 +222,7 @@ export default function CoursesPage() {
                         <td className="course-admin-muted">{course.duration || 'Not set'}</td>
                         <td><StatusBadge status={course.status} /></td>
                         <td className="course-admin-actions">
+                          <button onClick={() => setReviewModalCourse(course)} className="course-admin-neutral-btn text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-bold">Reviews</button>
                           <button onClick={() => handleEdit(course)} className="course-admin-text-btn">Edit</button>
                           {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'].filter((s) => s !== course.status).map((status) => (
                             <button key={status} onClick={() => setStatus(course, status)} className="course-admin-neutral-btn">{status}</button>
@@ -234,6 +237,13 @@ export default function CoursesPage() {
           )}
         </div>
       </div>
+
+      {/* Admin Course Reviews & Ratings Moderation Modal */}
+      <AdminCourseReviewsModal
+        isOpen={!!reviewModalCourse}
+        course={reviewModalCourse}
+        onClose={() => setReviewModalCourse(null)}
+      />
     </div>
   );
 }
