@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -68,8 +69,18 @@ app.use(
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
+
 // Static file serving for user uploads (profile photos, etc.)
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+// Serve Swagger UI at /api-docs
+const openapiDocPath = path.resolve(__dirname, "../../openapi/openapi.yaml");
+if (fs.existsSync(openapiDocPath)) {
+  const swaggerDocument = YAML.load(openapiDocPath);
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
 // Fast Health Check
 app.get("/api/health", (req, res) => {
