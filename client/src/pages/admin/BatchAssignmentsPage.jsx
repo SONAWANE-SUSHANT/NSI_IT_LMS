@@ -296,16 +296,26 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
               : 'Enroll students into course batches with checkbox selection and manage enrollment progress.'}
           </p>
         </div>
-        <button onClick={loadAssignments} disabled={isLoading || !selectedBatchId} className="course-admin-icon-btn">
+        <button
+          type="button"
+          onClick={loadAssignments}
+          disabled={isLoading || !selectedBatchId}
+          className="course-admin-icon-btn min-h-[42px] cursor-pointer w-full sm:w-auto"
+          title="Refresh assignments list"
+        >
           <RefreshCw size={17} className={isLoading ? 'animate-spin text-indigo-600' : ''} />
-          Refresh
+          <span>Refresh</span>
         </button>
       </div>
 
       <div className="course-admin-assignment-grid">
-        <label className="course-admin-label">
+        <label className="course-admin-label min-w-0">
           Course
-          <select value={selectedCourseId} onChange={(e) => setSelectedCourseId(e.target.value)} className="course-admin-select">
+          <select
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+            className="course-admin-select w-full mt-1.5 truncate"
+          >
             <option value="">Select a course</option>
             {courses.map((course) => (
               <option key={course.id} value={course.id}>
@@ -314,9 +324,13 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
             ))}
           </select>
         </label>
-        <label className="course-admin-label">
+        <label className="course-admin-label min-w-0">
           Batch
-          <select value={selectedBatchId} onChange={(e) => setSelectedBatchId(e.target.value)} className="course-admin-select">
+          <select
+            value={selectedBatchId}
+            onChange={(e) => setSelectedBatchId(e.target.value)}
+            className="course-admin-select w-full mt-1.5 truncate"
+          >
             <option value="">Select a batch</option>
             {batches.map((batch) => (
               <option key={batch.id} value={batch.id}>
@@ -343,7 +357,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
           </div>
           <button
             onClick={() => setNotification(null)}
-            className="text-[11px] font-bold underline opacity-80 hover:opacity-100"
+            className="text-[11px] font-bold underline opacity-80 hover:opacity-100 cursor-pointer"
           >
             Dismiss
           </button>
@@ -352,11 +366,11 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
 
       {/* Student Enrollment Section with Checkbox Option */}
       {!isInstructorMode ? (
-        <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-sm space-y-4">
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-4 sm:p-5 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#e7e9fb] text-[#3c4cb8]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#e7e9fb] text-[#3c4cb8] shrink-0">
                   <UserPlus size={16} />
                 </span>
                 <h3 className="font-[family-name:var(--font-display)] text-base font-bold text-[var(--text-primary)]">
@@ -369,30 +383,30 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
             </div>
 
             {/* View Mode Toggle: Checkbox vs Single Dropdown */}
-            <div className="flex items-center gap-1.5 self-start sm:self-auto bg-slate-100 p-1 rounded-xl">
+            <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto bg-slate-100 p-1 rounded-xl">
               <button
                 type="button"
                 onClick={() => setSelectionMode('checkbox')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition min-h-[34px] cursor-pointer ${
                   selectionMode === 'checkbox'
                     ? 'bg-white text-[#3c4cb8] shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <CheckSquare size={14} />
-                Checkbox Selection
+                <span>Checkbox Selection</span>
               </button>
               <button
                 type="button"
                 onClick={() => setSelectionMode('single')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition min-h-[34px] cursor-pointer ${
                   selectionMode === 'single'
                     ? 'bg-white text-[#3c4cb8] shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <ListFilter size={14} />
-                Single Dropdown
+                <span>Single Dropdown</span>
               </button>
             </div>
           </div>
@@ -400,34 +414,34 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
           {selectionMode === 'checkbox' ? (
             <div className="space-y-3">
               {/* Checkbox Toolbar: Search + Select All + Stats */}
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-                <div className="relative flex-1">
+              <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
+                <div className="relative flex-1 min-w-0">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     placeholder="Search available students by name, username, or email..."
                     value={studentSearchTerm}
                     onChange={(e) => setStudentSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3c4cb8] transition"
+                    className="w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3c4cb8] transition min-h-[38px]"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
                   <button
                     type="button"
                     onClick={handleSelectAllToggle}
                     disabled={filteredAvailableStudents.length === 0}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-50 text-slate-700 transition disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition disabled:opacity-50 min-h-[38px] cursor-pointer flex-1 sm:flex-none"
                   >
                     {allFilteredSelected ? (
                       <>
                         <CheckSquare size={15} className="text-[#3c4cb8]" />
-                        Deselect All ({filteredAvailableStudents.length})
+                        <span>Deselect All ({filteredAvailableStudents.length})</span>
                       </>
                     ) : (
                       <>
                         <Square size={15} className="text-slate-400" />
-                        Select All ({filteredAvailableStudents.length})
+                        <span>Select All ({filteredAvailableStudents.length})</span>
                       </>
                     )}
                   </button>
@@ -436,7 +450,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
                     <button
                       type="button"
                       onClick={() => setSelectedStudentIds(new Set())}
-                      className="px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
+                      className="px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition min-h-[38px] cursor-pointer"
                     >
                       Clear ({selectedStudentIds.size})
                     </button>
@@ -452,7 +466,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
                   </div>
                 ) : filteredAvailableStudents.length === 0 ? (
                   <div className="py-8 text-center text-xs text-slate-400 font-medium">
-                    No available students matching "{studentSearchTerm}".
+                    No available students matching &quot;{studentSearchTerm}&quot;.
                   </div>
                 ) : (
                   filteredAvailableStudents.map((user) => {
@@ -462,18 +476,18 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
                     return (
                       <label
                         key={user.id}
-                        className={`flex items-center justify-between p-2.5 rounded-xl border transition cursor-pointer select-none ${
+                        className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl border transition cursor-pointer select-none gap-2.5 ${
                           isChecked
                             ? 'bg-[#e7e9fb]/60 border-[#3c4cb8]/40 shadow-xs'
                             : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleStudentSelection(user.id)}
-                            className="h-4 w-4 rounded border-slate-300 text-[#3c4cb8] focus:ring-[#3c4cb8] cursor-pointer"
+                            className="h-4 w-4 rounded border-slate-300 text-[#3c4cb8] focus:ring-[#3c4cb8] cursor-pointer shrink-0"
                           />
                           <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
@@ -482,8 +496,8 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
                           >
                             {initials}
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1.5">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-bold text-slate-900 truncate flex flex-wrap items-center gap-1.5">
                               <span>{userName(user)}</span>
                               <span className="text-[11px] font-normal text-slate-400">@{user.username}</span>
                             </div>
@@ -491,7 +505,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
                           </div>
                         </div>
 
-                        <div className="shrink-0 ml-2">
+                        <div className="shrink-0 ml-1">
                           <span
                             className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
                               isChecked ? 'bg-[#3c4cb8] text-white' : 'bg-slate-100 text-slate-500'
@@ -507,7 +521,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
               </div>
 
               {/* Action Bar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
                 <div className="text-xs text-slate-600 font-medium">
                   {selectedStudentIds.size > 0 ? (
                     <span className="inline-flex items-center gap-1.5">
@@ -522,22 +536,22 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
                   type="button"
                   onClick={handleBulkEnroll}
                   disabled={isSaving || !selectedBatchId || selectedStudentIds.size === 0}
-                  className="course-admin-primary-btn w-full sm:w-auto"
+                  className="course-admin-primary-btn w-full sm:w-auto min-h-[42px] cursor-pointer"
                 >
                   <Users size={16} className={isSaving ? 'animate-spin' : ''} />
-                  {isSaving ? 'Enrolling...' : `Enroll Selected Students (${selectedStudentIds.size})`}
+                  <span>{isSaving ? 'Enrolling...' : `Enroll Selected Students (${selectedStudentIds.size})`}</span>
                 </button>
               </div>
             </div>
           ) : (
             /* Single Select Dropdown Option */
-            <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3 items-end">
-              <label className="course-admin-label flex-1 w-full">
+            <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+              <label className="course-admin-label flex-1 min-w-0 w-full">
                 Student
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="course-admin-select"
+                  className="course-admin-select w-full mt-1.5 truncate"
                 >
                   <option value="">Select student</option>
                   {availableUsers.map((user) => (
@@ -549,10 +563,10 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
               </label>
               <button
                 disabled={isSaving || !selectedBatchId || !selectedUserId}
-                className="course-admin-primary-btn w-full sm:w-auto"
+                className="course-admin-primary-btn w-full sm:w-auto min-h-[42px] cursor-pointer"
               >
                 <Users size={16} />
-                Enroll Single Student
+                <span>Enroll Single Student</span>
               </button>
             </form>
           )}
@@ -562,7 +576,7 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
         <form onSubmit={handleAdd} className="course-admin-assignment-form">
           <label className="course-admin-label course-admin-assignment-field">
             Instructor
-            <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} className="course-admin-select">
+            <select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} className="course-admin-select w-full mt-1.5 truncate">
               <option value="">Select instructor</option>
               {availableUsers.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -571,9 +585,9 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
               ))}
             </select>
           </label>
-          <button disabled={isSaving || !selectedBatchId || !selectedUserId} className="course-admin-primary-btn">
+          <button disabled={isSaving || !selectedBatchId || !selectedUserId} className="course-admin-primary-btn w-full sm:w-auto min-h-[42px] cursor-pointer">
             <Users size={16} />
-            Assign Instructor
+            <span>Assign Instructor</span>
           </button>
         </form>
       )}
@@ -589,60 +603,137 @@ export default function BatchAssignmentsPage({ mode = 'instructors' }) {
           icon={<Icon size={32} />}
         />
       ) : (
-        <div className="course-admin-table-wrap">
-          <div className="course-admin-table-scroll">
-            <table className="course-admin-table">
-              <thead>
-                <tr>
-                  <th className="px-5 py-3">User</th>
-                  <th className="px-5 py-3">Email</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignments.map((assignment) => {
-                  const person = isInstructorMode ? assignment.instructor : assignment.student;
-                  return (
-                    <tr key={assignment.id} className="course-admin-table-row">
-                      <td>
-                        <p className="course-admin-row-title">{userName(person)}</p>
-                        <p className="course-admin-row-meta">@{person?.username}</p>
-                      </td>
-                      <td className="course-admin-muted">{person?.email || 'No email'}</td>
-                      <td>
-                        <StatusBadge status={assignment.status} />
-                      </td>
-                      <td className="course-admin-actions">
-                        {isInstructorMode ? (
+        <div className="space-y-4 min-w-0">
+          {/* Mobile Cards (sm:hidden) */}
+          <div className="sm:hidden space-y-3">
+            {assignments.map((assignment) => {
+              const person = isInstructorMode ? assignment.instructor : assignment.student;
+              const initials = `${person?.first_name?.[0] || person?.username?.[0] || (isInstructorMode ? 'I' : 'S')}${person?.last_name?.[0] || ''}`.toUpperCase();
+
+              return (
+                <div key={assignment.id} className="course-admin-card">
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${isInstructorMode ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-indigo-50 text-indigo-700 border border-indigo-200'}`}>
+                        {initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-sm text-slate-900 truncate leading-snug">
+                          {userName(person)}
+                        </h4>
+                        <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                          @{person?.username}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <StatusBadge status={assignment.status} size="sm" />
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span className="text-slate-400 font-medium">Email:</span>
+                    <span className="font-medium text-slate-700 truncate max-w-[200px]" title={person?.email || ''}>
+                      {person?.email || 'No email'}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-end gap-2">
+                    {isInstructorMode ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateStatus(assignment, assignment.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')
+                        }
+                        className="course-admin-neutral-btn"
+                      >
+                        {assignment.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                      </button>
+                    ) : (
+                      <select
+                        value={assignment.status}
+                        onChange={(e) => updateStatus(assignment, e.target.value)}
+                        className="course-admin-inline-select min-h-[34px]"
+                      >
+                        {enrollmentStatuses.map((status) => (
+                          <option key={status}>{status}</option>
+                        ))}
+                      </select>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeAssignment(assignment)}
+                      className="course-admin-danger-btn"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop & Tablet Table (hidden sm:block) */}
+          <div className="hidden sm:block course-admin-table-wrap">
+            <div className="course-admin-table-scroll">
+              <table className="course-admin-table">
+                <thead>
+                  <tr>
+                    <th className="px-5 py-3">User</th>
+                    <th className="px-5 py-3">Email</th>
+                    <th className="px-5 py-3">Status</th>
+                    <th className="px-5 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assignments.map((assignment) => {
+                    const person = isInstructorMode ? assignment.instructor : assignment.student;
+                    return (
+                      <tr key={assignment.id} className="course-admin-table-row">
+                        <td>
+                          <p className="course-admin-row-title">{userName(person)}</p>
+                          <p className="course-admin-row-meta">@{person?.username}</p>
+                        </td>
+                        <td className="course-admin-muted">{person?.email || 'No email'}</td>
+                        <td>
+                          <StatusBadge status={assignment.status} />
+                        </td>
+                        <td className="course-admin-actions">
+                          {isInstructorMode ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateStatus(assignment, assignment.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')
+                              }
+                              className="course-admin-neutral-btn"
+                            >
+                              {assignment.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                            </button>
+                          ) : (
+                            <select
+                              value={assignment.status}
+                              onChange={(e) => updateStatus(assignment, e.target.value)}
+                              className="course-admin-inline-select"
+                            >
+                              {enrollmentStatuses.map((status) => (
+                                <option key={status}>{status}</option>
+                              ))}
+                            </select>
+                          )}
                           <button
-                            onClick={() =>
-                              updateStatus(assignment, assignment.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')
-                            }
-                            className="course-admin-neutral-btn"
+                            type="button"
+                            onClick={() => removeAssignment(assignment)}
+                            className="course-admin-danger-btn"
                           >
-                            {assignment.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                            Remove
                           </button>
-                        ) : (
-                          <select
-                            value={assignment.status}
-                            onChange={(e) => updateStatus(assignment, e.target.value)}
-                            className="course-admin-inline-select"
-                          >
-                            {enrollmentStatuses.map((status) => (
-                              <option key={status}>{status}</option>
-                            ))}
-                          </select>
-                        )}
-                        <button onClick={() => removeAssignment(assignment)} className="course-admin-danger-btn">
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

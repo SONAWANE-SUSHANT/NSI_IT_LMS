@@ -5,6 +5,7 @@ const {
   updateCourse,
   updateCourseStatus,
 } = require("../services/course.service");
+const courseAccessService = require("../services/courseAccess.service");
 
 const create = async (req, res) => {
   try {
@@ -33,10 +34,19 @@ const getAll = async (req, res) => {
       search,
     } = req.query;
 
-    const courses = await getCourses({
+    const filters = {
       status,
       search,
-    });
+    };
+
+    // If requester is an instructor or proxying as an instructor
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const allowedCourseIds = await courseAccessService.getInstructorCourseIds(instructorId);
+      filters.courseIds = allowedCourseIds;
+    }
+
+    const courses = await getCourses(filters);
 
     return res.status(200).json({
       success: true,
@@ -53,7 +63,20 @@ const getAll = async (req, res) => {
 
 const getOne = async (req, res) => {
   try {
-    const course = await getCourseById(req.params.id);
+    const courseId = req.params.id;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasCourseAccess(req.user, courseId, instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this course",
+        });
+      }
+    }
+
+    const course = await getCourseById(courseId);
 
     return res.status(200).json({
       success: true,

@@ -132,20 +132,31 @@ export default function BatchesPage() {
         <div>
           <div className="course-admin-kicker">
             <CalendarDays size={20} />
-            <span>Batches</span>
+            <span>Cohorts & Batches</span>
           </div>
           <h1 className="course-admin-title">Course Batches</h1>
           <p className="course-admin-subtitle">Organize and manage upcoming, active, and completed course cohorts.</p>
         </div>
-        <button onClick={loadBatches} disabled={isLoading || !selectedCourseId} className="course-admin-icon-btn">
+        <button
+          type="button"
+          onClick={loadBatches}
+          disabled={isLoading || !selectedCourseId}
+          className="course-admin-icon-btn min-h-[42px] cursor-pointer w-full sm:w-auto"
+          title="Refresh batches list"
+        >
           <RefreshCw size={17} className={isLoading ? 'animate-spin text-indigo-600' : ''} />
-          Refresh
+          <span>Refresh</span>
         </button>
       </div>
 
       <div className="course-admin-toolbar">
-        <label className="course-admin-label">Course
-          <select value={selectedCourseId} onChange={(e) => { setSelectedCourseId(e.target.value); resetForm(); }} className="course-admin-select">
+        <label className="course-admin-label w-full block">
+          Course
+          <select
+            value={selectedCourseId}
+            onChange={(e) => { setSelectedCourseId(e.target.value); resetForm(); }}
+            className="course-admin-select w-full mt-1.5"
+          >
             <option value="">Select a course</option>
             {courses.map((course) => (
               <option key={course.id} value={course.id}>
@@ -162,10 +173,10 @@ export default function BatchesPage() {
           <div className="course-admin-form">
             {editing && editing.batch_code && (
               <label className="course-admin-label">Batch Code (Auto-generated)
-                <input value={editing.batch_code} disabled className="course-admin-input bg-gray-50 opacity-80" />
+                <input value={editing.batch_code} disabled className="course-admin-input bg-slate-50 text-slate-500 opacity-90 cursor-not-allowed" />
               </label>
             )}
-            <label className="course-admin-label">Batch Name
+            <label className="course-admin-label">Batch Name *
               <input
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
@@ -175,8 +186,8 @@ export default function BatchesPage() {
                 className="course-admin-input"
               />
             </label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="course-admin-label">Start Date
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="course-admin-label">Start Date *
                 <input
                   type="date"
                   required
@@ -194,7 +205,7 @@ export default function BatchesPage() {
                 />
               </label>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-2">
               <label className="course-admin-label">Mode
                 <select
                   value={form.batch_mode}
@@ -239,58 +250,132 @@ export default function BatchesPage() {
           <div className="course-admin-form-actions">
             <button disabled={isSaving || !selectedCourseId} className="course-admin-primary-btn">
               <Plus size={16} />
-              {editing ? 'Save' : 'Create'}
+              {editing ? 'Save Batch' : 'Create Batch'}
             </button>
             {editing && <button type="button" onClick={resetForm} className="course-admin-secondary-btn">Cancel</button>}
           </div>
         </form>
 
-        {isLoading ? (
-          <LoadingState rows={6} />
-        ) : error ? (
-          <ErrorState title="Unable to load batches" message={error} onRetry={loadBatches} />
-        ) : batches.length === 0 ? (
-          <EmptyState title="No batches found" description="Select a course and create the first batch." icon={<CalendarDays size={32} />} />
-        ) : (
-          <div className="course-admin-table-wrap">
-            <div className="course-admin-table-scroll">
-              <table className="course-admin-table">
-                <thead>
-                  <tr>
-                    <th className="px-5 py-3">Batch</th>
-                    <th className="px-5 py-3">Mode & Schedule</th>
-                    <th className="px-5 py-3">Dates</th>
-                    <th className="px-5 py-3">Status</th>
-                    <th className="px-5 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {batches.map((batch) => (
-                    <tr key={batch.id} className="course-admin-table-row">
-                      <td>
-                        <p className="course-admin-row-title">{batch.name}</p>
-                        <p className="course-admin-row-meta">{batch.batch_code}</p>
-                      </td>
-                      <td className="course-admin-muted text-xs">
-                        <span className="font-semibold">{batch.batch_mode || 'ONLINE'}</span> • {batch.batch_time || 'MORNING'} • {batch.batch_schedule || 'WEEKDAYS'}
-                      </td>
-                      <td className="course-admin-muted text-xs">
-                        {batch.start_date || 'No start'} to {batch.end_date || 'Ongoing'}
-                      </td>
-                      <td><StatusBadge status={batch.status} /></td>
-                      <td className="course-admin-actions">
-                        <button onClick={() => handleEdit(batch)} className="course-admin-text-btn">Edit</button>
-                        <select value={batch.status} onChange={(e) => setStatus(batch, e.target.value)} className="course-admin-inline-select">
-                          {batchStatuses.map((st) => <option key={st} value={st}>{st}</option>)}
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <div className="space-y-4 min-w-0">
+          {isLoading ? (
+            <LoadingState rows={6} />
+          ) : error ? (
+            <ErrorState title="Unable to load batches" message={error} onRetry={loadBatches} />
+          ) : batches.length === 0 ? (
+            <EmptyState title="No batches found" description="Select a course and create the first batch." icon={<CalendarDays size={32} />} />
+          ) : (
+            <>
+              {/* Mobile Card List (sm:hidden) */}
+              <div className="sm:hidden space-y-3">
+                {batches.map((batch) => (
+                  <div key={batch.id} className="course-admin-card">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        {batch.batch_code && (
+                          <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2 py-0.5 rounded-md mb-1.5">
+                            {batch.batch_code}
+                          </span>
+                        )}
+                        <h3 className="font-bold text-sm text-slate-900 leading-snug">
+                          {batch.name}
+                        </h3>
+                      </div>
+                      <StatusBadge status={batch.status} size="sm" />
+                    </div>
+
+                    <div className="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
+                      <span className="font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                        {batch.batch_mode || 'ONLINE'}
+                      </span>
+                      <span className="font-medium text-slate-400">&bull;</span>
+                      <span className="font-medium text-slate-600">
+                        {batch.batch_time || 'MORNING'}
+                      </span>
+                      <span className="font-medium text-slate-400">&bull;</span>
+                      <span className="font-medium text-slate-600">
+                        {batch.batch_schedule || 'WEEKDAYS'}
+                      </span>
+                    </div>
+
+                    <div className="mt-2 text-xs text-slate-500 flex items-center justify-between">
+                      <span className="text-slate-400 font-medium">Timeline:</span>
+                      <span className="font-semibold text-slate-700">
+                        {batch.start_date || 'No start'} &rarr; {batch.end_date || 'Ongoing'}
+                      </span>
+                    </div>
+
+                    {batch.description && (
+                      <p className="mt-1.5 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {batch.description}
+                      </p>
+                    )}
+
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(batch)}
+                        className="course-admin-text-btn"
+                      >
+                        Edit
+                      </button>
+                      <select
+                        value={batch.status}
+                        onChange={(e) => setStatus(batch, e.target.value)}
+                        className="course-admin-inline-select min-h-[34px]"
+                      >
+                        {batchStatuses.map((st) => (
+                          <option key={st} value={st}>
+                            {st}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tablet & Desktop Table View (hidden sm:block) */}
+              <div className="hidden sm:block course-admin-table-wrap">
+                <div className="course-admin-table-scroll">
+                  <table className="course-admin-table">
+                    <thead>
+                      <tr>
+                        <th className="px-5 py-3">Batch</th>
+                        <th className="px-5 py-3">Mode &amp; Schedule</th>
+                        <th className="px-5 py-3">Dates</th>
+                        <th className="px-5 py-3">Status</th>
+                        <th className="px-5 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {batches.map((batch) => (
+                        <tr key={batch.id} className="course-admin-table-row">
+                          <td>
+                            <p className="course-admin-row-title">{batch.name}</p>
+                            <p className="course-admin-row-meta">{batch.batch_code}</p>
+                          </td>
+                          <td className="course-admin-muted text-xs">
+                            <span className="font-semibold text-slate-800">{batch.batch_mode || 'ONLINE'}</span> &bull; {batch.batch_time || 'MORNING'} &bull; {batch.batch_schedule || 'WEEKDAYS'}
+                          </td>
+                          <td className="course-admin-muted text-xs">
+                            {batch.start_date || 'No start'} to {batch.end_date || 'Ongoing'}
+                          </td>
+                          <td><StatusBadge status={batch.status} /></td>
+                          <td className="course-admin-actions">
+                            <button onClick={() => handleEdit(batch)} className="course-admin-text-btn">Edit</button>
+                            <select value={batch.status} onChange={(e) => setStatus(batch, e.target.value)} className="course-admin-inline-select">
+                              {batchStatuses.map((st) => <option key={st} value={st}>{st}</option>)}
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

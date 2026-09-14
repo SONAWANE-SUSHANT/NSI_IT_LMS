@@ -247,7 +247,7 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
   return (
     <div className="space-y-6">
       {/* ── Top Header Bar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#ECEEF2] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-xs shrink-0"
@@ -256,45 +256,45 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span
                 className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border"
                 style={{ background: ADMIN_LIGHT, color: ADMIN_DARK, borderColor: '#c7cef5' }}
               >
                 Assessment Center
               </span>
-              <span className="text-xs text-slate-400 font-medium">Production Support & IT LMS</span>
+              <span className="text-xs text-slate-400 font-medium hidden sm:inline">Production Support & IT LMS</span>
             </div>
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight mt-0.5">
               Quiz & Assessment Management
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 self-end sm:self-center">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto justify-start sm:justify-end">
           <button
             onClick={loadData}
             title="Refresh quizzes"
             disabled={loading}
-            className="p-2 text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs"
+            className="p-2 sm:px-2.5 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-xl border border-slate-300 transition-colors shadow-2xs min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-indigo-600' : ''}`} />
           </button>
           <button
             type="button"
             onClick={() => setShowCsvModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-2xs hover:border-[#3c4cb8] hover:text-[#3c4cb8]"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition-all shadow-2xs hover:border-[#3c4cb8] hover:text-[#3c4cb8] min-h-[40px] cursor-pointer flex-1 sm:flex-none"
           >
             <FileSpreadsheet className="w-4 h-4 text-[#3c4cb8]" />
-            <span>Upload CSV to Create Test</span>
+            <span>Upload CSV</span>
           </button>
           <button
             onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs hover:opacity-95"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs hover:opacity-95 min-h-[40px] cursor-pointer flex-1 sm:flex-none"
             style={{ background: ADMIN_PRIMARY }}
           >
             <Plus className="w-4 h-4" />
-            <span>+ Create Assessment</span>
+            <span>Create Assessment</span>
           </button>
         </div>
       </div>
@@ -307,7 +307,7 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
       )}
 
       {/* ── Filters & Search Controls ── */}
-      <div className="bg-white p-4 rounded-2xl border border-[#ECEEF2] shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -316,32 +316,34 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
             placeholder="Search quizzes by title..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#3c4cb8] focus:ring-1 focus:ring-[#3c4cb8]"
+            className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#3c4cb8] focus:ring-1 focus:ring-[#3c4cb8] min-h-[40px] bg-slate-50/50"
           />
         </form>
 
         {/* Filter Dropdowns */}
-        <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Status:</span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto flex-wrap">
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold shrink-0">
+              <Filter className="w-3.5 h-3.5" />
+              <span>Status:</span>
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-[#3c4cb8] min-h-[40px] cursor-pointer shadow-2xs"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="PUBLISHED">Published</option>
+              <option value="CLOSED">Closed</option>
+            </select>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-none focus:border-[#3c4cb8]"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="CLOSED">Closed</option>
-          </select>
 
           {courses.length > 0 && (
             <select
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-none focus:border-[#3c4cb8] max-w-[200px] truncate"
+              className="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-[#3c4cb8] max-w-full sm:max-w-[220px] truncate min-h-[40px] cursor-pointer shadow-2xs"
             >
               <option value="ALL">All Courses</option>
               {courses.map((c) => (
@@ -354,8 +356,21 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
         </div>
       </div>
 
-      {/* ── Quizzes Table ── */}
-      <div className="bg-white rounded-2xl border border-[#ECEEF2] shadow-xs overflow-hidden">
+      {/* ── No Assigned Courses Banner ── */}
+      {!loading && courses.length === 0 && !isViewingAsAdmin && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-xs font-bold text-amber-900">No Assigned Courses</h4>
+            <p className="text-xs text-amber-700 mt-0.5">
+              You are currently not assigned to any courses. You can only view and manage assessments for courses or batches you are assigned to teach.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Quizzes Container ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
             <RefreshCw className="w-6 h-6 text-[#3c4cb8] animate-spin" />
@@ -382,150 +397,285 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
             </button>
           </div>
         ) : (
-          <div className="table-container overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-xs text-slate-600 border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/80 font-bold text-slate-700 uppercase text-[11px] tracking-wider">
-                  <th className="py-3.5 px-4">Quiz</th>
-                  <th className="py-3.5 px-4">Course & Module</th>
-                  <th className="py-3.5 px-4">Questions & Marks</th>
-                  <th className="py-3.5 px-4">Attempts Allowed</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredQuizzes.map((quiz) => (
-                  <tr key={quiz.id} className="hover:bg-slate-50/60 transition-colors">
-                    {/* Quiz title & desc */}
-                    <td className="py-4 px-4">
-                      <div>
-                        <span className="font-bold text-slate-900 text-[13px] block">
-                          {quiz.title}
-                        </span>
-                        {quiz.description && (
-                          <p className="text-slate-400 text-[11px] truncate max-w-xs mt-0.5">
-                            {quiz.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
-                          {quiz.duration_minutes ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-slate-400" />
-                              {quiz.duration_minutes} mins
-                            </span>
-                          ) : (
-                            <span>No time limit</span>
-                          )}
-                          {quiz.passing_marks && (
-                            <span>Pass: {Number(quiz.passing_marks)} marks</span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Course & Module */}
-                    <td className="py-4 px-4">
-                      <span className="px-2 py-1 rounded-md bg-indigo-50 text-indigo-800 text-[11px] font-bold block max-w-xs truncate">
+          <>
+            {/* ── Mobile & Tablet Assessment Cards (lg:hidden) ── */}
+            <div className="lg:hidden divide-y divide-slate-100">
+              {filteredQuizzes.map((quiz) => (
+                <div key={quiz.id} className="p-4 space-y-3 hover:bg-slate-50/50 transition-colors">
+                  {/* Header: Course/Module Badge & Status Badge */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="min-w-0 flex-1 flex flex-wrap items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-800 text-[11px] font-bold truncate max-w-full sm:max-w-xs">
                         {quiz.course?.name || quiz.module?.course?.name || quiz.session?.title || 'General Course'}
                       </span>
                       {(quiz.module?.name || quiz.session?.module?.name) && (
-                        <span className="text-[11px] font-semibold text-slate-600 block mt-1 truncate max-w-xs">
-                          {quiz.module?.name || quiz.session?.module?.name}
+                        <span className="text-[11px] font-semibold text-slate-500 truncate max-w-full sm:max-w-xs">
+                          &bull; {quiz.module?.name || quiz.session?.module?.name}
                         </span>
                       )}
-                    </td>
+                    </div>
+                    <div className="shrink-0">
+                      {getStatusBadge(quiz.status)}
+                    </div>
+                  </div>
 
-                    {/* Questions & Marks */}
-                    <td className="py-4 px-4">
-                      <div className="space-y-0.5">
-                        <span className="font-bold text-slate-800 text-[12px] block">
-                          {quiz.question_count || 0} Questions • {Number(quiz.total_marks || 0)} Total Marks
+                  {/* Quiz Title & Description */}
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm leading-snug break-words">
+                      {quiz.title}
+                    </h3>
+                    {quiz.description && (
+                      <p className="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">
+                        {quiz.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Metrics Row: Duration, Pass Marks, Questions, Attempts */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2.5 border-t border-slate-100 text-xs">
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium">
+                        {quiz.duration_minutes ? `${quiz.duration_minutes} mins` : 'No time limit'}
+                      </span>
+                      {quiz.passing_marks && (
+                        <span className="text-slate-400 text-[11px]">
+                          (Pass: {Number(quiz.passing_marks)})
                         </span>
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                          <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold">
-                            {quiz.mcq_count || 0} MCQ
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-semibold">
-                            {quiz.coding_count || 0} Coding
-                          </span>
-                        </div>
-                      </div>
-                    </td>
+                      )}
+                    </div>
 
-                    {/* Max attempts */}
-                    <td className="py-4 px-4">
-                      <span className="text-slate-700 font-semibold">
+                    <div className="flex items-center gap-1.5 flex-wrap text-slate-700">
+                      <span className="font-bold text-slate-800">
+                        {quiz.question_count || 0} Questions
+                      </span>
+                      <span className="text-slate-400">&bull;</span>
+                      <span className="font-semibold text-slate-700">
+                        {Number(quiz.total_marks || 0)} Marks
+                      </span>
+                      <div className="flex items-center gap-1 ml-auto sm:ml-0">
+                        <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-bold">
+                          {quiz.mcq_count || 0} MCQ
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                          {quiz.coding_count || 0} Code
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-1.5 text-slate-600">
+                      <span className="text-slate-400 text-[11px]">Attempts:</span>
+                      <span className="font-semibold text-slate-800 text-xs">
                         {quiz.max_attempts} {quiz.max_attempts === 1 ? 'attempt' : 'attempts'}
                       </span>
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Status */}
-                    <td className="py-4 px-4">{getStatusBadge(quiz.status)}</td>
+                  {/* Action Buttons Footer */}
+                  <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`${basePath}/quizzes/${quiz.id}/attempts`)}
+                      title="View Student Attempts"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition min-h-[38px] cursor-pointer flex-1 sm:flex-initial"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Attempts</span>
+                    </button>
 
-                    {/* Actions */}
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {/* View Attempts */}
-                        <button
-                          type="button"
-                          onClick={() => navigate(`${basePath}/quizzes/${quiz.id}/attempts`)}
-                          title="View Student Attempts"
-                          className="p-1.5 text-slate-600 hover:text-[#3c4cb8] hover:bg-slate-100 rounded-lg transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`${basePath}/quizzes/builder/${quiz.id}`)}
+                      title="Open Quiz & Question Builder"
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-xs font-semibold text-indigo-700 transition min-h-[38px] cursor-pointer flex-1 sm:flex-initial"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>Builder</span>
+                    </button>
 
-                        {/* Edit / Build */}
-                        <button
-                          type="button"
-                          onClick={() => navigate(`${basePath}/quizzes/builder/${quiz.id}`)}
-                          title="Open Quiz & Question Builder"
-                          className="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                    {quiz.status === 'DRAFT' && (
+                      <button
+                        type="button"
+                        onClick={() => handlePublish(quiz.id)}
+                        title="Verify & Publish Quiz"
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-emerald-700 transition min-h-[38px] cursor-pointer flex-1 sm:flex-initial"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        <span>Publish</span>
+                      </button>
+                    )}
 
-                        {/* Publish (if Draft) */}
-                        {quiz.status === 'DRAFT' && (
-                          <button
-                            type="button"
-                            onClick={() => handlePublish(quiz.id)}
-                            title="Verify & Publish Quiz"
-                            className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                        )}
+                    {quiz.status === 'PUBLISHED' && (
+                      <button
+                        type="button"
+                        onClick={() => handleClose(quiz.id)}
+                        title="Close Quiz"
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-700 transition min-h-[38px] cursor-pointer flex-1 sm:flex-initial"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Close</span>
+                      </button>
+                    )}
 
-                        {/* Close (if Published) */}
-                        {quiz.status === 'PUBLISHED' && (
-                          <button
-                            type="button"
-                            onClick={() => handleClose(quiz.id)}
-                            title="Close Quiz"
-                            className="p-1.5 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(quiz.id)}
+                      title="Delete Quiz"
+                      className="inline-flex items-center justify-center p-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 transition min-h-[38px] min-w-[38px] cursor-pointer ml-auto sm:ml-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                        {/* Delete */}
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(quiz.id)}
-                          title="Delete Quiz"
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+            {/* ── Desktop Quizzes Table (hidden lg:block) ── */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-600 border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/80 font-bold text-slate-700 uppercase text-[11px] tracking-wider">
+                    <th className="py-3.5 px-4">Quiz</th>
+                    <th className="py-3.5 px-4">Course &amp; Module</th>
+                    <th className="py-3.5 px-4">Questions &amp; Marks</th>
+                    <th className="py-3.5 px-4">Attempts Allowed</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {filteredQuizzes.map((quiz) => (
+                    <tr key={quiz.id} className="hover:bg-slate-50/60 transition-colors">
+                      {/* Quiz title & desc */}
+                      <td className="py-4 px-4">
+                        <div>
+                          <span className="font-bold text-slate-900 text-[13px] block">
+                            {quiz.title}
+                          </span>
+                          {quiz.description && (
+                            <p className="text-slate-400 text-[11px] truncate max-w-xs mt-0.5">
+                              {quiz.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
+                            {quiz.duration_minutes ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-400" />
+                                {quiz.duration_minutes} mins
+                              </span>
+                            ) : (
+                              <span>No time limit</span>
+                            )}
+                            {quiz.passing_marks && (
+                              <span>Pass: {Number(quiz.passing_marks)} marks</span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Course & Module */}
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 rounded-md bg-indigo-50 text-indigo-800 text-[11px] font-bold block max-w-xs truncate">
+                          {quiz.course?.name || quiz.module?.course?.name || quiz.session?.title || 'General Course'}
+                        </span>
+                        {(quiz.module?.name || quiz.session?.module?.name) && (
+                          <span className="text-[11px] font-semibold text-slate-600 block mt-1 truncate max-w-xs">
+                            {quiz.module?.name || quiz.session?.module?.name}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Questions & Marks */}
+                      <td className="py-4 px-4">
+                        <div className="space-y-0.5">
+                          <span className="font-bold text-slate-800 text-[12px] block">
+                            {quiz.question_count || 0} Questions • {Number(quiz.total_marks || 0)} Total Marks
+                          </span>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                            <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold">
+                              {quiz.mcq_count || 0} MCQ
+                            </span>
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-semibold">
+                              {quiz.coding_count || 0} Coding
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Max attempts */}
+                      <td className="py-4 px-4">
+                        <span className="text-slate-700 font-semibold">
+                          {quiz.max_attempts} {quiz.max_attempts === 1 ? 'attempt' : 'attempts'}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-4 px-4">{getStatusBadge(quiz.status)}</td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* View Attempts */}
+                          <button
+                            type="button"
+                            onClick={() => navigate(`${basePath}/quizzes/${quiz.id}/attempts`)}
+                            title="View Student Attempts"
+                            className="p-1.5 text-slate-600 hover:text-[#3c4cb8] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+
+                          {/* Edit / Build */}
+                          <button
+                            type="button"
+                            onClick={() => navigate(`${basePath}/quizzes/builder/${quiz.id}`)}
+                            title="Open Quiz & Question Builder"
+                            className="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+
+                          {/* Publish (if Draft) */}
+                          {quiz.status === 'DRAFT' && (
+                            <button
+                              type="button"
+                              onClick={() => handlePublish(quiz.id)}
+                              title="Verify & Publish Quiz"
+                              className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* Close (if Published) */}
+                          {quiz.status === 'PUBLISHED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleClose(quiz.id)}
+                              title="Close Quiz"
+                              className="p-1.5 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* Delete */}
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(quiz.id)}
+                            title="Delete Quiz"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -582,19 +732,25 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Target Course <span className="text-rose-500">*</span>
                 </label>
-                <select
-                  value={newQuiz.course_id}
-                  onChange={handleCourseChange}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#3c4cb8] bg-white"
-                  required
-                >
-                  <option value="">Select a course...</option>
-                  {courses.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} {c.code ? `(${c.code})` : ''}
-                    </option>
-                  ))}
-                </select>
+                {courses.length === 0 ? (
+                  <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                    No assigned courses found. You can only create assessments for courses you are assigned to teach.
+                  </p>
+                ) : (
+                  <select
+                    value={newQuiz.course_id}
+                    onChange={handleCourseChange}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#3c4cb8] bg-white"
+                    required
+                  >
+                    <option value="">Select a course...</option>
+                    {courses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} {c.code ? `(${c.code})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Module Selector */}

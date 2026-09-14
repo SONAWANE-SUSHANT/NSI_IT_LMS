@@ -1,15 +1,13 @@
 import { API_BASE_URL } from '../config/apiConfig';
-const TOKEN_KEY = 'nsi_lms_token';
-
-function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
-}
+import { getAuthToken, getViewingInstructorId } from '../utils/token';
 
 function getAuthHeaders() {
-  const token = getToken();
+  const token = getAuthToken();
+  const viewingInstructorId = getViewingInstructorId();
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(viewingInstructorId ? { 'x-instructor-id': String(viewingInstructorId) } : {}),
   };
 }
 
@@ -32,7 +30,10 @@ async function request(path, options = {}, defaultMsg = 'Request failed') {
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
-      headers: getAuthHeaders(),
+      headers: {
+        ...getAuthHeaders(),
+        ...(options.headers || {}),
+      },
     });
     return handleResponse(response, defaultMsg);
   } catch (error) {
@@ -54,7 +55,7 @@ function queryString(filters = {}) {
 }
 
 export const getCourses = (filters) =>
-  request(`/admin/courses${queryString(filters)}`, {}, 'Failed to load courses');
+  request(`/courses${queryString(filters)}`, {}, 'Failed to load courses');
 
 export const createCourse = (data) =>
   request('/admin/courses', {

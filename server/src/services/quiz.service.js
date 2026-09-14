@@ -17,7 +17,7 @@ const { parseQuizCsv, getSampleCsvString } = require("../utils/quizCsvParser");
 /**
  * List all quizzes with optional filters
  */
-const listQuizzes = async ({ sessionId, moduleId, courseId, status, search }) => {
+const listQuizzes = async ({ sessionId, moduleId, courseId, status, search, allowedCourseIds, instructorId }) => {
   const where = {};
   if (sessionId) where.session_id = Number(sessionId);
   if (moduleId) where.module_id = Number(moduleId);
@@ -25,6 +25,38 @@ const listQuizzes = async ({ sessionId, moduleId, courseId, status, search }) =>
   if (status) where.status = status;
   if (search) {
     where.title = { [Op.like]: `%${search.trim()}%` };
+  }
+
+  if (Array.isArray(allowedCourseIds)) {
+    const allowedModules =
+      allowedCourseIds.length > 0
+        ? await CourseModule.findAll({
+            where: { course_id: { [Op.in]: allowedCourseIds } },
+            attributes: ["id"],
+          })
+        : [];
+    const allowedModuleIds = allowedModules.map((m) => m.id);
+
+    const allowedSessions =
+      allowedModuleIds.length > 0
+        ? await Lecture.findAll({
+            where: { module_id: { [Op.in]: allowedModuleIds } },
+            attributes: ["id"],
+          })
+        : [];
+    const allowedSessionIds = allowedSessions.map((s) => s.id);
+
+    const orConditions = [];
+    if (allowedCourseIds.length > 0) orConditions.push({ course_id: { [Op.in]: allowedCourseIds } });
+    if (allowedModuleIds.length > 0) orConditions.push({ module_id: { [Op.in]: allowedModuleIds } });
+    if (allowedSessionIds.length > 0) orConditions.push({ session_id: { [Op.in]: allowedSessionIds } });
+    if (instructorId) orConditions.push({ created_by: instructorId });
+
+    if (orConditions.length === 0) {
+      return [];
+    }
+
+    where[Op.and] = where[Op.and] ? [...where[Op.and], { [Op.or]: orConditions }] : [{ [Op.or]: orConditions }];
   }
 
   const quizzes = await Quiz.findAll({

@@ -132,31 +132,31 @@ export default function AdminDashboard() {
   return (
     <div className="admin-page admin-dashboard-page">
       {/* Welcome Banner */}
-      <div className="admin-dashboard-hero bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
-        <div className="admin-dashboard-hero-art absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-8">
-          <Sparkles size={200} />
+      <div className="admin-dashboard-hero bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-5 sm:p-7 lg:p-8 text-white shadow-lg relative overflow-hidden w-full">
+        <div className="admin-dashboard-hero-art absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none hidden sm:flex items-center pr-6 lg:pr-8">
+          <Sparkles size={180} />
         </div>
 
-        <div className="admin-dashboard-hero-content relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="admin-eyebrow inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold mb-3">
+        <div className="admin-dashboard-hero-content relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="admin-eyebrow inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-[11px] sm:text-xs font-semibold mb-2.5">
               <span>NSI IT LMS Administration Hub</span>
             </div>
-            <h1 className="admin-dashboard-title text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="admin-dashboard-title text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
               Admin Dashboard
             </h1>
-            <p className="admin-dashboard-subtitle text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+            <p className="admin-dashboard-subtitle text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
               Monitor and manage the NSI IT LMS platform. Welcome back,{' '}
-              <strong className="text-white">{fullName}</strong>.
+              <strong className="text-white font-bold">{fullName}</strong>.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
+          <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
             <button
               type="button"
               onClick={fetchDashboardData}
               disabled={isLoading}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white text-xs font-semibold backdrop-blur-xs transition disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white text-xs font-semibold backdrop-blur-xs transition disabled:opacity-50 min-h-[40px] border border-white/10 shadow-xs cursor-pointer"
               title="Refresh Dashboard"
             >
               <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
@@ -166,16 +166,16 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Statistics Cards Grid */}
-      <div>
-        <div className="admin-section-heading flex items-center justify-between mb-4">
-          <h2 className="text-base font-bold text-slate-800 tracking-tight">
+      {/* Statistics Cards Grid: 3 cols on lg, 2 cols on tablet, 1 col on mobile */}
+      <div className="w-full">
+        <div className="admin-section-heading flex flex-col xs:flex-row xs:items-center justify-between gap-1 sm:gap-4 mb-3.5">
+          <h2 className="text-base font-bold text-slate-900 tracking-tight">
             Platform Key Metrics
           </h2>
           <span className="text-xs text-slate-400 font-medium">Real-time database records</span>
         </div>
 
-        <div className="admin-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="admin-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full">
           {/* Total Students */}
           <StatCard
             title="Total Students"
@@ -240,94 +240,94 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="admin-panel admin-quick-actions bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      {/* Quick Actions: 4 cols on lg, 2 cols on tablet, 1 col on mobile */}
+      <div className="admin-panel admin-quick-actions bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs w-full">
         <h2 className="text-base font-bold text-slate-900 tracking-tight mb-4">
           Quick Actions
         </h2>
 
-        <div className="admin-actions-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="admin-actions-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
           <button
             type="button"
             onClick={() => setAddModalConfig({ isOpen: true, roleType: 'student' })}
-            className="admin-action-card admin-action-card-blue flex items-center justify-between p-4 rounded-xl border border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 text-left transition group shadow-2xs"
+            className="admin-action-card admin-action-card-blue flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-blue-200/90 bg-blue-50/40 hover:bg-blue-50/80 hover:border-blue-300 text-left transition-all duration-200 group shadow-2xs hover:shadow-xs min-h-[72px] sm:min-h-[76px] w-full min-w-0"
           >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
                 <UserPlus size={18} />
               </div>
-              <div>
-                <p className="text-xs font-bold text-blue-950">+ Add Student</p>
-                <p className="text-[11px] text-blue-700">Create student account</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-bold text-blue-950 truncate">+ Add Student</p>
+                <p className="text-[11px] text-blue-700 truncate">Create student account</p>
               </div>
             </div>
-            <ArrowRight size={16} className="text-blue-500 group-hover:translate-x-1 transition" />
+            <ArrowRight size={16} className="text-blue-500 group-hover:translate-x-1 transition shrink-0 ml-2" />
           </button>
 
           <button
             type="button"
             onClick={() => setAddModalConfig({ isOpen: true, roleType: 'instructor' })}
-            className="admin-action-card admin-action-card-teal flex items-center justify-between p-4 rounded-xl border border-teal-200 bg-teal-50/50 hover:bg-teal-50 hover:border-teal-300 text-left transition group shadow-2xs"
+            className="admin-action-card admin-action-card-teal flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-teal-200/90 bg-teal-50/40 hover:bg-teal-50/80 hover:border-teal-300 text-left transition-all duration-200 group shadow-2xs hover:shadow-xs min-h-[72px] sm:min-h-[76px] w-full min-w-0"
           >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-teal-600 text-white flex items-center justify-center shadow-xs">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
                 <UserPlus size={18} />
               </div>
-              <div>
-                <p className="text-xs font-bold text-teal-950">+ Add Instructor</p>
-                <p className="text-[11px] text-teal-700">Create instructor account</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-bold text-teal-950">+ Add Instructor</p>
+                <p className="text-[11px] text-teal-700 truncate">Create instructor account</p>
               </div>
             </div>
-            <ArrowRight size={16} className="text-teal-500 group-hover:translate-x-1 transition" />
+            <ArrowRight size={16} className="text-teal-500 group-hover:translate-x-1 transition shrink-0 ml-2" />
           </button>
 
           <Link
             to="/admin/students"
-            className="admin-action-card flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-left transition group shadow-2xs"
+            className="admin-action-card flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-slate-100 hover:border-slate-300 text-left transition-all duration-200 group shadow-2xs hover:shadow-xs min-h-[72px] sm:min-h-[76px] w-full min-w-0"
           >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-slate-800 text-white flex items-center justify-center shadow-xs">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-slate-800 text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
                 <GraduationCap size={18} />
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900">View Students</p>
-                <p className="text-[11px] text-slate-500">Manage all students</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">View Students</p>
+                <p className="text-[11px] text-slate-500 truncate">Manage all students</p>
               </div>
             </div>
-            <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 transition" />
+            <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 transition shrink-0 ml-2" />
           </Link>
 
           <Link
             to="/admin/instructors"
-            className="admin-action-card flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-left transition group shadow-2xs"
+            className="admin-action-card flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-slate-100 hover:border-slate-300 text-left transition-all duration-200 group shadow-2xs hover:shadow-xs min-h-[72px] sm:min-h-[76px] w-full min-w-0"
           >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-slate-800 text-white flex items-center justify-center shadow-xs">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-slate-800 text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
                 <Users size={18} />
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900">View Instructors</p>
-                <p className="text-[11px] text-slate-500">Manage faculty members</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">View Instructors</p>
+                <p className="text-[11px] text-slate-500 truncate">Manage faculty members</p>
               </div>
             </div>
-            <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 transition" />
+            <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 transition shrink-0 ml-2" />
           </Link>
         </div>
       </div>
 
       {/* Recent Users Table */}
-      <div className="admin-panel admin-recent-users space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="admin-panel admin-recent-users bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs w-full space-y-4">
+        <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-4">
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight">
               Recent Users
             </h2>
-            <p className="text-xs text-slate-500">Recently registered platform accounts</p>
+            <p className="text-xs text-slate-500 mt-0.5">Recently registered platform accounts</p>
           </div>
 
           <Link
             to="/admin/students"
-            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition"
+            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition shrink-0 self-start xs:self-auto"
           >
             <span>View All</span>
             <ArrowRight size={13} />

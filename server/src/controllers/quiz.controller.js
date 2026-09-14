@@ -1,4 +1,5 @@
 const quizService = require("../services/quiz.service");
+const courseAccessService = require("../services/courseAccess.service");
 const { getSupportedLmsLanguages, fetchAvailableLanguages } = require("../config/judge0Languages");
 
 const getSupportedLanguages = async (req, res) => {
@@ -23,7 +24,22 @@ const getSupportedLanguages = async (req, res) => {
 const listQuizzes = async (req, res) => {
   try {
     const { sessionId, moduleId, courseId, status, search } = req.query;
-    const quizzes = await quizService.listQuizzes({ sessionId, moduleId, courseId, status, search });
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    let allowedCourseIds = null;
+    if (instructorId) {
+      allowedCourseIds = await courseAccessService.getInstructorCourseIds(instructorId);
+    }
+
+    const quizzes = await quizService.listQuizzes({
+      sessionId,
+      moduleId,
+      courseId,
+      status,
+      search,
+      allowedCourseIds,
+      instructorId,
+    });
     return res.json({
       success: true,
       count: quizzes.length,
@@ -40,6 +56,18 @@ const listQuizzes = async (req, res) => {
 const getQuizById = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this quiz",
+        });
+      }
+    }
+
     const quiz = await quizService.getQuizById(Number(quizId), { includeCorrect: true });
     return res.json({
       success: true,
@@ -59,6 +87,27 @@ const createQuiz = async (req, res) => {
     const rawSessionId = req.body.session_id || req.body.sessionId || req.params.sessionId;
     const rawModuleId = req.body.module_id || req.body.moduleId;
     const rawCourseId = req.body.course_id || req.body.courseId;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      if (rawCourseId) {
+        const hasAccess = await courseAccessService.hasCourseAccess(req.user, Number(rawCourseId), instructorId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not authorized to create assessments for this course",
+          });
+        }
+      } else if (rawModuleId) {
+        const hasAccess = await courseAccessService.hasModuleAccess(req.user, Number(rawModuleId), instructorId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not authorized to create assessments for this module",
+          });
+        }
+      }
+    }
 
     const quiz = await quizService.createQuiz({
       sessionId: rawSessionId ? Number(rawSessionId) : null,
@@ -91,6 +140,18 @@ const createQuiz = async (req, res) => {
 const updateQuiz = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to edit this quiz",
+        });
+      }
+    }
+
     const quiz = await quizService.updateQuiz(Number(quizId), req.body, req.user?.id);
     return res.json({
       success: true,
@@ -109,6 +170,18 @@ const updateQuiz = async (req, res) => {
 const deleteQuiz = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to delete this quiz",
+        });
+      }
+    }
+
     const result = await quizService.deleteQuiz(Number(quizId));
     return res.json(result);
   } catch (error) {
@@ -123,6 +196,18 @@ const deleteQuiz = async (req, res) => {
 const publishQuiz = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to publish this quiz",
+        });
+      }
+    }
+
     const quiz = await quizService.publishQuiz(Number(quizId), req.user?.id);
     return res.json({
       success: true,
@@ -141,6 +226,18 @@ const publishQuiz = async (req, res) => {
 const closeQuiz = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to close this quiz",
+        });
+      }
+    }
+
     const quiz = await quizService.closeQuiz(Number(quizId), req.user?.id);
     return res.json({
       success: true,
@@ -159,6 +256,18 @@ const closeQuiz = async (req, res) => {
 const addQuestion = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to modify questions for this quiz",
+        });
+      }
+    }
+
     const question = await quizService.addQuestion({
       quizId: Number(quizId),
       question_type: req.body.question_type,
@@ -223,6 +332,18 @@ const deleteQuestion = async (req, res) => {
 const reorderQuestions = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to reorder questions for this quiz",
+        });
+      }
+    }
+
     const { orderList } = req.body;
     const result = await quizService.reorderQuestions(Number(quizId), orderList);
     return res.json(result);
@@ -295,6 +416,18 @@ const deleteOption = async (req, res) => {
 const getQuizAttempts = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to view attempts for this quiz",
+        });
+      }
+    }
+
     const result = await quizService.getQuizAttempts(Number(quizId));
     return res.json({
       success: true,
@@ -332,6 +465,27 @@ const createQuizFromCsv = async (req, res) => {
     const rawModuleId = req.body.module_id || req.body.moduleId;
     const rawCourseId = req.body.course_id || req.body.courseId;
 
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      if (rawCourseId) {
+        const hasAccess = await courseAccessService.hasCourseAccess(req.user, Number(rawCourseId), instructorId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not authorized to create assessments for this course",
+          });
+        }
+      } else if (rawModuleId) {
+        const hasAccess = await courseAccessService.hasModuleAccess(req.user, Number(rawModuleId), instructorId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not authorized to create assessments for this module",
+          });
+        }
+      }
+    }
+
     const quiz = await quizService.createQuizFromCsv({
       sessionId: rawSessionId ? Number(rawSessionId) : null,
       moduleId: rawModuleId ? Number(rawModuleId) : null,
@@ -363,6 +517,18 @@ const createQuizFromCsv = async (req, res) => {
 const importQuestionsFromCsv = async (req, res) => {
   try {
     const { quizId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasQuizAccess(req.user, Number(quizId), instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to import questions into this quiz",
+        });
+      }
+    }
+
     const quiz = await quizService.importQuestionsFromCsv(Number(quizId), {
       csvContent: req.body.csv_content || req.body.csvContent,
       questions: req.body.questions,

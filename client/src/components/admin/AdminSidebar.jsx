@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   BookOpen,
   CalendarDays,
-  CheckSquare,
   BarChart3,
   Bell,
   Settings,
@@ -80,7 +79,6 @@ export default function AdminSidebar({ isOpen = false, onClose }) {
     items: [
       { name: 'Scheduling', path: '/admin/scheduling', icon: CalendarDays },
       { name: 'Announcements', path: '/admin/announcements', icon: Megaphone },
-      { name: 'Attendance', path: '/admin/attendance', icon: CheckSquare },
     ],
   },
   {
@@ -115,22 +113,24 @@ export default function AdminSidebar({ isOpen = false, onClose }) {
       )}
 
       <aside
-        className={`admin-sidebar fixed top-0 left-0 bottom-0 z-50 lg:z-30 w-[280px] flex flex-col bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`admin-sidebar fixed top-0 left-0 bottom-0 z-50 lg:z-30 w-[280px] max-w-[85vw] flex flex-col bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
         style={{
           borderRight: '1px solid #ECEEF2',
         }}
       >
-        {/* ─── Mobile-only close button (brand lives in navbar) ─── */}
-        <div className="flex items-center justify-end px-4 pt-4 pb-1 flex-shrink-0 lg:hidden">
+        {/* ─── Mobile-only drawer header ─── */}
+        <div className="flex items-center justify-between px-4 py-3.5 shrink-0 lg:hidden border-b border-slate-100 bg-slate-50/60">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200/80">
+              Admin Menu
+            </span>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg transition-colors flex-shrink-0"
-            style={{ color: '#9CA3AF' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#111827'; e.currentTarget.style.background = '#F3F4F6'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'transparent'; }}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors shrink-0 min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer"
             aria-label="Close sidebar"
           >
             <X size={20} />
@@ -138,7 +138,7 @@ export default function AdminSidebar({ isOpen = false, onClose }) {
         </div>
 
         {/* ─── Navigation (Scrollable) ─── */}
-        <div className="flex-1 overflow-y-auto pt-6 pb-4 px-3.5 space-y-6 admin-sidebar-scroll">
+        <div className="flex-1 overflow-y-auto pt-4 lg:pt-6 pb-4 px-3.5 space-y-6 admin-sidebar-scroll">
           {navGroups.map((group) => (
             <div key={group.label}>
               {/* Group label */}

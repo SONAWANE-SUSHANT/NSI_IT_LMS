@@ -1,8 +1,20 @@
 const courseModuleService = require("../services/courseModule.service");
+const courseAccessService = require("../services/courseAccess.service");
 
 const createModule = async (req, res) => {
   try {
     const { courseId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasCourseAccess(req.user, courseId, instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to create modules for this course",
+        });
+      }
+    }
 
     const module = await courseModuleService.createModule({
       courseId: Number(courseId),
@@ -33,6 +45,17 @@ const getModulesByCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
 
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasCourseAccess(req.user, courseId, instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access modules for this course",
+        });
+      }
+    }
+
     const modules =
       await courseModuleService.getModulesByCourse(
         Number(courseId)
@@ -56,6 +79,17 @@ const getModulesByCourse = async (req, res) => {
 const getModuleById = async (req, res) => {
   try {
     const { moduleId } = req.params;
+
+    const instructorId = courseAccessService.resolveInstructorId(req);
+    if (instructorId) {
+      const hasAccess = await courseAccessService.hasModuleAccess(req.user, moduleId, instructorId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to access this module",
+        });
+      }
+    }
 
     const module =
       await courseModuleService.getModuleById(

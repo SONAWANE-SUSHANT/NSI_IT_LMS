@@ -377,7 +377,7 @@ export const fetchCourses = async () => {
     });
     if (response.ok) {
       const data = await handleResponse(response);
-      if (Array.isArray(data) && data.length > 0) return data;
+      return Array.isArray(data) ? data : (data?.courses || []);
     }
   } catch {
     // Try fallback
@@ -389,7 +389,7 @@ export const fetchCourses = async () => {
     });
     if (adminRes.ok) {
       const data = await handleResponse(adminRes);
-      if (Array.isArray(data) && data.length > 0) return data;
+      return Array.isArray(data) ? data : (data?.courses || []);
     }
   } catch {
     // Try next fallback
@@ -410,7 +410,7 @@ export const fetchCourses = async () => {
           coursesMap.set(c.id, c);
         }
       });
-      if (coursesMap.size > 0) return Array.from(coursesMap.values());
+      return Array.from(coursesMap.values());
     }
   } catch {
     // Return empty array

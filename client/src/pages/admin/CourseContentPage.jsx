@@ -155,7 +155,7 @@ function ModulePanel({ courseId, selectedModuleId, onModuleSelect }) {
               onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
               placeholder="Module title *"
               maxLength={200}
-              className="course-admin-input"
+              className="course-admin-input flex-1 min-w-0"
             />
             <input
               type="number"
@@ -582,7 +582,7 @@ function LecturePanel({ moduleId, user, onPlayLecture }) {
           <Video size={15} />
           <span>Lectures</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={loadLectures} disabled={isLoading || !moduleId} className="content-icon-btn-sm">
             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
           </button>
@@ -753,7 +753,6 @@ export default function CourseContentPage() {
   const isInstructor = user?.role === 'INSTRUCTOR';
 
   const [courses, setCourses] = useState([]);
-  const [assignedCourseIds, setAssignedCourseIds] = useState(new Set());
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedModuleId, setSelectedModuleId] = useState(null);
   const [showReviewsModal, setShowReviewsModal] = useState(false);
@@ -765,23 +764,8 @@ export default function CourseContentPage() {
     setIsLoadingCourses(true);
     setCourseError('');
     try {
-      let myCourseIds = new Set();
-      if (isInstructor) {
-        try {
-          const myBatches = await fetchMyBatches();
-          myCourseIds = new Set(
-            myBatches
-              .map((b) => b.course_id || b.course?.id)
-              .filter(Boolean)
-          );
-          setAssignedCourseIds(myCourseIds);
-        } catch {
-          // Non-critical fallback if batches fail
-        }
-      }
-
       const allCourses = await getCourses();
-      const list = allCourses || [];
+      const list = Array.isArray(allCourses) ? allCourses : [];
       setCourses(list);
 
       // Auto-select course if none selected yet
@@ -790,10 +774,6 @@ export default function CourseContentPage() {
           return prev;
         }
         if (list.length === 0) return '';
-        if (isInstructor && myCourseIds.size > 0) {
-          const firstAssigned = list.find((c) => myCourseIds.has(c.id));
-          if (firstAssigned) return String(firstAssigned.id);
-        }
         return String(list[0].id);
       });
     } catch (err) {
@@ -801,7 +781,7 @@ export default function CourseContentPage() {
     } finally {
       setIsLoadingCourses(false);
     }
-  }, [isInstructor]);
+  }, []);
 
   useEffect(() => {
     loadCoursesData();
@@ -833,63 +813,72 @@ export default function CourseContentPage() {
       </div>
 
       <div className="content-course-selector-wrap">
-        <label className="course-admin-label" style={{ maxWidth: 520 }}>
-          Select Course
-          {isLoadingCourses ? (
-            <div className="course-admin-input flex items-center gap-2 text-[var(--text-muted)]">
-              <RefreshCw size={14} className="animate-spin" /> Loading courses…
-            </div>
-          ) : courseError ? (
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-rose-600 flex items-center gap-1">
-                <AlertCircle size={14} /> {courseError}
-              </span>
-              <button
-                type="button"
-                onClick={loadCoursesData}
-                className="text-xs text-[var(--admin-primary)] font-semibold underline"
-              >
-                Retry
-              </button>
-            </div>
-          ) : (
-            <select value={selectedCourseId} onChange={handleCourseChange} className="course-admin-select">
-              <option value="">— Choose a course —</option>
-              {courses.map((c) => {
-                const isAssigned = assignedCourseIds.has(c.id);
-                return (
+        <div className="flex-1 min-w-0 max-w-xl w-full">
+          <label className="course-admin-label w-full block">
+            Select Course
+            {isLoadingCourses ? (
+              <div className="course-admin-input flex items-center gap-2 text-[var(--text-muted)]">
+                <RefreshCw size={14} className="animate-spin" /> Loading courses…
+              </div>
+            ) : courseError ? (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-rose-600 flex items-center gap-1">
+                  <AlertCircle size={14} /> {courseError}
+                </span>
+                <button
+                  type="button"
+                  onClick={loadCoursesData}
+                  className="text-xs text-[var(--admin-primary)] font-semibold underline"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <select value={selectedCourseId} onChange={handleCourseChange} className="course-admin-select w-full mt-1.5">
+                <option value="">
+                  {courses.length === 0 && isInstructor ? '— No courses assigned to you —' : '— Choose a course —'}
+                </option>
+                {courses.map((c) => (
                   <option key={c.id} value={c.id}>
                     {(c.code || c.course_code) ? `[${c.code || c.course_code}] ` : ''}
                     {c.name}
-                    {isAssigned ? ' ★ (Assigned to you)' : ''}
                   </option>
-                );
-              })}
-            </select>
-          )}
-        </label>
-        {selectedCourse && (
-          <div className="content-selected-course-pill">
-            <BookOpen size={14} />
-            <span>{selectedCourse.name}</span>
-            {assignedCourseIds.has(selectedCourse.id) && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
-                Assigned
-              </span>
+                ))}
+              </select>
             )}
-            {selectedCourse.status && <StatusBadge status={selectedCourse.status} />}
-          </div>
-        )}
-        {selectedCourse && (
-          <button
-            type="button"
-            onClick={() => setShowReviewsModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors shadow-2xs cursor-pointer ml-auto"
-          >
-            <Star size={14} className="text-amber-500 fill-amber-500" />
-            <span>Course Reviews</span>
-          </button>
-        )}
+          </label>
+          {courses.length === 0 && isInstructor && !isLoadingCourses && !courseError && (
+            <div className="mt-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center gap-2 max-w-xl">
+              <AlertCircle size={15} className="shrink-0 text-amber-600" />
+              <span>You are not currently assigned to any courses. Please contact an administrator to be allocated to a batch.</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-start sm:justify-end">
+          {selectedCourse && (
+            <div className="content-selected-course-pill">
+              <BookOpen size={14} className="shrink-0" />
+              <span className="truncate max-w-[160px] sm:max-w-xs">{selectedCourse.name}</span>
+              {isInstructor && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 shrink-0">
+                  My Course
+                </span>
+              )}
+              {selectedCourse.status && <StatusBadge status={selectedCourse.status} size="sm" />}
+            </div>
+          )}
+          {selectedCourse && (
+            <button
+              type="button"
+              onClick={() => setShowReviewsModal(true)}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors shadow-2xs cursor-pointer min-h-[38px] flex-1 sm:flex-none"
+            >
+              <Star size={14} className="text-amber-500 fill-amber-500" />
+              <span>Course Reviews</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="content-two-panel-grid">

@@ -31,17 +31,17 @@ export default function FilterBar({
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+    <div className="flex flex-col xs:flex-row flex-wrap items-stretch xs:items-center gap-2 sm:gap-3 w-full sm:w-auto">
       {/* Status Filter */}
-      <div className="flex items-center gap-1.5">
-        <label className="text-xs font-semibold text-slate-500 hidden sm:flex items-center gap-1">
+      <div className="flex items-center gap-1.5 w-full xs:w-auto">
+        <label className="text-xs font-bold text-slate-500 hidden sm:flex items-center gap-1 shrink-0">
           <Filter size={13} />
           Status:
         </label>
         <select
           value={statusFilter}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="bg-white border border-slate-300 text-slate-700 text-xs sm:text-sm font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-2xs cursor-pointer"
+          className="w-full xs:w-auto bg-white border border-slate-300 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl px-3 py-2.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-2xs cursor-pointer min-h-[38px]"
         >
           {statuses.map((s) => (
             <option key={s.value} value={s.value}>
@@ -53,12 +53,12 @@ export default function FilterBar({
 
       {/* Role Filter (if requested) */}
       {showRoleFilter && onRoleChange && (
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs font-semibold text-slate-500 hidden sm:inline">Role:</label>
+        <div className="flex items-center gap-1.5 w-full xs:w-auto">
+          <label className="text-xs font-bold text-slate-500 hidden sm:inline shrink-0">Role:</label>
           <select
             value={roleFilter}
             onChange={(e) => onRoleChange(e.target.value)}
-            className="bg-white border border-slate-300 text-slate-700 text-xs sm:text-sm font-medium rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-2xs cursor-pointer"
+            className="w-full xs:w-auto bg-white border border-slate-300 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl px-3 py-2.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-2xs cursor-pointer min-h-[38px]"
           >
             {roles.map((r) => (
               <option key={r.value} value={r.value}>

@@ -96,19 +96,19 @@ export default function InstructorBatchesPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 self-end sm:self-center">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-start sm:justify-end">
           <button
             onClick={loadBatches}
             title="Refresh Batches"
             disabled={loading}
-            className="p-2 text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs"
+            className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           {batches.length > 0 && (
             <button
               onClick={() => setSelectedBatchForSchedule(batches[0])}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs min-h-[40px] cursor-pointer flex-1 sm:flex-initial"
               style={{ background: ADMIN_PRIMARY }}
             >
               <Plus className="w-4 h-4" />
@@ -126,7 +126,7 @@ export default function InstructorBatchesPage() {
       )}
 
       {/* ── Search Bar ── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
@@ -134,7 +134,7 @@ export default function InstructorBatchesPage() {
             placeholder="Search batches by name or code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 shadow-xs focus:outline-hidden focus:ring-2 focus:ring-[#3c4cb8] transition-all"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[40px] bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 shadow-xs focus:outline-hidden focus:ring-2 focus:ring-[#3c4cb8] transition-all"
           />
         </div>
 
@@ -145,7 +145,7 @@ export default function InstructorBatchesPage() {
 
       {/* ── Batch Cards Grid ── */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-64 bg-slate-200/60 animate-pulse rounded-2xl" />
           ))}
@@ -161,7 +161,7 @@ export default function InstructorBatchesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {filteredBatches.map((batch) => {
             const course = batch.course || {};
 
@@ -172,9 +172,9 @@ export default function InstructorBatchesPage() {
               >
                 <div className="p-5">
                   {/* Badges */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <span
-                      className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-md border"
+                      className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-md border truncate max-w-[180px]"
                       style={{
                         background: ADMIN_LIGHT,
                         color: ADMIN_DARK,
@@ -183,45 +183,45 @@ export default function InstructorBatchesPage() {
                     >
                       {batch.batch_code || `BATCH-${batch.id}`}
                     </span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200 shrink-0">
                       {batch.batch_mode || 'ONLINE'}
                     </span>
                   </div>
 
                   {/* Course Info */}
                   <div className="mb-2">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
                       {course.code || 'COURSE'} &bull; {course.duration || 'Flexible'}
                     </p>
-                    <h3 className="text-base font-bold text-slate-900 mt-0.5 leading-snug line-clamp-1">
+                    <h3 className="text-base font-bold text-slate-900 mt-0.5 leading-snug line-clamp-2 break-words">
                       {course.name || batch.name}
                     </h3>
-                    <p className="text-xs text-slate-600 font-medium mt-1">Batch: {batch.name}</p>
+                    <p className="text-xs text-slate-600 font-medium mt-1 truncate">Batch: {batch.name}</p>
                   </div>
 
                   {/* Meta details */}
                   <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="capitalize">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="capitalize truncate">
                         {batch.batch_time?.toLowerCase() || 'Morning'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="capitalize">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="capitalize truncate">
                         {batch.batch_schedule?.toLowerCase() || 'Weekdays'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-indigo-600" />
-                      <span className="font-semibold text-slate-800">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Users className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span className="font-semibold text-slate-800 truncate">
                         {batch.student_count || 0} Students
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-indigo-600" />
-                      <span className="font-semibold text-slate-800">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Layers className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span className="font-semibold text-slate-800 truncate">
                         {batch.module_count || 0} Modules
                       </span>
                     </div>
@@ -230,17 +230,17 @@ export default function InstructorBatchesPage() {
 
                 {/* Footer Actions */}
                 <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => setSelectedBatchForStudents(batch)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors shadow-2xs"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors shadow-2xs min-h-[38px] flex-1 sm:flex-initial cursor-pointer"
                     >
                       <Users className="w-3.5 h-3.5 text-slate-500" />
                       <span>Students ({batch.student_count || 0})</span>
                     </button>
                     <button
                       onClick={() => setSelectedBatchForContent(batch)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors shadow-2xs"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors shadow-2xs min-h-[38px] flex-1 sm:flex-initial cursor-pointer"
                     >
                       <BookOpen className="w-3.5 h-3.5 text-slate-500" />
                       <span>Syllabus</span>
@@ -249,7 +249,7 @@ export default function InstructorBatchesPage() {
 
                   <button
                     onClick={() => setSelectedBatchForSchedule(batch)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-colors shadow-xs ml-auto"
+                    className="inline-flex items-center justify-center gap-1 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-colors shadow-xs w-full sm:w-auto sm:ml-auto min-h-[38px] cursor-pointer"
                     style={{ background: ADMIN_PRIMARY }}
                   >
                     <Video className="w-3.5 h-3.5" />

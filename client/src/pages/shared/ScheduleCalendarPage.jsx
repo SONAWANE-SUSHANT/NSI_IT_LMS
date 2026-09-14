@@ -323,7 +323,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
   return (
     <div className="space-y-6">
       {/* Page Title & Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#ECEEF2] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-[#ECEEF2] shadow-xs">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-xs shrink-0"
@@ -331,8 +331,8 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
           >
             <CalendarDays className="w-5 h-5" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <span
                 className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border"
                 style={{ background: ADMIN_LIGHT, color: ADMIN_DARK, borderColor: '#c7cef5' }}
@@ -341,21 +341,21 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
               </span>
               <span className="text-xs text-slate-400 font-medium">NSI IT LMS</span>
             </div>
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight mt-0.5 truncate">
               Live Lecture & Session Calendar
             </h1>
           </div>
         </div>
 
         {/* Filter & Actions */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           {courses.length > 0 && (
-            <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 text-xs flex-1 sm:flex-initial min-w-0">
+              <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <select
                 value={selectedCourseFilter}
                 onChange={(e) => setSelectedCourseFilter(e.target.value)}
-                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-hidden"
+                className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-hidden truncate w-full sm:max-w-[200px] md:max-w-[240px] cursor-pointer"
               >
                 <option value="ALL">All Enrolled Courses</option>
                 {courses.map((c) => (
@@ -368,21 +368,23 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
             </div>
           )}
 
-          <button
-            onClick={loadLectures}
-            title="Refresh Schedule"
-            disabled={isLoading}
-            className="p-2 text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={loadLectures}
+              title="Refresh Schedule"
+              disabled={isLoading}
+              className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
 
-          <button
-            onClick={handleTodayClick}
-            className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-2xs"
-          >
-            Today
-          </button>
+            <button
+              onClick={handleTodayClick}
+              className="flex-1 sm:flex-initial px-3.5 py-2 min-h-[38px] text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-2xs cursor-pointer text-center"
+            >
+              Today
+            </button>
+          </div>
         </div>
       </div>
 
@@ -393,25 +395,25 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
       )}
 
       {/* Main Calendar + Day Details Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Monthly Grid (8 cols) */}
-        <div className="lg:col-span-8 bg-white rounded-2xl border border-[#ECEEF2] p-5 sm:p-6 shadow-xs flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+        {/* Left: Monthly Grid (8 cols on desktop) */}
+        <div className="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl border border-[#ECEEF2] p-3.5 sm:p-5 md:p-6 shadow-xs flex flex-col">
           {/* Calendar Header Month Navigation */}
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100">
             <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
               {MONTHS[month]} {year}
             </h2>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={handlePrevMonth}
-                className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors"
+                className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                 aria-label="Previous Month"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={handleNextMonth}
-                className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors"
+                className="p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                 aria-label="Next Month"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -424,7 +426,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
             {DAYS.map((day) => (
               <div
                 key={day}
-                className="py-1 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none"
+                className="py-1 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none truncate"
               >
                 <span className="sm:hidden">{day.charAt(0)}</span>
                 <span className="hidden sm:inline">{day}</span>
@@ -451,7 +453,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                   key={idx}
                   type="button"
                   onClick={() => setSelectedDate(date)}
-                  className={`min-h-[52px] sm:min-h-[80px] p-1 sm:p-2 rounded-xl text-left flex flex-col justify-between transition-all border ${
+                  className={`min-h-[50px] sm:min-h-[76px] lg:min-h-[82px] p-1 sm:p-1.5 md:p-2 rounded-xl text-left flex flex-col justify-between transition-all border cursor-pointer ${
                     isSelected
                       ? 'border-[#3c4cb8] bg-[#EEF0FB] ring-2 ring-[#3c4cb8]/30 shadow-xs'
                       : isToday
@@ -505,10 +507,10 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                       {/* Mobile dot indicators */}
                       <div className="sm:hidden flex items-center justify-center gap-1 mt-1">
                         {dayQuizzes.length > 0 && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                         )}
                         {dayLectures.length > 0 && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#3c4cb8]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#3c4cb8] shrink-0" />
                         )}
                       </div>
 
@@ -530,7 +532,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                             className="truncate text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-800 shadow-2xs"
                             title={l.title}
                           >
-                            {l.title}
+                            <span className="truncate">{l.title}</span>
                           </div>
                         ))}
                         {totalEvents > 2 && (
@@ -549,8 +551,8 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
           </div>
         </div>
 
-        {/* Right: Selected Day's Schedule Details (4 cols) */}
-        <div className="lg:col-span-4 bg-white rounded-2xl border border-[#ECEEF2] p-5 sm:p-6 shadow-xs flex flex-col">
+        {/* Right: Selected Day's Schedule Details (stacked on mobile/tablet) */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-white rounded-2xl border border-[#ECEEF2] p-4 sm:p-5 md:p-6 shadow-xs flex flex-col">
           <div className="border-b border-slate-100 pb-4 mb-4">
             <span
               className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
@@ -620,25 +622,25 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                               </span>
                             </div>
 
-                            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                            <h4 className="text-sm font-bold text-slate-900 leading-snug break-words">
                               {quiz.title}
                             </h4>
 
                             {quiz.description && (
-                              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                              <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed break-words">
                                 {quiz.description}
                               </p>
                             )}
 
                             <div className="mt-3 space-y-1 text-xs text-slate-600 font-medium">
-                              <div className="flex items-center gap-1.5 text-slate-500">
+                              <div className="flex items-center gap-1.5 text-slate-500 min-w-0">
                                 <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                                 <span className="truncate">
                                   {quiz._courseName} {quiz._moduleName ? `• ${quiz._moduleName}` : ''}
                                 </span>
                               </div>
 
-                              <div className="flex items-center gap-3 text-[11px] text-slate-500 pt-1">
+                              <div className="flex items-center gap-3 text-[11px] text-slate-500 pt-1 flex-wrap">
                                 <span>Total Marks: <strong className="text-slate-800">{Number(quiz.total_marks || 0)}</strong></span>
                                 {quiz.passing_marks && (
                                   <span>Pass Score: <strong className="text-emerald-700">{Number(quiz.passing_marks)}</strong></span>
@@ -652,7 +654,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                               <button
                                 type="button"
                                 onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
-                                className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
+                                className="w-full min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
                               >
                                 <Play className="w-3.5 h-3.5 fill-current" />
                                 <span>
@@ -669,7 +671,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                               <button
                                 type="button"
                                 onClick={() => navigate(`/instructor/quizzes/${quiz.id}/builder`)}
-                                className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
+                                className="w-full min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
                               >
                                 <Award className="w-3.5 h-3.5" />
                                 <span>Edit Test In Builder</span>
@@ -691,12 +693,12 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                 return (
                   <div
                     key={lec.id}
-                    className="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between gap-3"
+                    className="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xs transition-all flex flex-col justify-between gap-3 shadow-2xs"
                     style={{ borderLeft: `4px solid ${ADMIN_PRIMARY}` }}
                   >
                     <div>
                       {/* Badge row */}
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                             isLive
@@ -712,10 +714,10 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                       </div>
 
                       {/* Title */}
-                      <h4 className="text-sm font-bold text-slate-900 leading-snug">{lec.title}</h4>
+                      <h4 className="text-sm font-bold text-slate-900 leading-snug break-words">{lec.title}</h4>
 
                       {lec.description && (
-                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">{lec.description}</p>
+                        <p className="text-xs text-slate-600 mt-1 line-clamp-2 break-words">{lec.description}</p>
                       )}
 
                       {/* Meta Tags */}
@@ -731,7 +733,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                         )}
 
                         {(lec._courseName || lec._moduleName) && (
-                          <div className="flex items-center gap-1.5 text-slate-500">
+                          <div className="flex items-center gap-1.5 text-slate-500 min-w-0">
                             <BookOpen className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             <span className="truncate">
                               {lec._courseName}
@@ -741,9 +743,9 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                         )}
 
                         {lec.instructor && (
-                          <div className="flex items-center gap-1.5 text-slate-500">
+                          <div className="flex items-center gap-1.5 text-slate-500 min-w-0">
                             <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>
+                            <span className="truncate">
                               Prof. {lec.instructor.first_name} {lec.instructor.last_name}
                             </span>
                           </div>
@@ -759,11 +761,11 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                               href={note.external_url || note.file_url || '#'}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#3c4cb8] bg-[#EEF0FB] px-2 py-0.5 rounded-md hover:bg-indigo-100 transition-colors"
+                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#3c4cb8] bg-[#EEF0FB] px-2 py-0.5 rounded-md hover:bg-indigo-100 transition-colors max-w-full"
                             >
-                              <FileText className="w-2.5 h-2.5" />
-                              <span className="truncate max-w-[140px]">{note.title}</span>
-                              <ExternalLink className="w-2 h-2 opacity-60" />
+                              <FileText className="w-2.5 h-2.5 shrink-0" />
+                              <span className="truncate max-w-[150px] sm:max-w-[200px]">{note.title}</span>
+                              <ExternalLink className="w-2 h-2 opacity-60 shrink-0" />
                             </a>
                           ))}
                         </div>
@@ -778,7 +780,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                             href={meetLink}
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs"
+                            className="w-full min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs cursor-pointer"
                             style={{ background: ADMIN_PRIMARY }}
                           >
                             <Video className="w-3.5 h-3.5" />
@@ -789,13 +791,13 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                           <button
                             type="button"
                             onClick={() => setPlayingLecture({ ...lec, recording_url: recLink })}
-                            className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 hover:text-[#3c4cb8] transition-colors cursor-pointer shadow-2xs"
+                            className="w-full min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 hover:text-[#3c4cb8] transition-colors cursor-pointer shadow-2xs"
                           >
                             <Video className="w-3.5 h-3.5 text-[#3c4cb8]" />
                             <span>Watch Recording</span>
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">Live link available before class</span>
+                          <span className="text-xs text-slate-400 italic py-2 block text-center w-full">Live link available before class</span>
                         )
                       ) : (
                         /* RECORDED */
@@ -803,14 +805,14 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                           <button
                             type="button"
                             onClick={() => setPlayingLecture({ ...lec, recording_url: recLink })}
-                            className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs cursor-pointer hover:opacity-90"
+                            className="w-full min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs cursor-pointer hover:opacity-90"
                             style={{ background: ADMIN_PRIMARY }}
                           >
                             <Video className="w-3.5 h-3.5" />
                             <span>Watch Recording</span>
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">Recording not uploaded yet</span>
+                          <span className="text-xs text-slate-400 italic py-2 block text-center w-full">Recording not uploaded yet</span>
                         )
                       )}
                     </div>

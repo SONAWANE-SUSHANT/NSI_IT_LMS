@@ -287,9 +287,9 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
           <p className="text-xs font-bold text-slate-600">Loading your profile…</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* ── Left Column: Avatar & Account Badge (1 Col) ── */}
-          <div className="md:col-span-1 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* ── Left Column: Avatar & Account Badge (Desktop: 4 cols, Tablet/Mobile: Full width stacked) ── */}
+          <div className="lg:col-span-4 space-y-6">
             <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#ECEEF2] p-6 text-center shadow-xs flex flex-col items-center">
               {/* Avatar Circle */}
               <div className="relative group">
@@ -310,7 +310,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingPhoto}
-                  className="absolute bottom-1 right-1 p-2.5 rounded-xl text-white bg-slate-900/90 hover:bg-slate-950 shadow-md border-2 border-white transition-all transform hover:scale-105 cursor-pointer disabled:opacity-50"
+                  className="absolute bottom-1 right-1 p-2.5 rounded-xl text-white bg-slate-900/90 hover:bg-slate-950 shadow-md border-2 border-white transition-all transform hover:scale-105 cursor-pointer disabled:opacity-50 min-h-[38px] min-w-[38px] flex items-center justify-center"
                   title="Upload new photo"
                 >
                   <Camera className="w-4 h-4" />
@@ -339,7 +339,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingPhoto}
-                  className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200/80 transition-colors cursor-pointer disabled:opacity-50"
+                  className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200/80 transition-colors cursor-pointer disabled:opacity-50 min-h-[40px]"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingPhoto ? 'Uploading…' : 'Change Photo'}</span>
@@ -348,7 +348,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                 <button
                   type="button"
                   onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer min-h-[36px]"
                 >
                   <LinkIcon className="w-3 h-3" />
                   <span>{showUrlInput ? 'Cancel URL' : 'Use Photo URL'}</span>
@@ -361,12 +361,12 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       placeholder="https://images.example.com/avatar.jpg"
                       value={customPhotoUrl}
                       onChange={(e) => setCustomPhotoUrl(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 text-xs bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 min-h-[38px]"
                     />
                     <button
                       type="submit"
                       disabled={uploadingPhoto || !customPhotoUrl.trim()}
-                      className="w-full py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40"
+                      className="w-full py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors cursor-pointer disabled:opacity-40 min-h-[38px]"
                     >
                       Save URL
                     </button>
@@ -375,20 +375,20 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
               </div>
 
               {/* Role & Status Pill */}
-              <div className="w-full pt-4 mt-2 flex items-center justify-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <div className="w-full pt-4 mt-2 flex flex-wrap items-center justify-center gap-2">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {profile?.role || role}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
                   {profile?.status || 'ACTIVE'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* ── Right Column: Form Fields (2 Cols) ── */}
-          <div className="md:col-span-2">
-            <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#ECEEF2] p-6 sm:p-7 shadow-xs">
+          {/* ── Right Column: Form Fields (Desktop: 8 cols, Tablet/Mobile: Full width stacked) ── */}
+          <div className="lg:col-span-8">
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#ECEEF2] p-5 sm:p-7 shadow-xs">
               <div className="border-b border-slate-100 pb-4 mb-5 flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900">
@@ -415,7 +415,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       value={formData.first_name}
                       onChange={(e) => handleChange('first_name', e.target.value)}
                       placeholder="Enter first name"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 min-h-[42px]"
                     />
                   </div>
 
@@ -430,7 +430,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       value={formData.last_name}
                       onChange={(e) => handleChange('last_name', e.target.value)}
                       placeholder="Enter last name"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 min-h-[42px]"
                     />
                   </div>
                 </div>
@@ -448,7 +448,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       readOnly
                       disabled
                       value={profile?.username || ''}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100/70 text-xs font-mono text-slate-500 cursor-not-allowed"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100/70 text-xs sm:text-sm font-mono text-slate-500 cursor-not-allowed min-h-[42px]"
                     />
                   </div>
 
@@ -463,7 +463,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       readOnly
                       disabled
                       value={profile?.email || ''}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100/70 text-xs font-medium text-slate-500 cursor-not-allowed"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100/70 text-xs sm:text-sm font-medium text-slate-500 cursor-not-allowed min-h-[42px]"
                     />
                   </div>
                 </div>
@@ -480,7 +480,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       value={formData.contact_no}
                       onChange={(e) => handleChange('contact_no', e.target.value)}
                       placeholder="e.g. 9876543210"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 min-h-[42px]"
                     />
                   </div>
 
@@ -491,7 +491,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                     <select
                       value={formData.gender}
                       onChange={(e) => handleChange('gender', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-800 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer min-h-[42px]"
                     >
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
@@ -509,16 +509,16 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                     type="date"
                     value={formData.date_of_birth}
                     onChange={(e) => handleChange('date_of_birth', e.target.value)}
-                    className="w-full sm:w-1/2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    className="w-full sm:w-1/2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-800 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 cursor-pointer min-h-[42px]"
                   />
                 </div>
 
                 {/* Form Buttons */}
-                <div className="pt-4 border-t border-slate-100 flex items-center gap-3">
+                <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-xs hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-xs hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50 min-h-[42px]"
                     style={{ background: PRIMARY_COLOR }}
                   >
                     <Save className="w-3.5 h-3.5" />
@@ -530,7 +530,7 @@ export default function UserProfilePage({ role = 'STUDENT' }) {
                       type="button"
                       onClick={handleReset}
                       disabled={saving}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer min-h-[42px]"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Discard Changes</span>

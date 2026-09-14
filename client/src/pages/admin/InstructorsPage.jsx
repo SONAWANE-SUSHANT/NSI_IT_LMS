@@ -121,12 +121,12 @@ export default function InstructorsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={fetchInstructors}
             disabled={isLoading}
-            className="p-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 rounded-xl shadow-2xs transition disabled:opacity-50"
+            className="p-2.5 sm:px-3 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-600 border border-slate-300 rounded-xl shadow-2xs transition disabled:opacity-50 min-h-[42px] min-w-[42px] flex items-center justify-center cursor-pointer"
             title="Refresh list"
             aria-label="Refresh instructor list"
           >
@@ -136,7 +136,7 @@ export default function InstructorsPage() {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition min-h-[42px] cursor-pointer flex-1 sm:flex-none"
           >
             <UserPlus size={17} />
             <span>Add Instructor</span>
@@ -145,7 +145,7 @@ export default function InstructorsPage() {
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
         <SearchBar
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

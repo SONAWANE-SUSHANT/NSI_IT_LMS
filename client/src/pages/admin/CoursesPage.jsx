@@ -114,14 +114,20 @@ export default function CoursesPage() {
         <div>
           <div className="course-admin-kicker">
             <BookOpen size={20} />
-            <span>Courses</span>
+            <span>Course Catalog</span>
           </div>
           <h1 className="course-admin-title">Courses</h1>
           <p className="course-admin-subtitle">Manage core course information, duration, thumbnail, and availability.</p>
         </div>
-        <button onClick={loadData} disabled={isLoading} className="course-admin-icon-btn">
+        <button
+          type="button"
+          onClick={loadData}
+          disabled={isLoading}
+          className="course-admin-icon-btn min-h-[42px] cursor-pointer w-full sm:w-auto"
+          title="Refresh course list"
+        >
           <RefreshCw size={17} className={isLoading ? 'animate-spin text-indigo-600' : ''} />
-          Refresh
+          <span>Refresh</span>
         </button>
       </div>
 
@@ -166,7 +172,7 @@ export default function CoursesPage() {
                 className="course-admin-input"
               />
             </label>
-            <label className="course-admin-label sm:col-span-2 xl:col-span-1">Description
+            <label className="course-admin-label sm:col-span-2 lg:col-span-1">Description
               <textarea
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
@@ -178,13 +184,13 @@ export default function CoursesPage() {
           <div className="course-admin-form-actions">
             <button disabled={isSaving} className="course-admin-primary-btn">
               <Plus size={16} />
-              {editing ? 'Save' : 'Create'}
+              {editing ? 'Save Course' : 'Create Course'}
             </button>
             {editing && <button type="button" onClick={resetForm} className="course-admin-secondary-btn">Cancel</button>}
           </div>
         </form>
 
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <div className="course-admin-toolbar">
             <SearchBar
               value={searchQuery}
@@ -201,39 +207,126 @@ export default function CoursesPage() {
           ) : filteredCourses.length === 0 ? (
             <EmptyState title="No courses found" description="Create a course before adding batches or assignments." icon={<BookOpen size={32} />} />
           ) : (
-            <div className="course-admin-table-wrap">
-              <div className="course-admin-table-scroll">
-                <table className="course-admin-table">
-                  <thead>
-                    <tr>
-                      <th className="px-5 py-3">Course</th>
-                      <th className="px-5 py-3">Duration</th>
-                      <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCourses.map((course) => (
-                      <tr key={course.id} className="course-admin-table-row">
-                        <td>
-                          <p className="course-admin-row-title">{course.name}</p>
-                          <p className="course-admin-row-meta">{course.code || course.course_code}</p>
-                        </td>
-                        <td className="course-admin-muted">{course.duration || 'Not set'}</td>
-                        <td><StatusBadge status={course.status} /></td>
-                        <td className="course-admin-actions">
-                          <button onClick={() => setReviewModalCourse(course)} className="course-admin-neutral-btn text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 font-bold">Reviews</button>
-                          <button onClick={() => handleEdit(course)} className="course-admin-text-btn">Edit</button>
-                          {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'].filter((s) => s !== course.status).map((status) => (
-                            <button key={status} onClick={() => setStatus(course, status)} className="course-admin-neutral-btn">{status}</button>
+            <>
+              {/* Mobile Card List (sm:hidden) */}
+              <div className="sm:hidden space-y-3">
+                {filteredCourses.map((course) => (
+                  <div key={course.id} className="course-admin-card">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2 py-0.5 rounded-md mb-1.5">
+                          {course.code || course.course_code || 'N/A'}
+                        </span>
+                        <h3 className="font-bold text-sm text-slate-900 leading-snug">
+                          {course.name}
+                        </h3>
+                      </div>
+                      <StatusBadge status={course.status} size="sm" />
+                    </div>
+
+                    <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                      <span className="font-medium text-slate-400">Duration:</span>
+                      <span className="font-semibold text-slate-700">{course.duration || 'Not set'}</span>
+                    </div>
+
+                    {course.description && (
+                      <p className="mt-1.5 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {course.description}
+                      </p>
+                    )}
+
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setReviewModalCourse(course)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition min-h-[34px] cursor-pointer"
+                      >
+                        Reviews
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(course)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition min-h-[34px] cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <div className="flex items-center gap-1 flex-wrap ml-auto">
+                        {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED']
+                          .filter((s) => s !== course.status)
+                          .map((status) => (
+                            <button
+                              key={status}
+                              type="button"
+                              onClick={() => setStatus(course, status)}
+                              className="px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-semibold text-slate-600 transition min-h-[30px] cursor-pointer"
+                            >
+                              {status}
+                            </button>
                           ))}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+
+              {/* Tablet & Desktop Table View (hidden sm:block) */}
+              <div className="hidden sm:block course-admin-table-wrap">
+                <div className="course-admin-table-scroll">
+                  <table className="course-admin-table">
+                    <thead>
+                      <tr>
+                        <th className="px-5 py-3">Course</th>
+                        <th className="px-5 py-3">Duration</th>
+                        <th className="px-5 py-3">Status</th>
+                        <th className="px-5 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCourses.map((course) => (
+                        <tr key={course.id} className="course-admin-table-row">
+                          <td>
+                            <p className="course-admin-row-title">{course.name}</p>
+                            <p className="course-admin-row-meta">{course.code || course.course_code}</p>
+                          </td>
+                          <td className="course-admin-muted">{course.duration || 'Not set'}</td>
+                          <td><StatusBadge status={course.status} /></td>
+                          <td>
+                            <div className="course-admin-actions">
+                              <button
+                                type="button"
+                                onClick={() => setReviewModalCourse(course)}
+                                className="course-admin-neutral-btn text-amber-700 bg-amber-50 hover:bg-amber-100 border-amber-200 font-bold"
+                              >
+                                Reviews
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleEdit(course)}
+                                className="course-admin-text-btn"
+                              >
+                                Edit
+                              </button>
+                              {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED']
+                                .filter((s) => s !== course.status)
+                                .map((status) => (
+                                  <button
+                                    key={status}
+                                    type="button"
+                                    onClick={() => setStatus(course, status)}
+                                    className="course-admin-neutral-btn"
+                                  >
+                                    {status}
+                                  </button>
+                                ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

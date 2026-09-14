@@ -175,14 +175,14 @@ export default function StudentCoursesPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span
-                    className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border"
+                    className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border"
                     style={{ background: ADMIN_LIGHT, color: ADMIN_DARK, borderColor: '#c7cef5' }}
                   >
-                    Learner Workspace
+                    Student Workspace
                   </span>
                   <span className="text-xs text-slate-400 font-medium">NSI IT LMS</span>
                 </div>
-                <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight mt-0.5">
                   My Enrolled Courses
                 </h1>
               </div>
@@ -193,7 +193,7 @@ export default function StudentCoursesPage() {
                 onClick={loadBatches}
                 title="Refresh Courses"
                 disabled={loading}
-                className="p-2 text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs cursor-pointer"
+                className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
@@ -201,7 +201,7 @@ export default function StudentCoursesPage() {
           </div>
 
           {/* Search Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -209,18 +209,18 @@ export default function StudentCoursesPage() {
                 placeholder="Search enrolled courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 shadow-xs focus:outline-hidden focus:ring-2 focus:ring-[#3c4cb8] transition-all"
+                className="w-full pl-10 pr-4 py-2.5 min-h-[40px] bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 shadow-xs focus:outline-hidden focus:ring-2 focus:ring-[#3c4cb8] transition-all"
               />
             </div>
 
             <div className="text-xs font-bold text-slate-500 self-end sm:self-center">
-              Enrolled in {filteredBatches.length} of {batches.length} Course Programs
+              Enrolled in {filteredBatches.length} of {batches.length} Courses
             </div>
           </div>
 
           {/* Cards Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-64 bg-slate-200/60 animate-pulse rounded-2xl" />
               ))}
@@ -236,7 +236,7 @@ export default function StudentCoursesPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filteredBatches.map((batch) => {
                 const course = batch.course || {};
                 const instructors = batch.instructors || [];
@@ -244,143 +244,140 @@ export default function StudentCoursesPage() {
                 return (
                   <div
                     key={batch.id}
-                    className="bg-white rounded-2xl border border-[#ECEEF2] shadow-xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
+                    className="bg-white rounded-2xl sm:rounded-3xl border border-[#ECEEF2] shadow-xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
                   >
-                    <div className="p-5">
-                      {/* Badges */}
-                      <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="p-5 sm:p-6 flex flex-col flex-1">
+                      {/* Top Row: Learning Status & Rating */}
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
                         <span
-                          className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-md border"
-                          style={{
-                            background: ADMIN_LIGHT,
-                            color: ADMIN_DARK,
-                            borderColor: '#c7cef5',
-                          }}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            batch.course_progress?.status === 'COMPLETED'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : batch.course_progress?.status === 'IN_PROGRESS'
+                              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                              : 'bg-slate-100 text-slate-600 border border-slate-200'
+                          }`}
                         >
-                          {batch.batch_code || `BATCH-${batch.id}`}
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              batch.course_progress?.status === 'COMPLETED'
+                                ? 'bg-emerald-500'
+                                : batch.course_progress?.status === 'IN_PROGRESS'
+                                ? 'bg-indigo-600'
+                                : 'bg-slate-400'
+                            }`}
+                          />
+                          {batch.course_progress?.status === 'COMPLETED'
+                            ? 'Completed'
+                            : batch.course_progress?.status === 'IN_PROGRESS'
+                            ? 'In Progress'
+                            : 'Ready to Start'}
                         </span>
-                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
-                          {batch.batch_mode || 'ONLINE'}
-                        </span>
+
+                        <CourseCardRating courseId={course.id || batch.course_id} />
                       </div>
 
-                      {/* Course Header */}
-                      <div className="mb-3">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                          {course.code || 'COURSE'} &bull; {course.duration || 'Flexible'}
-                        </p>
-                        <h3 className="text-base font-bold text-slate-900 mt-0.5 leading-snug line-clamp-2">
+                      {/* Course Title & De-emphasized Metadata */}
+                      <div>
+                        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug break-words">
                           {course.name || batch.name}
                         </h3>
-                        <CourseCardRating courseId={course.id || batch.course_id} />
-                        <p className="text-xs text-slate-600 font-medium mt-1">
-                          Cohort: {batch.name}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400 font-medium mt-1">
+                          {course.code && <span className="font-semibold text-slate-500">{course.code}</span>}
+                          {course.code && course.duration && <span>&bull;</span>}
+                          {course.duration && <span>{course.duration}</span>}
+                          {batch.batch_code && (
+                            <>
+                              <span>&bull;</span>
+                              <span className="font-mono text-[11px] text-slate-400">Cohort: {batch.batch_code}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Instructors */}
-                      {instructors.length > 0 && (
-                        <div className="flex items-center gap-2 py-2.5 border-t border-slate-100 text-xs text-slate-600">
+                      {/* Primary Focus: Progress Section */}
+                      <div className="my-4 p-3.5 rounded-xl bg-slate-50/80 border border-slate-100">
+                        <div className="flex items-center justify-between text-xs mb-1.5">
+                          <span className="font-bold text-slate-700">Course Progress</span>
+                          <span className="font-extrabold text-[#3c4cb8]">
+                            {Math.round(batch.course_progress?.progress_percentage || 0)}%
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
                           <div
-                            className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0"
-                            style={{ background: ADMIN_LIGHT, color: ADMIN_PRIMARY }}
-                          >
-                            <User className="w-3.5 h-3.5" />
-                          </div>
-                          <span className="truncate">
-                            Faculty:{' '}
-                            <strong className="text-slate-800">
-                              {instructors[0]?.instructor?.first_name}{' '}
-                              {instructors[0]?.instructor?.last_name}
-                            </strong>
-                          </span>
+                            className={`h-full rounded-full transition-all ${
+                              (batch.course_progress?.progress_percentage || 0) >= 100
+                                ? 'bg-emerald-500'
+                                : 'bg-[#3c4cb8]'
+                            }`}
+                            style={{
+                              width: `${Math.min(100, Math.max(0, batch.course_progress?.progress_percentage || 0))}%`,
+                            }}
+                          />
                         </div>
-                      )}
-
-                      {/* Meta details */}
-                      <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="capitalize">
-                            {batch.batch_time?.toLowerCase() || 'Morning'}
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2 font-medium">
+                          <span>
+                            {batch.course_progress?.completed_sessions || 0} of {batch.course_progress?.total_sessions || 0} sessions completed
                           </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="capitalize">
-                            {batch.batch_schedule?.toLowerCase() || 'Weekdays'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 col-span-2">
-                          <Layers className="w-3.5 h-3.5 text-indigo-600" />
-                          <span className="font-semibold text-slate-800">
-                            {batch.module_count || 0} Modules Available
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            {batch.batch_mode || 'Online'}
                           </span>
                         </div>
                       </div>
 
-                      {/* Course Progress */}
-                      {batch.course_progress && (
-                        <div className="mt-3 pt-3 border-t border-slate-100">
-                          <div className="flex items-center justify-between text-xs mb-1.5">
-                            <span className="font-bold text-slate-700">Course Progress</span>
-                            <span className="font-extrabold text-indigo-600">
-                              {Math.round(batch.course_progress.progress_percentage || 0)}%
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                      {/* Secondary Info: Faculty, Schedule & Modules */}
+                      <div className="mt-auto space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                        {instructors.length > 0 && (
+                          <div className="flex items-center gap-2">
                             <div
-                              className={`h-full rounded-full transition-all ${
-                                batch.course_progress.progress_percentage >= 100
-                                  ? 'bg-emerald-500'
-                                  : 'bg-indigo-600'
-                              }`}
-                              style={{
-                                width: `${Math.min(100, Math.max(0, batch.course_progress.progress_percentage || 0))}%`,
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
-                            <span>
-                              {batch.course_progress.completed_sessions || 0} / {batch.course_progress.total_sessions || 0} Sessions Completed
-                            </span>
-                            <span
-                              className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
-                                batch.course_progress.status === 'COMPLETED'
-                                  ? 'bg-emerald-50 text-emerald-700'
-                                  : batch.course_progress.status === 'IN_PROGRESS'
-                                  ? 'bg-indigo-50 text-indigo-700'
-                                  : 'bg-slate-100 text-slate-500'
-                              }`}
+                              className="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[9px] shrink-0"
+                              style={{ background: ADMIN_LIGHT, color: ADMIN_PRIMARY }}
                             >
-                              {batch.course_progress.status === 'COMPLETED'
-                                ? 'Completed'
-                                : batch.course_progress.status === 'IN_PROGRESS'
-                                ? 'In Progress'
-                                : 'Not Started'}
+                              <User className="w-3 h-3" />
+                            </div>
+                            <span className="truncate text-[11px]">
+                              Instructor:{' '}
+                              <strong className="text-slate-800 font-semibold">
+                                {instructors[0]?.instructor?.first_name} {instructors[0]?.instructor?.last_name}
+                              </strong>
                             </span>
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="capitalize">{batch.batch_schedule?.toLowerCase() || 'Flexible'}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="capitalize">{batch.batch_time?.toLowerCase() || 'Standard'}</span>
+                          </div>
+                          <div className="flex items-center gap-1 ml-auto">
+                            <Layers className="w-3 h-3 text-indigo-600 shrink-0" />
+                            <span className="font-semibold text-slate-700">{batch.module_count || 0} Modules</span>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
 
-                    {/* Action */}
-                    <div className="p-4 bg-slate-50 border-t border-slate-100">
+                    {/* Action Footer */}
+                    <div className="p-4 bg-slate-50/70 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() => openCourse(batch)}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-xs cursor-pointer hover:opacity-95 active:scale-[0.99]"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-xs cursor-pointer hover:opacity-95 active:scale-[0.99] min-h-[42px]"
                         style={{ background: ADMIN_PRIMARY }}
                       >
                         <BookOpen className="w-4 h-4" />
                         <span>
                           {batch.course_progress?.status === 'COMPLETED'
-                            ? 'Review Course Materials'
+                            ? 'Review Course'
                             : batch.course_progress?.status === 'IN_PROGRESS'
                             ? 'Continue Learning'
-                            : 'Access Course & Study Materials'}
+                            : 'Start Learning'}
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+                        <ChevronRight className="w-4 h-4 ml-0.5" />
                       </button>
                     </div>
                   </div>

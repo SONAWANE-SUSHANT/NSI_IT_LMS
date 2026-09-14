@@ -84,8 +84,8 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
       )}
 
       <aside
-        className={`admin-sidebar fixed top-0 left-0 bottom-0 z-50 lg:z-30 w-[280px] flex flex-col bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`admin-sidebar fixed top-0 left-0 bottom-0 z-50 lg:z-30 w-[280px] max-w-[85vw] sm:max-w-xs flex flex-col bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
         style={{ borderRight: '1px solid #ECEEF2' }}
       >
@@ -94,10 +94,7 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg transition-colors flex-shrink-0"
-            style={{ color: '#9CA3AF' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#111827'; e.currentTarget.style.background = '#F3F4F6'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'transparent'; }}
+            className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
             aria-label="Close menu"
           >
             <X size={20} />
@@ -106,15 +103,15 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
 
         {/* Portal badge */}
         <div className="px-4 pt-5 pb-3 flex-shrink-0">
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: ADMIN_LIGHT }}>
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: ADMIN_PRIMARY, color: '#fff' }}>
-              <GraduationCap size={15} />
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-[#c7cef5]/50" style={{ background: ADMIN_LIGHT }}>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl shadow-2xs shrink-0" style={{ background: ADMIN_PRIMARY, color: '#fff' }}>
+              <GraduationCap size={16} />
             </span>
             <div>
               <span className="text-[12px] font-extrabold uppercase tracking-wider block leading-tight" style={{ color: ADMIN_DARK }}>
                 Student Portal
               </span>
-              <span className="text-[10px] text-slate-500 font-medium">Learner Workspace</span>
+              <span className="text-[10px] text-slate-500 font-medium">Learning Workspace</span>
             </div>
           </div>
         </div>
@@ -123,10 +120,10 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
         <div className="flex-1 overflow-y-auto pt-2 pb-4 px-3.5 space-y-6 admin-sidebar-scroll">
           {navGroups.map((group) => (
             <div key={group.label}>
-              <p className="px-2.5 mb-1.5 text-[11px] font-semibold uppercase select-none" style={{ color: '#A3A9B7', letterSpacing: '0.08em' }}>
+              <p className="px-2.5 mb-1.5 text-[11px] font-bold uppercase select-none tracking-wider text-slate-400">
                 {group.label}
               </p>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -135,11 +132,11 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
                       to={item.path}
                       end={Boolean(item.isExact)}
                       onClick={() => { if (isOpen && onClose) onClose(); }}
-                      className="group relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+                      className="group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[42px]"
                       style={({ isActive }) => ({
                         color: isActive ? ADMIN_PRIMARY : '#4B5563',
                         background: isActive ? ADMIN_ACTIVE : 'transparent',
-                        fontWeight: isActive ? 600 : 500,
+                        fontWeight: isActive ? 700 : 500,
                       })}
                       onMouseEnter={(e) => {
                         if (!e.currentTarget.classList.contains('active')) {
@@ -184,7 +181,7 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
           <div className="flex items-center justify-between p-2 rounded-xl border border-slate-100 bg-slate-50/60">
             <NavLink
               to={`${basePath}/profile`}
-              className="flex items-center gap-2.5 overflow-hidden hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2.5 overflow-hidden hover:opacity-80 transition-opacity min-w-0"
               title="View & Edit Profile"
             >
               <div
@@ -205,7 +202,7 @@ export default function StudentSidebar({ isOpen = false, onClose }) {
             <button
               onClick={handleLogout}
               title={isViewingAsAdmin ? "Return to Admin Portal" : "Sign Out"}
-              className={`p-1.5 rounded-lg transition-colors shrink-0 ${
+              className={`p-2 rounded-xl transition-colors shrink-0 min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer ${
                 isViewingAsAdmin
                   ? 'text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50'
                   : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'

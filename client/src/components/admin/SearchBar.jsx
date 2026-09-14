@@ -25,7 +25,7 @@ export default function SearchBar({
   };
 
   return (
-    <div className="relative flex items-center w-full max-w-md">
+    <div className="relative flex items-center w-full">
       <div className="absolute left-3.5 pointer-events-none text-slate-400">
         {isLoading ? (
           <Loader2 size={18} className="animate-spin text-indigo-600" />
@@ -38,15 +38,15 @@ export default function SearchBar({
         type="text"
         value={value}
         onChange={onChange}
-      
-        className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-2xs"
+        placeholder={placeholder}
+        className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition shadow-2xs min-h-[38px]"
       />
 
       {value && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-3 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+          className="absolute right-3 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
           title="Clear search"
           aria-label="Clear search"
         >

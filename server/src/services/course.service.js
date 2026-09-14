@@ -36,6 +36,13 @@ const createCourse = async (courseData, adminId) => {
 const getCourses = async (filters = {}) => {
   const where = {};
 
+  if (Array.isArray(filters.courseIds)) {
+    if (filters.courseIds.length === 0) {
+      return [];
+    }
+    where.id = { [Op.in]: filters.courseIds };
+  }
+
   if (filters.status && filters.status !== "ALL") {
     where.status = filters.status;
   }
