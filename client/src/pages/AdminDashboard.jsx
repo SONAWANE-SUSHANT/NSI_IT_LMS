@@ -14,10 +14,7 @@ import ErrorState from '../components/admin/ErrorState';
 import {
   GraduationCap,
   Users,
-  ShieldCheck,
   UserCheck,
-  BookOpen,
-  CalendarDays,
   UserPlus,
   ArrowRight,
   RefreshCw,
@@ -196,16 +193,6 @@ export default function AdminDashboard() {
             isLoading={isLoading}
           />
 
-          {/* Total Admins */}
-          <StatCard
-            title="Total Admins"
-            value={isLoading ? null : stats.totalAdmins}
-            icon={<ShieldCheck size={22} />}
-            subtitle="System & platform administrators"
-            colorScheme="indigo"
-            isLoading={isLoading}
-          />
-
           {/* Active Users */}
           <StatCard
             title="Active Users"
@@ -214,28 +201,6 @@ export default function AdminDashboard() {
             subtitle="Users with ACTIVE status"
             colorScheme="emerald"
             isLoading={isLoading}
-          />
-
-          {/* Active Courses (Module Pending API) */}
-          <StatCard
-            title="Active Courses"
-            value={null}
-            unavailableMessage="No data available"
-            icon={<BookOpen size={22} />}
-            subtitle="Course module scheduled in Phase 2B"
-            colorScheme="purple"
-            isLoading={false}
-          />
-
-          {/* Upcoming Lectures (Module Pending API) */}
-          <StatCard
-            title="Upcoming Lectures"
-            value={null}
-            unavailableMessage="No data available"
-            icon={<CalendarDays size={22} />}
-            subtitle="Scheduling module scheduled in Phase 3"
-            colorScheme="amber"
-            isLoading={false}
           />
         </div>
       </div>

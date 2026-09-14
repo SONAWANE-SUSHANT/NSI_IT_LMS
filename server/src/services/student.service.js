@@ -128,6 +128,8 @@ const getBatchCourseContent = async (batchId, studentId) => {
     order: [
       ["display_order", "ASC"],
       ["id", "ASC"],
+      [{ model: Lecture, as: "lectures" }, "display_order", "ASC"],
+      [{ model: Lecture, as: "lectures" }, "id", "ASC"],
     ],
     include: [
       {

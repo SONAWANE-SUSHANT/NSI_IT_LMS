@@ -21,6 +21,16 @@ const sequelize = new Sequelize(
       decimalNumbers: true,
       supportBigNumbers: true,
       connectTimeout: 10000,
+      ...(process.env.DB_SSL === "REQUIRED" ||
+      process.env.DB_SSL === "true" ||
+      (process.env.DB_HOST && process.env.DB_HOST.includes("aivencloud.com"))
+        ? {
+            ssl: {
+              require: true,
+              rejectUnauthorized: false,
+            },
+          }
+        : {}),
     },
     // Keep connection alive and recycle stale connections
     retry: {
