@@ -48,23 +48,32 @@ app.use(
   })
 );
 
-// CORS configuration (supports comma-separated origins or default fallback)
-const allowedOrigins = process.env.CLIENT_URL
+// CORS configuration (supports Vercel, localhost, and custom CLIENT_URL)
+const defaultOrigins = [
+  "https://nsi-it-lms-theta.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+const envOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map((url) => url.trim().replace(/\/+$/, ""))
-  : ["http://localhost:5173", "http://localhost:3000"];
+  : [];
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
       if (!origin) return callback(null, true);
       const cleanOrigin = origin.replace(/\/+$/, "");
       if (
         allowedOrigins.includes("*") ||
         allowedOrigins.includes(cleanOrigin) ||
-        process.env.NODE_ENV !== "production" ||
+        cleanOrigin.endsWith(".vercel.app") ||
         cleanOrigin.includes("localhost") ||
-        cleanOrigin.includes("127.0.0.1")
+        cleanOrigin.includes("127.0.0.1") ||
+        process.env.NODE_ENV !== "production"
       ) {
         return callback(null, true);
       }
