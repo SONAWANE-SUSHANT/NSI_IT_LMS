@@ -103,7 +103,7 @@ export default function InstructorDashboard() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <button
               onClick={loadData}
               title="Refresh Data"
@@ -159,7 +159,7 @@ export default function InstructorDashboard() {
 
       {/* ── Batches List & Quick Schedule ── */}
       <div className="bg-white rounded-2xl border border-[#ECEEF2] p-6 shadow-xs">
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
           <div>
             <h3 className="text-base font-extrabold text-slate-900">
               Assigned Cohorts & Classes
@@ -168,7 +168,7 @@ export default function InstructorDashboard() {
               Review assigned student batches and curriculum coverage
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               to={schedulePath}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors shadow-2xs"

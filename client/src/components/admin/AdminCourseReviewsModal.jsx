@@ -221,8 +221,8 @@ export default function AdminCourseReviewsModal({ isOpen, onClose, course }) {
               </p>
             </div>
           ) : (
-            <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
-              <table className="w-full text-left text-xs">
+            <div className="rounded-xl border border-slate-200 overflow-x-auto shadow-2xs">
+              <table className="w-full min-w-[620px] text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
                   <tr>
                     <th className="px-4 py-3">Student</th>

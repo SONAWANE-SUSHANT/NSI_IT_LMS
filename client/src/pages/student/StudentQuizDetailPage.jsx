@@ -291,8 +291,8 @@ export default function StudentQuizDetailPage({ basePathOverride }) {
             My Previous Attempts ({pastAttempts.length})
           </h3>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
+          <div className="table-container overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-xs text-slate-600">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/80 font-bold text-slate-700 uppercase text-[11px] tracking-wider">
                   <th className="py-3 px-4">Attempt #</th>

@@ -156,14 +156,14 @@ export default function StudentDossierModal({ studentId, onClose }) {
       <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden print:max-w-none print:max-h-none print:shadow-none print:border-none">
         
         {/* Header Bar */}
-        <div className="px-6 py-4.5 bg-slate-900 text-white flex items-center justify-between gap-4 border-b border-slate-800 print:bg-white print:text-slate-950 print:border-b-2 print:border-slate-950">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 print:hidden">
+        <div className="px-4 sm:px-6 py-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 print:bg-white print:text-slate-950 print:border-b-2 print:border-slate-950">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 print:hidden shrink-0">
               <GraduationCap size={22} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300 print:text-indigo-700">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-indigo-300 print:text-indigo-700">
                   NSI IT Learning Management System
                 </span>
                 <span className="hidden sm:inline-block text-slate-500 print:hidden">•</span>
@@ -171,7 +171,7 @@ export default function StudentDossierModal({ studentId, onClose }) {
                   Student Comprehensive Academic Dossier
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white print:text-slate-950">
+              <h2 className="text-base sm:text-xl font-bold text-white print:text-slate-950 truncate">
                 {isLoading
                   ? 'Loading Student Dossier...'
                   : dossier
@@ -181,7 +181,7 @@ export default function StudentDossierModal({ studentId, onClose }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 print:hidden">
+          <div className="flex flex-wrap items-center gap-2 print:hidden self-end sm:self-center">
             {dossier && (
               <>
                 <button
@@ -413,7 +413,7 @@ export default function StudentDossierModal({ studentId, onClose }) {
                   <p className="text-sm text-slate-400 py-4">No enrolled courses found for this student.</p>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[620px] text-left text-xs">
                       <thead className="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
                         <tr>
                           <th className="px-4 py-3">Course</th>
@@ -489,7 +489,7 @@ export default function StudentDossierModal({ studentId, onClose }) {
                   <p className="text-sm text-slate-400 py-4">No quiz attempts recorded yet.</p>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[640px] text-left text-xs">
                       <thead className="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
                         <tr>
                           <th className="px-4 py-3">Quiz Name</th>
@@ -556,7 +556,7 @@ export default function StudentDossierModal({ studentId, onClose }) {
                   <p className="text-sm text-slate-400 py-4">No session progress recorded yet.</p>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-72 overflow-y-auto">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[620px] text-left text-xs">
                       <thead className="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200 sticky top-0">
                         <tr>
                           <th className="px-4 py-3">Lecture / Session</th>
@@ -610,7 +610,7 @@ export default function StudentDossierModal({ studentId, onClose }) {
                   <p className="text-sm text-slate-400 py-4">No devices recorded.</p>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[600px] text-left text-xs">
                       <thead className="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-200">
                         <tr>
                           <th className="px-4 py-3">Device Name</th>

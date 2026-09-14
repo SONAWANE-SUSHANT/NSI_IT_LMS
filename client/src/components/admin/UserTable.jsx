@@ -55,8 +55,8 @@ export default function UserTable({
 
   return (
     <div className="admin-table-card w-full bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="table-container overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[540px] sm:min-w-full">
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
               <th className="py-3.5 px-4 sm:px-6">User</th>

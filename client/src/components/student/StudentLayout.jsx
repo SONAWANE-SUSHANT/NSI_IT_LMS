@@ -9,7 +9,7 @@ export default function StudentLayout() {
 
   return (
     <div className="portal-page-layout admin-shell">
-      <Navbar currentPortal="student" />
+      <Navbar currentPortal="student" onToggleSidebar={() => setSidebarOpen(true)} />
 
       <div className="admin-body">
         <StudentSidebar

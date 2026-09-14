@@ -4145,6 +4145,182 @@
           "response": []
         },
         {
+          "name": "Download sample CSV template for quiz authoring",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 2xx', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+                  "});",
+                  "",
+                  "pm.test('Response is valid JSON with success flag', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quizzes/sample-csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quizzes",
+                "sample-csv"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Download sample CSV template for quiz authoring"
+          },
+          "response": []
+        },
+        {
+          "name": "Create new test / assessment by uploading or parsing CSV",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 2xx', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+                  "});",
+                  "",
+                  "pm.test('Response is valid JSON with success flag', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Python Fundamentals & OOP Assessment\",\n  \"description\": \"Assessment imported via CSV\",\n  \"course_id\": 1,\n  \"module_id\": 1,\n  \"duration_minutes\": 30,\n  \"passing_marks\": 15,\n  \"max_attempts\": 2,\n  \"csv_content\": \"string\",\n  \"questions\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/quizzes/import-csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quizzes",
+                "import-csv"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "description": "Create new test / assessment by uploading or parsing CSV"
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk import questions from CSV into an existing quiz",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 2xx', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+                  "});",
+                  "",
+                  "pm.test('Response is valid JSON with success flag', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"csv_content\": \"string\",\n  \"questions\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/quizzes/:quizId/import-csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quizzes",
+                ":quizId",
+                "import-csv"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "key": "quizId",
+                  "value": "{{quizId}}",
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Bulk import questions from CSV into an existing quiz"
+          },
+          "response": []
+        },
+        {
           "name": "List all quizzes",
           "event": [
             {

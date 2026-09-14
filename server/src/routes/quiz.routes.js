@@ -10,6 +10,11 @@ const auth = [authenticate, authorizeRoles("ADMIN", "INSTRUCTOR")];
 // Language discovery
 router.get("/quizzes/languages", auth, quizController.getSupportedLanguages);
 
+// CSV Import & Template
+router.get("/quizzes/sample-csv", auth, quizController.getSampleCsv);
+router.post("/quizzes/import-csv", auth, quizController.createQuizFromCsv);
+router.post("/quizzes/:quizId/import-csv", auth, quizController.importQuestionsFromCsv);
+
 // Quiz CRUD
 router.get("/quizzes", auth, quizController.listQuizzes);
 router.get("/quizzes/:quizId", auth, quizController.getQuizById);

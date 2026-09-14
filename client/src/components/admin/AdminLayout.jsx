@@ -15,7 +15,7 @@ export default function AdminLayout({ children, pageTitle }) {
 
   return (
     <div className="portal-page-layout admin-shell">
-      <Navbar currentPortal="admin" />
+      <Navbar currentPortal="admin" onToggleSidebar={() => setSidebarOpen(true)} />
 
       <div className="admin-body">
         <AdminSidebar

@@ -17,7 +17,10 @@ import {
   ExternalLink,
   ChevronRight,
   Filter,
+  FileSpreadsheet,
+  Upload,
 } from 'lucide-react';
+import CreateQuizCsvModal from '../../components/quiz/CreateQuizCsvModal';
 import {
   fetchQuizzes,
   deleteQuiz,
@@ -51,6 +54,7 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
 
   // Create Quiz Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCsvModal, setShowCsvModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
   const [newQuiz, setNewQuiz] = useState({
@@ -277,6 +281,14 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button
+            type="button"
+            onClick={() => setShowCsvModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-2xs hover:border-[#3c4cb8] hover:text-[#3c4cb8]"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-[#3c4cb8]" />
+            <span>Upload CSV to Create Test</span>
+          </button>
+          <button
             onClick={handleOpenCreateModal}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-xs hover:opacity-95"
             style={{ background: ADMIN_PRIMARY }}
@@ -370,8 +382,8 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600 border-collapse">
+          <div className="table-container overflow-x-auto">
+            <table className="w-full min-w-[700px] text-left text-xs text-slate-600 border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/80 font-bold text-slate-700 uppercase text-[11px] tracking-wider">
                   <th className="py-3.5 px-4">Quiz</th>
@@ -728,6 +740,19 @@ export default function InstructorQuizzesPage({ basePathOverride }) {
           </div>
         </div>
       )}
+
+      {/* ── Create Test via CSV Modal ── */}
+      <CreateQuizCsvModal
+        isOpen={showCsvModal}
+        onClose={() => setShowCsvModal(false)}
+        onSuccess={(created) => {
+          loadData();
+          if (created?.id) {
+            navigate(`${basePath}/quizzes/builder/${created.id}`);
+          }
+        }}
+        courses={courses}
+      />
     </div>
   );
 }

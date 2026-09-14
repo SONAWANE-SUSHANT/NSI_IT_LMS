@@ -1,4 +1,5 @@
 const { Op } = require("sequelize");
+const sequelize = require("../config/database");
 const {
   Quiz,
   QuizQuestion,
@@ -11,6 +12,7 @@ const {
   User,
 } = require("../models");
 const { resolveLanguage } = require("../config/judge0Languages");
+const { parseQuizCsv, getSampleCsvString } = require("../utils/quizCsvParser");
 
 /**
  * List all quizzes with optional filters
@@ -360,8 +362,8 @@ const publishQuiz = async (quizId, userId) => {
     throw new Error("Quiz title is required to publish");
   }
 
-  if (!quiz.session_id || !quiz.session) {
-    throw new Error("Quiz must belong to a valid session");
+  if (!quiz.session_id && !quiz.module_id && !quiz.course_id) {
+    throw new Error("Quiz must belong to a valid course, module, or session");
   }
 
   const activeQuestions = quiz.questions || [];
@@ -804,6 +806,234 @@ const getAttemptDetails = async (attemptId) => {
   return attempt;
 };
 
+/**
+ * Create a new quiz from CSV content or pre-parsed questions in a single transaction
+ */
+const createQuizFromCsv = async ({
+  sessionId,
+  moduleId,
+  courseId,
+  title,
+  description,
+  instructions,
+  duration_minutes,
+  passing_marks,
+  max_attempts = 1,
+  csvContent,
+  questions: inputQuestions,
+  userId,
+}) => {
+  let parsed = { metadata: {}, questions: [] };
+  if (csvContent) {
+    parsed = parseQuizCsv(csvContent);
+  } else if (Array.isArray(inputQuestions) && inputQuestions.length > 0) {
+    parsed.questions = inputQuestions;
+  } else {
+    throw new Error("Either csvContent or a non-empty questions array is required.");
+  }
+
+  const effectiveTitle = (title || parsed.metadata.title || "").trim();
+  if (!effectiveTitle) {
+    throw new Error("Quiz title is required");
+  }
+
+  const effectiveDuration =
+    duration_minutes !== undefined && duration_minutes !== null && duration_minutes !== ""
+      ? Number(duration_minutes)
+      : parsed.metadata.duration_minutes || null;
+
+  const effectivePassingMarks =
+    passing_marks !== undefined && passing_marks !== null && passing_marks !== ""
+      ? Number(passing_marks)
+      : parsed.metadata.passing_marks || null;
+
+  let resolvedModuleId = moduleId ? Number(moduleId) : null;
+  let resolvedCourseId = courseId ? Number(courseId) : null;
+  let resolvedSessionId = sessionId ? Number(sessionId) : null;
+
+  if (resolvedSessionId && (!resolvedModuleId || !resolvedCourseId)) {
+    const session = await Lecture.findByPk(resolvedSessionId, {
+      include: [{ model: CourseModule, as: "module" }],
+    });
+    if (session) {
+      if (!resolvedModuleId) resolvedModuleId = session.module_id;
+      if (!resolvedCourseId && session.module) resolvedCourseId = session.module.course_id;
+    }
+  }
+
+  if (resolvedModuleId && !resolvedCourseId) {
+    const mod = await CourseModule.findByPk(resolvedModuleId);
+    if (mod) resolvedCourseId = mod.course_id;
+  }
+
+  if (!resolvedModuleId && !resolvedSessionId && !resolvedCourseId) {
+    throw new Error("Course Module or Session is required for creating a quiz");
+  }
+
+  if (!parsed.questions || parsed.questions.length === 0) {
+    throw new Error("Cannot create quiz without any questions");
+  }
+
+  // Execute in transaction
+  const t = await sequelize.transaction();
+  try {
+    const quiz = await Quiz.create(
+      {
+        session_id: resolvedSessionId,
+        module_id: resolvedModuleId,
+        course_id: resolvedCourseId,
+        title: effectiveTitle,
+        description: description ? String(description).trim() : null,
+        instructions: instructions ? String(instructions).trim() : null,
+        duration_minutes: effectiveDuration,
+        total_marks: 0.0,
+        passing_marks: effectivePassingMarks,
+        max_attempts: Number(max_attempts) || 1,
+        status: "DRAFT",
+        created_by: userId || null,
+        updated_by: userId || null,
+      },
+      { transaction: t }
+    );
+
+    let totalMarks = 0;
+    for (let i = 0; i < parsed.questions.length; i += 1) {
+      const q = parsed.questions[i];
+      const qMarks = Number(q.marks) || 1.0;
+      totalMarks += qMarks;
+
+      const createdQuestion = await QuizQuestion.create(
+        {
+          quiz_id: quiz.id,
+          question_type: q.question_type === "CODING" ? "CODING" : "MCQ",
+          question_text: String(q.question_text).trim(),
+          marks: qMarks,
+          display_order: i + 1,
+          difficulty: ["EASY", "MEDIUM", "HARD"].includes(q.difficulty) ? q.difficulty : "MEDIUM",
+          explanation: q.explanation ? String(q.explanation).trim() : null,
+          programming_language:
+            q.question_type === "CODING"
+              ? (q.programming_language || "python").trim().toLowerCase()
+              : null,
+          starter_code: q.question_type === "CODING" ? q.starter_code || null : null,
+          constraints: q.question_type === "CODING" ? q.constraints || null : null,
+          expected_output: q.question_type === "CODING" ? q.expected_output || null : null,
+          status: "ACTIVE",
+          created_by: userId || null,
+          updated_by: userId || null,
+        },
+        { transaction: t }
+      );
+
+      if (q.question_type === "MCQ" && Array.isArray(q.options) && q.options.length > 0) {
+        const optionsToCreate = q.options.map((opt, optIdx) => ({
+          question_id: createdQuestion.id,
+          option_label: opt.option_label || String.fromCharCode(65 + optIdx),
+          option_text: String(opt.option_text || "").trim(),
+          is_correct: Boolean(opt.is_correct),
+          display_order: opt.display_order || optIdx + 1,
+          created_by: userId || null,
+          updated_by: userId || null,
+        }));
+        await QuizOption.bulkCreate(optionsToCreate, { transaction: t });
+      }
+    }
+
+    await quiz.update({ total_marks: totalMarks }, { transaction: t });
+    await t.commit();
+
+    return await getQuizById(quiz.id);
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+};
+
+/**
+ * Bulk import questions into an existing quiz from CSV or pre-parsed questions
+ */
+const importQuestionsFromCsv = async (quizId, { csvContent, questions: inputQuestions, userId }) => {
+  const quiz = await Quiz.findByPk(quizId);
+  if (!quiz) {
+    throw new Error("Quiz not found");
+  }
+
+  if (quiz.status === "CLOSED") {
+    throw new Error("Cannot add questions to a closed quiz");
+  }
+
+  let parsed = { questions: [] };
+  if (csvContent) {
+    parsed = parseQuizCsv(csvContent);
+  } else if (Array.isArray(inputQuestions) && inputQuestions.length > 0) {
+    parsed.questions = inputQuestions;
+  } else {
+    throw new Error("Either csvContent or a non-empty questions array is required.");
+  }
+
+  if (!parsed.questions || parsed.questions.length === 0) {
+    throw new Error("No valid questions found to import");
+  }
+
+  // Get current max display_order
+  const maxOrderResult = await QuizQuestion.max("display_order", {
+    where: { quiz_id: quizId },
+  });
+  let nextOrder = (maxOrderResult || 0) + 1;
+
+  const t = await sequelize.transaction();
+  try {
+    for (let i = 0; i < parsed.questions.length; i += 1) {
+      const q = parsed.questions[i];
+      const qMarks = Number(q.marks) || 1.0;
+
+      const createdQuestion = await QuizQuestion.create(
+        {
+          quiz_id: quiz.id,
+          question_type: q.question_type === "CODING" ? "CODING" : "MCQ",
+          question_text: String(q.question_text).trim(),
+          marks: qMarks,
+          display_order: nextOrder++,
+          difficulty: ["EASY", "MEDIUM", "HARD"].includes(q.difficulty) ? q.difficulty : "MEDIUM",
+          explanation: q.explanation ? String(q.explanation).trim() : null,
+          programming_language:
+            q.question_type === "CODING"
+              ? (q.programming_language || "python").trim().toLowerCase()
+              : null,
+          starter_code: q.question_type === "CODING" ? q.starter_code || null : null,
+          constraints: q.question_type === "CODING" ? q.constraints || null : null,
+          expected_output: q.question_type === "CODING" ? q.expected_output || null : null,
+          status: "ACTIVE",
+          created_by: userId || null,
+          updated_by: userId || null,
+        },
+        { transaction: t }
+      );
+
+      if (q.question_type === "MCQ" && Array.isArray(q.options) && q.options.length > 0) {
+        const optionsToCreate = q.options.map((opt, optIdx) => ({
+          question_id: createdQuestion.id,
+          option_label: opt.option_label || String.fromCharCode(65 + optIdx),
+          option_text: String(opt.option_text || "").trim(),
+          is_correct: Boolean(opt.is_correct),
+          display_order: opt.display_order || optIdx + 1,
+          created_by: userId || null,
+          updated_by: userId || null,
+        }));
+        await QuizOption.bulkCreate(optionsToCreate, { transaction: t });
+      }
+    }
+
+    await t.commit();
+    await syncQuizTotalMarks(quiz.id);
+
+    return await getQuizById(quiz.id);
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+};
+
 module.exports = {
   listQuizzes,
   getQuizById,
@@ -821,4 +1051,7 @@ module.exports = {
   deleteOption,
   getQuizAttempts,
   getAttemptDetails,
+  createQuizFromCsv,
+  importQuestionsFromCsv,
+  getSampleCsvString,
 };

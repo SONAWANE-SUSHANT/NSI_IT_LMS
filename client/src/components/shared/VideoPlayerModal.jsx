@@ -25,6 +25,19 @@ export default function VideoPlayerModal({
 }) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'notes'
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('fit'); // 'fit' | 'tall'
+  const playerContainerRef = useState(null)[0] || { current: null };
+
+  const handleToggleFullscreen = () => {
+    const el = document.getElementById('modal-video-viewport');
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -53,14 +66,14 @@ export default function VideoPlayerModal({
   const notes = (lecture.notes || []).filter((n) => n.status !== 'INACTIVE');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md transition-all animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/80 backdrop-blur-md transition-all animate-fadeIn">
       {/* Click outside to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Main Player Window */}
-      <div className="relative z-10 w-full max-w-5xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh]">
+      <div className="relative z-10 w-full max-w-5xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[96vh]">
         {/* Header Bar */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-4 bg-slate-50/80 shrink-0">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-50/90 shrink-0">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-50 text-[#3c4cb8] border border-indigo-200">
@@ -69,43 +82,42 @@ export default function VideoPlayerModal({
               </span>
 
               {courseName && (
-                <span className="text-xs font-semibold text-slate-500 truncate max-w-[200px]">
+                <span className="text-xs font-semibold text-slate-500 truncate max-w-[160px] sm:max-w-[240px]">
                   {courseName}
                 </span>
               )}
 
               {moduleName && (
                 <>
-                  <span className="text-slate-300 text-xs">&bull;</span>
-                  <span className="text-xs font-semibold text-slate-500 truncate max-w-[200px]">
+                  <span className="text-slate-300 text-xs hidden sm:inline">&bull;</span>
+                  <span className="text-xs font-semibold text-slate-500 truncate max-w-[160px] sm:max-w-[240px] hidden sm:inline">
                     {moduleName}
                   </span>
                 </>
               )}
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate" title={lecture.title}>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate" title={lecture.title}>
               {lecture.title}
             </h3>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* View Mode Switcher on Header for Mobile & Desktop */}
             {recordingUrl && (
-              <a
-                href={recordingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Open video in external browser tab"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-2xs"
+              <button
+                type="button"
+                onClick={() => setViewMode((prev) => (prev === 'fit' ? 'tall' : 'fit'))}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                title="Toggle viewing mode"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Open Externally</span>
-              </a>
+                <span>{viewMode === 'fit' ? 'Tall View' : '16:9'}</span>
+              </button>
             )}
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition-colors"
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition-colors cursor-pointer"
               title="Close Player (ESC)"
             >
               <X className="w-5 h-5" />
@@ -113,41 +125,90 @@ export default function VideoPlayerModal({
           </div>
         </div>
 
-        {/* Video Screen Viewport (16:9) */}
-        <div className="relative bg-black w-full aspect-video shrink-0 max-h-[56vh] flex items-center justify-center overflow-hidden">
+        {/* Video Screen Viewport with Responsive / Adjustable Height & Protective Top Shield */}
+        <div
+          id="modal-video-viewport"
+          className={`relative bg-black w-full shrink-0 flex items-center justify-center overflow-hidden transition-all duration-200 ${
+            viewMode === 'tall'
+              ? 'aspect-[4/3] sm:aspect-[16/10] min-h-[280px] sm:min-h-[440px] max-h-[72vh]'
+              : 'aspect-video min-h-[220px] sm:min-h-[350px] max-h-[58vh]'
+          }`}
+          onContextMenu={(e) => e.preventDefault()}
+        >
           {!recordingUrl ? (
             <div className="text-center p-8 text-slate-400">
               <AlertCircle className="w-10 h-10 mx-auto mb-2 text-slate-500" />
               <p className="text-sm font-semibold">No recording URL available for this lecture.</p>
               <p className="text-xs text-slate-500 mt-1">Please check back once the instructor uploads the recording.</p>
             </div>
-          ) : parsed.type === 'video' ? (
-            <video
-              src={parsed.embedUrl}
-              controls
-              autoPlay
-              playsInline
-              className="w-full h-full object-contain"
-            >
-              Your browser does not support HTML5 video streaming.
-            </video>
           ) : (
-            <div className="relative w-full h-full">
-              {iframeLoading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-slate-300 z-10">
-                  <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
-                  <span className="text-xs font-semibold">Buffering LMS Video Player…</span>
+            <>
+              {/* Top Protective Shield - blocks Drive popout icon and provides direct controls */}
+              <div
+                className="absolute top-0 inset-x-0 h-13 sm:h-14 z-20 pointer-events-auto flex items-center justify-between px-3 sm:px-4 bg-gradient-to-b from-black/85 via-black/40 to-transparent select-none"
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                <div className="flex items-center gap-2 min-w-0 pr-2">
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-[#3c4cb8] text-white tracking-wider shrink-0 shadow-xs">
+                    Secure Stream
+                  </span>
+                  <span className="text-xs font-semibold text-white/90 truncate drop-shadow-xs">
+                    {lecture.title}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode((prev) => (prev === 'fit' ? 'tall' : 'fit'))}
+                    className="px-2 py-1 rounded-lg bg-black/60 hover:bg-black/90 text-white/95 text-[11px] font-bold border border-white/25 backdrop-blur-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                    title={viewMode === 'fit' ? 'Switch to Tall Mode (Expanded for mobile & slides)' : 'Switch to 16:9 Fit Mode'}
+                  >
+                    <span>{viewMode === 'fit' ? 'Tall' : '16:9'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleToggleFullscreen}
+                    className="p-1.5 rounded-lg bg-black/60 hover:bg-black/90 text-white/95 border border-white/25 backdrop-blur-xs transition-all cursor-pointer shadow-xs"
+                    title="Fullscreen Mode"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {parsed.type === 'video' ? (
+                <video
+                  src={parsed.embedUrl}
+                  controls
+                  controlsList="nodownload"
+                  onContextMenu={(e) => e.preventDefault()}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
+                >
+                  Your browser does not support HTML5 video streaming.
+                </video>
+              ) : (
+                <div className="relative w-full h-full">
+                  {iframeLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-slate-300 z-10">
+                      <div className="w-8 h-8 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
+                      <span className="text-xs font-semibold">Buffering LMS Video Player…</span>
+                    </div>
+                  )}
+                  <iframe
+                    src={parsed.embedUrl}
+                    title={lecture.title}
+                    className="w-full h-full border-0 absolute inset-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    onLoad={() => setIframeLoading(false)}
+                  />
                 </div>
               )}
-              <iframe
-                src={parsed.embedUrl}
-                title={lecture.title}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                onLoad={() => setIframeLoading(false)}
-              />
-            </div>
+            </>
           )}
         </div>
 

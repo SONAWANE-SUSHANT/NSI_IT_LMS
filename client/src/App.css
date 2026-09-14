@@ -256,7 +256,8 @@
 }
 
 .navbar-container {
-  @apply mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between;
+  @apply mx-auto flex max-w-7xl flex-row items-center justify-between gap-3 px-4 py-2.5 sm:px-6;
+  min-height: var(--navbar-height, 64px);
 }
 
 .navbar-brand {
@@ -568,28 +569,52 @@
    ========================================================================== */
 
 .admin-shell {
-  --navbar-height: 68px;
+  --navbar-height: 64px;
   --admin-sidebar-width: 260px;
   @apply min-h-screen w-full;
   background: var(--bg-page);
 }
 
 .admin-body {
-  @apply relative flex flex-1;
+  @apply relative flex flex-1 w-full min-w-0;
   min-height: calc(100vh - var(--navbar-height));
 }
 
 .admin-sidebar {
-  top: var(--navbar-height);
   width: var(--admin-sidebar-width);
   max-width: 86vw;
-  height: calc(100vh - var(--navbar-height));
   @apply bg-white/95 backdrop-blur;
   box-shadow: var(--shadow-xl);
 }
 
-.admin-sidebar-backdrop {
-  top: var(--navbar-height);
+/* Desktop static sidebar under navbar */
+@media (min-width: 1024px) {
+  .admin-sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    height: calc(100vh - var(--navbar-height));
+  }
+}
+
+/* Mobile & tablet slide-over drawer: full height */
+@media (max-width: 1023px) {
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 50;
+  }
+  .admin-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    top: 0;
+    z-index: 40;
+  }
 }
 
 .admin-main {
@@ -719,12 +744,19 @@
   @apply leading-5;
 }
 
+/* Standard responsive table container */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .admin-table-card {
   @apply overflow-hidden;
 }
 
 .admin-table-card table {
-  @apply min-w-[820px];
+  @apply w-full;
 }
 
 .admin-table-card th {
@@ -866,7 +898,7 @@
 }
 
 .course-admin-table {
-  @apply w-full min-w-[780px] text-left text-sm;
+  @apply w-full min-w-[560px] sm:min-w-full text-left text-sm;
 }
 
 .course-admin-table thead {
@@ -1074,16 +1106,19 @@
   }
 }
 
-@media (max-width: 768px) {
-  .admin-shell {
-    --navbar-height: 126px;
-  }
-}
-
 @media (max-width: 480px) {
   .logout-text {
     @apply hidden;
   }
+}
+
+/* Touch-friendly horizontal scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Course Content Page (modules + lectures)

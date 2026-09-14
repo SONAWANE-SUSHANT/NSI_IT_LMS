@@ -81,6 +81,33 @@ export const createQuiz = async (quizData) => {
 };
 
 /**
+ * Create a new quiz from CSV
+ * @param {object} payload - { course_id, module_id, session_id, title, duration_minutes, passing_marks, max_attempts, csv_content, questions }
+ */
+export const createQuizFromCsv = async (payload) => {
+  const response = await fetch(`${API_BASE_URL}/quizzes/import-csv`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response, 'Failed to create quiz from CSV');
+};
+
+/**
+ * Import questions from CSV into an existing quiz
+ * @param {number|string} quizId
+ * @param {object} payload - { csv_content, questions }
+ */
+export const importQuestionsFromCsv = async (quizId, payload) => {
+  const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}/import-csv`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response, 'Failed to import questions from CSV');
+};
+
+/**
  * Update quiz metadata
  * @param {number|string} quizId
  * @param {object} quizData

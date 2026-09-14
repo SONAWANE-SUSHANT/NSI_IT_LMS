@@ -326,6 +326,77 @@ const getAttemptDetails = async (req, res) => {
   }
 };
 
+const createQuizFromCsv = async (req, res) => {
+  try {
+    const rawSessionId = req.body.session_id || req.body.sessionId || req.params.sessionId;
+    const rawModuleId = req.body.module_id || req.body.moduleId;
+    const rawCourseId = req.body.course_id || req.body.courseId;
+
+    const quiz = await quizService.createQuizFromCsv({
+      sessionId: rawSessionId ? Number(rawSessionId) : null,
+      moduleId: rawModuleId ? Number(rawModuleId) : null,
+      courseId: rawCourseId ? Number(rawCourseId) : null,
+      title: req.body.title,
+      description: req.body.description,
+      instructions: req.body.instructions,
+      duration_minutes: req.body.duration_minutes,
+      passing_marks: req.body.passing_marks,
+      max_attempts: req.body.max_attempts,
+      csvContent: req.body.csv_content || req.body.csvContent,
+      questions: req.body.questions,
+      userId: req.user?.id,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Test created successfully from CSV",
+      data: quiz,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Failed to create quiz from CSV",
+    });
+  }
+};
+
+const importQuestionsFromCsv = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const quiz = await quizService.importQuestionsFromCsv(Number(quizId), {
+      csvContent: req.body.csv_content || req.body.csvContent,
+      questions: req.body.questions,
+      userId: req.user?.id,
+    });
+
+    return res.json({
+      success: true,
+      message: "Questions imported successfully from CSV",
+      data: quiz,
+    });
+  } catch (error) {
+    const status = error.message === "Quiz not found" ? 404 : 400;
+    return res.status(status).json({
+      success: false,
+      message: error.message || "Failed to import questions from CSV",
+    });
+  }
+};
+
+const getSampleCsv = async (req, res) => {
+  try {
+    const sample = quizService.getSampleCsvString();
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="quiz-template.csv"');
+    return res.send(sample);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to generate sample CSV",
+    });
+  }
+};
+
 module.exports = {
   getSupportedLanguages,
   listQuizzes,
@@ -344,4 +415,7 @@ module.exports = {
   deleteOption,
   getQuizAttempts,
   getAttemptDetails,
+  createQuizFromCsv,
+  importQuestionsFromCsv,
+  getSampleCsv,
 };

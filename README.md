@@ -20,20 +20,20 @@
 * **👨‍🏫 Instructor Faculty Portal:**
   * Assigned cohort batch overview with learner rosters.
   * Live session scheduling with automated calendar timetable integration.
-  * Assessment management: build quizzes, define MCQ options, and set coding challenges.
+  * Assessment management: build quizzes, define MCQ options, set coding challenges, and create tests by uploading CSV files or bulk-importing questions.
   * Evaluation & grading: inspect student submissions, test outputs, and override grades.
   * Instructor-targeted announcements and course review inspections.
 * **⚡ Admin Operations & Management:**
   * User directory with role filters, status toggling, and bulk CSV learner import.
   * Course catalog and syllabus builder (Courses → Modules → Lectures → Notes).
   * Cohort batch creation, instructor assignments, and student enrollments.
-  * Assessment management suite with Judge0 language support.
+  * Assessment management suite with Judge0 language support and bulk CSV test creation engine.
   * Broadcast notification center: create announcements targeted by academy, course, or batch.
   * Reports & Analytics Hub: 6 downloadable reports (Enrollments, Quizzes, Attendance, Batches, Instructors, and 360° individual student dossiers) with CSV export.
   * Platform settings management (branding title, support contacts, default passing threshold, session timeouts).
 * **📚 Interactive API Documentation:**
   * Live OpenAPI 3.0.3 Swagger UI mounted at `http://localhost:5000/api-docs`.
-  * Complete 123-request Postman Collection with automated JWT extraction and test assertions.
+  * Complete 126-request Postman Collection with automated JWT extraction and test assertions.
 
 ---
 
@@ -179,6 +179,7 @@ A pre-configured collection is provided at [`postman/NSI-IT-LMS.postman_collecti
 The server contains verification scripts in `server/src/scripts/`:
 * `test_users_api.js` — Verifies user management, duplicate prevention, and role assignment.
 * `test_quiz_flow.js` — Verifies quiz authoring and submission grading.
+* `test_quiz_csv_suite.js` — Verifies automated test creation via CSV upload and bulk question appending.
 * `test_device_management.js` — Verifies student device limit enforcement.
 * `test_report_suite.js` — Verifies analytical aggregations and dossier generation.
 * `test_announcement_notification_suite.js` — Tests notice broadcasts and read receipts.

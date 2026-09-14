@@ -376,8 +376,8 @@ export default function AdminAnnouncementsPage() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="table-container overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
                   <th className="py-3.5 px-5">Title & Message</th>

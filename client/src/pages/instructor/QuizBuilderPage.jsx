@@ -19,7 +19,9 @@ import {
   Terminal,
   HelpCircle,
   Check,
+  FileSpreadsheet,
 } from 'lucide-react';
+import ImportQuestionsCsvModal from '../../components/quiz/ImportQuestionsCsvModal';
 import {
   fetchQuizById,
   updateQuiz,
@@ -53,6 +55,7 @@ export default function QuizBuilderPage({ basePathOverride }) {
 
   // Quiz Settings Modal
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showImportCsvModal, setShowImportCsvModal] = useState(false);
   const [settingsForm, setSettingsForm] = useState({
     title: '',
     description: '',
@@ -417,6 +420,19 @@ export default function QuizBuilderPage({ basePathOverride }) {
           >
             View Student Attempts
           </button>
+
+          {/* Import CSV Button */}
+          {quiz?.status !== 'CLOSED' && (
+            <button
+              type="button"
+              onClick={() => setShowImportCsvModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-[#3c4cb8] bg-[#e7e9fb]/70 hover:bg-[#e7e9fb] rounded-xl border border-[#c7cef5] transition-colors shadow-2xs"
+              title="Bulk import questions from CSV"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Import CSV</span>
+            </button>
+          )}
 
           {/* Publish button */}
           {quiz?.status !== 'PUBLISHED' ? (
@@ -1005,6 +1021,19 @@ export default function QuizBuilderPage({ basePathOverride }) {
           </div>
         </div>
       )}
+
+      {/* Bulk Import Questions from CSV Modal */}
+      <ImportQuestionsCsvModal
+        isOpen={showImportCsvModal}
+        onClose={() => setShowImportCsvModal(false)}
+        quizId={quizId}
+        quizTitle={quiz?.title}
+        onSuccess={(updated) => {
+          setQuiz(updated);
+          setActionSuccess('Questions successfully imported from CSV!');
+          setTimeout(() => setActionSuccess(''), 4000);
+        }}
+      />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { useInstructorPortal } from '../../context/InstructorPortalContext';
@@ -23,6 +24,16 @@ export default function InstructorSidebar({ isOpen = false, onClose }) {
   const { user, logout } = useAuth();
   const { currentInstructor, isViewingAsAdmin, baseRoute, returnToAdmin } = useInstructorPortal();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleLogout = () => {
     if (isViewingAsAdmin) {
@@ -74,7 +85,7 @@ export default function InstructorSidebar({ isOpen = false, onClose }) {
       )}
 
       <aside
-        className={`admin-sidebar fixed top-0 left-0 bottom-0 z-40 w-[280px] flex flex-col bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`admin-sidebar fixed top-0 left-0 bottom-0 z-50 lg:z-30 w-[280px] flex flex-col bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{ borderRight: '1px solid #ECEEF2' }}

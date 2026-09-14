@@ -353,7 +353,7 @@ export default function StudentQuizTakingPage({ basePathOverride }) {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3 self-end sm:self-center">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-stretch sm:self-center justify-between sm:justify-end">
           {/* Real-time Countdown Timer */}
           <div
             className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-2 font-mono text-xs font-bold transition-colors ${
@@ -390,8 +390,8 @@ export default function StudentQuizTakingPage({ basePathOverride }) {
 
       {/* ── Main Two-Column Assessment Layout ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* ── Left Palette: Question Navigation (3 cols) ── */}
-        <div className="lg:col-span-3 bg-white p-4 rounded-2xl border border-[#ECEEF2] shadow-xs space-y-4">
+        {/* ── Left Palette: Question Navigation (3 cols on desktop, second on mobile) ── */}
+        <div className="order-2 lg:order-1 lg:col-span-3 bg-white p-4 rounded-2xl border border-[#ECEEF2] shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Questions ({questions.length})
@@ -450,8 +450,8 @@ export default function StudentQuizTakingPage({ basePathOverride }) {
           </div>
         </div>
 
-        {/* ── Center / Right Area: Active Question Canvas (9 cols) ── */}
-        <div className="lg:col-span-9 bg-white p-6 rounded-2xl border border-[#ECEEF2] shadow-xs space-y-6">
+        {/* ── Center / Right Area: Active Question Canvas (9 cols on desktop, first on mobile) ── */}
+        <div className="order-1 lg:order-2 lg:col-span-9 bg-white p-4 sm:p-6 rounded-2xl border border-[#ECEEF2] shadow-xs space-y-6">
           {currentQuestion ? (
             <>
               {/* Question Header & Badges */}

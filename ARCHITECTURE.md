@@ -135,6 +135,35 @@ flowchart LR
 * **Supported Compilers:** Python 3, JavaScript (Node.js), Java, C++, C, and Bash.
 * **Security Isolation:** Code execution does not take place on the LMS API server; it is sandboxed through Judge0 containers with memory and CPU time thresholds.
 
+### 4.1 Assessment Authoring & Bulk CSV Import Pipeline
+
+Instructors and Administrators can author assessments manually or bulk-create complete tests by uploading standard RFC 4180 CSV files:
+
+```mermaid
+flowchart TD
+    subgraph ClientValidation["Client-Side Pre-flight Inspection"]
+        CSVFile["Teacher CSV File Upload"] --> ClientParser["quizCsvParser.js (RFC 4180)"]
+        ClientParser --> ClientValidationLogic["Row Validation & MCQ/Coding Tagging"]
+        ClientValidationLogic --> PreviewUI["Live Inspection Table & Stat Badges"]
+    end
+
+    subgraph ServerTransaction["Server-Side Transaction (ACID)"]
+        Submit["POST /api/quizzes/import-csv"] --> SrvParser["Server quizCsvParser.js"]
+        SrvParser --> TxStart["Begin Sequelize Transaction"]
+        TxStart --> CreateQuiz["INSERT quizzes (status: DRAFT)"]
+        CreateQuiz --> CreateQuestions["INSERT quiz_questions (ordered display_order)"]
+        CreateQuestions --> CreateOptions["INSERT quiz_options (MCQ options & correct flag)"]
+        CreateOptions --> CalcMarks["Compute & UPDATE total_marks"]
+        CalcMarks --> TxCommit["Commit Transaction"]
+    end
+
+    PreviewUI --> Submit
+    TxCommit --> CreatedResponse["201 Created -> Navigate to Quiz Builder"]
+```
+
+* **Supported Question Formats:** Both MCQ (with options A–E and automatic correct answer mapping) and CODING (with programming language, starter code, constraints, and automated evaluation output).
+* **ACID Transaction Guarantees:** Database writes for the Quiz, QuizQuestions, and QuizOptions are executed atomically within a managed database transaction. If any question row or option fails validation, the transaction automatically rolls back with zero orphan records.
+
 ---
 
 ## 5. Reporting & Analytics Architecture

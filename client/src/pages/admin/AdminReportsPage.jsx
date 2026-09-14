@@ -389,7 +389,7 @@ export default function AdminReportsPage() {
       )}
 
       {/* ── Tab Navigation Bar ── */}
-      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-1 no-scrollbar">
         <button
           onClick={() => setActiveTab('progress')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap ${
@@ -571,8 +571,8 @@ export default function AdminReportsPage() {
               description="Try adjusting your course or batch filters."
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="table-container overflow-x-auto">
+              <table className="w-full min-w-[740px] text-left text-xs">
                 <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5">Student</th>
@@ -674,8 +674,8 @@ export default function AdminReportsPage() {
               description="No student attempts match your search filters."
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="table-container overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left text-xs">
                 <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5">Student</th>
@@ -766,8 +766,8 @@ export default function AdminReportsPage() {
               description="No batches match your filter criteria."
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="table-container overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left text-xs">
                 <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5">Batch Name</th>
@@ -849,8 +849,8 @@ export default function AdminReportsPage() {
               description="No feedback records match the selected filters."
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="table-container overflow-x-auto">
+              <table className="w-full min-w-[680px] text-left text-xs">
                 <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5">Course</th>
@@ -940,8 +940,8 @@ export default function AdminReportsPage() {
               description="No registered devices match your filter criteria."
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="table-container overflow-x-auto">
+              <table className="w-full min-w-[720px] text-left text-xs">
                 <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-3.5">User</th>

@@ -9,7 +9,7 @@ export default function InstructorLayout() {
 
   return (
     <div className="portal-page-layout admin-shell">
-      <Navbar currentPortal="instructor" />
+      <Navbar currentPortal="instructor" onToggleSidebar={() => setSidebarOpen(true)} />
 
       <div className="admin-body">
         <InstructorSidebar

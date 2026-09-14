@@ -424,15 +424,16 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
             {DAYS.map((day) => (
               <div
                 key={day}
-                className="py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none"
+                className="py-1 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none"
               >
-                {day}
+                <span className="sm:hidden">{day.charAt(0)}</span>
+                <span className="hidden sm:inline">{day}</span>
               </div>
             ))}
           </div>
 
           {/* 42-cell Month Days Grid */}
-          <div className="grid grid-cols-7 gap-1.5 flex-1">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5 flex-1">
             {calendarDays.map(({ date, isCurrentMonth }, idx) => {
               const dayLectures = filteredLectures.filter(
                 (l) => l.scheduled_at && isSameDay(new Date(l.scheduled_at), date)
@@ -450,7 +451,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                   key={idx}
                   type="button"
                   onClick={() => setSelectedDate(date)}
-                  className={`min-h-[68px] sm:min-h-[80px] p-2 rounded-xl text-left flex flex-col justify-between transition-all border ${
+                  className={`min-h-[52px] sm:min-h-[80px] p-1 sm:p-2 rounded-xl text-left flex flex-col justify-between transition-all border ${
                     isSelected
                       ? 'border-[#3c4cb8] bg-[#EEF0FB] ring-2 ring-[#3c4cb8]/30 shadow-xs'
                       : isToday
@@ -466,7 +467,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                         isSelected
                           ? 'text-[#3c4cb8]'
                           : isToday
-                          ? 'text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded-md'
+                          ? 'text-indigo-600 bg-indigo-100 px-1 sm:px-1.5 py-0.5 rounded-md'
                           : isCurrentMonth
                           ? 'text-slate-800'
                           : 'text-slate-400'
@@ -479,7 +480,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                       <div className="flex items-center gap-1">
                         {dayQuizzes.length > 0 && (
                           <span
-                            className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full text-white bg-amber-500 shadow-2xs"
+                            className="hidden sm:inline-block text-[9px] font-extrabold px-1.5 py-0.2 rounded-full text-white bg-amber-500 shadow-2xs"
                             title={`${dayQuizzes.length} test(s)`}
                           >
                             📝 {dayQuizzes.length}
@@ -487,7 +488,7 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                         )}
                         {dayLectures.length > 0 && (
                           <span
-                            className="text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white"
+                            className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white"
                             style={{ background: ADMIN_PRIMARY }}
                             title={`${dayLectures.length} class(es)`}
                           >
@@ -498,34 +499,47 @@ export default function ScheduleCalendarPage({ role = 'student' }) {
                     )}
                   </div>
 
-                  {/* Badges on day cell */}
+                  {/* Badges on day cell (dot indicators on mobile, text badges on sm+) */}
                   {hasEvents ? (
-                    <div className="mt-1 space-y-0.5 overflow-hidden">
-                      {dayQuizzes.slice(0, 1).map((q) => (
-                        <div
-                          key={`day-q-${q.id}`}
-                          className="truncate text-[9.5px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100/90 border border-amber-300 text-amber-900 shadow-2xs flex items-center gap-1"
-                          title={`Test: ${q.title}`}
-                        >
-                          <Award className="w-2.5 h-2.5 text-amber-700 shrink-0" />
-                          <span className="truncate">{q.title}</span>
-                        </div>
-                      ))}
-                      {dayLectures.slice(0, dayQuizzes.length > 0 ? 1 : 2).map((l) => (
-                        <div
-                          key={l.id}
-                          className="truncate text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-800 shadow-2xs"
-                          title={l.title}
-                        >
-                          {l.title}
-                        </div>
-                      ))}
-                      {totalEvents > 2 && (
-                        <span className="text-[9px] font-bold text-slate-400 block px-1">
-                          +{totalEvents - 2} more
-                        </span>
-                      )}
-                    </div>
+                    <>
+                      {/* Mobile dot indicators */}
+                      <div className="sm:hidden flex items-center justify-center gap-1 mt-1">
+                        {dayQuizzes.length > 0 && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        )}
+                        {dayLectures.length > 0 && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#3c4cb8]" />
+                        )}
+                      </div>
+
+                      {/* Desktop badges */}
+                      <div className="hidden sm:block mt-1 space-y-0.5 overflow-hidden">
+                        {dayQuizzes.slice(0, 1).map((q) => (
+                          <div
+                            key={`day-q-${q.id}`}
+                            className="truncate text-[9.5px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100/90 border border-amber-300 text-amber-900 shadow-2xs flex items-center gap-1"
+                            title={`Test: ${q.title}`}
+                          >
+                            <Award className="w-2.5 h-2.5 text-amber-700 shrink-0" />
+                            <span className="truncate">{q.title}</span>
+                          </div>
+                        ))}
+                        {dayLectures.slice(0, dayQuizzes.length > 0 ? 1 : 2).map((l) => (
+                          <div
+                            key={l.id}
+                            className="truncate text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-800 shadow-2xs"
+                            title={l.title}
+                          >
+                            {l.title}
+                          </div>
+                        ))}
+                        {totalEvents > 2 && (
+                          <span className="text-[9px] font-bold text-slate-400 block px-1">
+                            +{totalEvents - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </>
                   ) : (
                     <div />
                   )}
