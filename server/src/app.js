@@ -50,14 +50,22 @@ app.use(
 
 // CORS configuration (supports comma-separated origins or default fallback)
 const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(",").map((url) => url.trim())
+  ? process.env.CLIENT_URL.split(",").map((url) => url.trim().replace(/\/+$/, ""))
   : ["http://localhost:5173", "http://localhost:3000"];
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/+$/, "");
+      if (
+        allowedOrigins.includes("*") ||
+        allowedOrigins.includes(cleanOrigin) ||
+        process.env.NODE_ENV !== "production" ||
+        cleanOrigin.includes("localhost") ||
+        cleanOrigin.includes("127.0.0.1")
+      ) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
