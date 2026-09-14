@@ -82,6 +82,19 @@ if (fs.existsSync(openapiDocPath)) {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
+// Root / Welcome route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "NSI IT LMS Backend API is online and running",
+    environment: process.env.NODE_ENV || "production",
+    healthCheck: "/api/health",
+    apiDocumentation: "/api-docs",
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+  });
+});
+
 // Fast Health Check
 app.get("/api/health", (req, res) => {
   res.json({
